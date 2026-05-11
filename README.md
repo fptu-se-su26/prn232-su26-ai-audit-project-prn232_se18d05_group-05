@@ -4,10 +4,10 @@
 
 | Item | Description |
 |---|---|
-| Course |  |
-| Class |  |
+| Course | PRN232 |
+| Class | SE18D05 |
 | Semester | SU26 |
-| Group |  |
+| Group | 5 |
 | Topic |  |
 | Repository |  |
 
@@ -15,13 +15,11 @@
 
 ## 2. Team Members
 
-| No | Student ID | Full Name | GitHub Username | Role | Main Responsibility |
-|---:|---|---|---|---|---|
-| 1 |  |  |  | Leader |  |
-| 2 |  |  |  | Member |  |
-| 3 |  |  |  | Member |  |
-| 4 |  |  |  | Member |  |
-| 5 |  |  |  | Member |  |
+| No | Student ID | Full Name | Email | Role |
+|---:|---|---|---|---|
+| 1 | DE180079 | Nguyễn Thị Khánh Dương | DuongNTKDE180079@fpt.edu.vn | Leader |
+| 2 | DE180148 | Võ Thành Nhiệm | NhiemVTDE180148@fpt.edu.vn | Member |
+| 3 | DE180942 | Trần Quang Huy | HuyTQDE180942@fpt.edu.vn | Member |
 
 ---
 
@@ -105,9 +103,54 @@ feat, fix, docs, test, refactor, style, chore
 
 ## 8. How to Run
 
-```text
-Students write project running instructions here.
+### Prerequisites
+
+- [.NET SDK 8.0+](https://dotnet.microsoft.com/download)
+- SQL Server (local or remote)
+- Visual Studio 2022 / VS Code / Rider
+
+### Steps
+
+**1. Clone repository**
+
+```bash
+git clone <repository-url>
+cd <project-folder>
 ```
+
+**2. Configure connection string**
+
+Open `appsettings.json` (or `appsettings.Development.json`) and update:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_SERVER;Database=YOUR_DB;Trusted_Connection=True;TrustServerCertificate=True"
+  }
+}
+```
+
+**3. Apply database migrations**
+
+```bash
+dotnet ef database update
+```
+
+**4. Restore packages and build**
+
+```bash
+dotnet restore
+dotnet build
+```
+
+**5. Run the API**
+
+```bash
+dotnet run --project src/YourProject.API
+```
+
+API runs at `https://localhost:7xxx` / `http://localhost:5xxx` by default.  
+Swagger UI available at `/swagger`.
 
 ---
 

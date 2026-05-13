@@ -15,11 +15,12 @@
 
 ## 2. Team Members
 
-| No | Student ID | Full Name | Email | Role |
-|---:|---|---|---|---|
-| 1 | DE180079 | Nguyễn Thị Khánh Dương | DuongNTKDE180079@fpt.edu.vn | Leader |
-| 2 | DE180148 | Võ Thành Nhiệm | NhiemVTDE180148@fpt.edu.vn | Member |
-| 3 | DE180942 | Trần Quang Huy | HuyTQDE180942@fpt.edu.vn | Member |
+| No | Student ID | Full Name              | Email                       | Role   |
+|---:|------------|------------------------|-----------------------------|--------|
+|  1 | DE180079   | Nguyễn Thị Khánh Dương | DuongNTKDE180079@fpt.edu.vn | Leader |
+|  2 | DE180148   | Võ Thành Nhiệm         | NhiemVTDE180148@fpt.edu.vn  | Member |
+|  3 | DE180942   | Trần Quang Huy         | HuyTQDE180942@fpt.edu.vn    | Member |
+|  4 | DE170043   | Nguyễn Phi Hùng        | hungnpde170043@fpt.edu.vn   | Member |
 
 ---
 

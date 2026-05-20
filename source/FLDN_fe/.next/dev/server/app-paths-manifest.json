@@ -1,0 +1,7 @@
+{
+  "/(private)/orders/create/page": "app/(private)/orders/create/page.js",
+  "/(private)/products/page": "app/(private)/products/page.js",
+  "/(public)/auth/login/page": "app/(public)/auth/login/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js"
+}

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/macbook/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_fe/src/app/%28private%29/admin/layout.tsx"],"sourcesContent":["import { ProtectedRoute } from '@/components/ProtectedRoute'\n\nexport default function AdminLayout({ children }: { readonly children: React.ReactNode }) {\n  return <ProtectedRoute allowedRoles={['Admin']}>{children}</ProtectedRoute>\n}\n"],"names":["AdminLayout","children","allowedRoles"],"mappings":";;;;;AAAA;;;AAEe,SAASA,YAAY,EAAEC,QAAQ,EAA0C;IACtF,qBAAO,6UAAC,qPAAc;QAACC,cAAc;YAAC;SAAQ;kBAAGD;;;;;;AACnD"}}]
+}

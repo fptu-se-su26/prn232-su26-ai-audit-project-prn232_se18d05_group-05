@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/macbook/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_fe/src/app/%28private%29/dashboard/page.tsx"],"sourcesContent":["'use client'\n\nimport { useEffect } from 'react'\nimport { useRouter } from 'next/navigation'\nimport { APP_ROUTES } from '@/routes/app-routes'\nimport { useAuthStore } from '@/stores/auth.store'\n\nexport default function DashboardPage() {\n  const router = useRouter()\n  const user = useAuthStore((state) => state.user)\n\n  useEffect(() => {\n    if (!user) return\n    if (user.role === 'Admin') router.replace(APP_ROUTES.admin.users)\n    // other roles stay on /dashboard\n  }, [user, router])\n\n  return <h1 className=\"text-2xl font-semibold\">Tổng quan</h1>\n}\n"],"names":["DashboardPage","router","user","state","role","replace","admin","users","className"],"mappings":";;;;;AAEA;AACA;AACA;AACA;AALA;;;;;;AAOe,SAASA;IACtB,MAAMC,SAAS,IAAA,8OAAS;IACxB,MAAMC,OAAO,IAAA,6OAAY,EAAC,CAACC,QAAUA,MAAMD,IAAI;IAE/C,IAAA,iTAAS,EAAC;QACR,IAAI,CAACA,MAAM;QACX,IAAIA,KAAKE,IAAI,KAAK,SAASH,OAAOI,OAAO,CAAC,2OAAU,CAACC,KAAK,CAACC,KAAK;IAChE,iCAAiC;IACnC,GAAG;QAACL;QAAMD;KAAO;IAEjB,qBAAO,6UAAC;QAAGO,WAAU;kBAAyB;;;;;;AAChD"}}]
+}

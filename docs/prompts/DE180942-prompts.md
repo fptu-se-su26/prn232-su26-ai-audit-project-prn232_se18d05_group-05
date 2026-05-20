@@ -2,9 +2,17 @@
 
 | Thông tin | Nội dung |
 |---|---|
-| Môn học | PRN232 – SE18D05 – SU26 |
-| MSSV | DE180942 |
-| Công cụ AI | Claude (Claude Code CLI) |
+| Môn học | PRN232 |
+| Mã môn học | PRN232 |
+| Lớp | SE18D05 |
+| Học kỳ | SU26 |
+| Tên bài tập / Project | Food Link |
+| Tên sinh viên / Nhóm | Trần Quang Huy - Nhóm 5 |
+| MSSV / Danh sách MSSV | DE180942 |
+| Giảng viên hướng dẫn | Thầy Quang |
+| Ngày bắt đầu | 11/5/2026 |
+| Ngày cập nhật gần nhất | 20/5/2026 |
+| Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
 
@@ -12,36 +20,25 @@
 
 | STT | Ngày | Công cụ | Mục đích | Có áp dụng? |
 |---:|---|---|---|---|
-| 1 | 2026-05-11 | Claude | Cập nhật README (course info, team, how to run) | Có |
-| 2 | 2026-05-11 | Claude | Bổ sung .gitignore rules cho file nhạy cảm | Có |
-| 3 | 2026-05-11 | Claude | Tư vấn branch naming và commit convention | Có – áp dụng khi tạo branch |
+| 1 | 2026-05-20 | Claude | Cấu hình frontend với Tailwind, Vite, PWA | Có |
+| 2 | 2026-05-20 | Claude | Thêm middleware xác thực và phân quyền | Có |
 
 ---
 
-## Prompt 1 – Cập nhật README
+## Prompt 1 – Cấu hình frontend
 
-**Mục đích:** Điền thông tin course, class, group, team members và hướng dẫn How to Run cho .NET API
+**Mục đích:** Thiết lập frontend để dùng Tailwind, cấu hình Vite và PWA
 
-**Prompt (tóm tắt):** Yêu cầu Claude chỉnh sửa README.md với Course PRN232, Class SE18D05, Group 5, danh sách 3 thành viên kèm email, và viết hướng dẫn chạy dự án .NET API.
+**Prompt (tóm tắt):** Yêu cầu Claude kiểm tra frontend đã có Tailwind chưa, cấu hình lại theo PostCSS, cập nhật `vite.config.js` với alias, port, proxy và PWA cho dự án Food Link.
 
-**Kết quả áp dụng:** Có. Kiểm tra lại thông tin team member trước khi commit.
-
----
-
-## Prompt 2 – Bổ sung .gitignore
-
-**Mục đích:** Tránh commit file chứa connection string và config cá nhân lên GitHub
-
-**Prompt (tóm tắt):** Hỏi Claude file nào nên ignore (appsettings, .env, .claude, .obsidian), yêu cầu thêm vào .gitignore.
-
-**Kết quả áp dụng:** Có. Tự kiểm tra lại không bỏ sót file nhạy cảm.
+**Kết quả áp dụng:** Có. Đã kiểm tra lại bằng `npm run build`.
 
 ---
 
-## Prompt 3 – Convention branch / commit
+## Prompt 2 – Middleware auth
 
-**Mục đích:** Hiểu đúng quy tắc đặt tên branch và commit theo chuẩn repo
+**Mục đích:** Thêm middleware xác thực, phân quyền và các route bảo vệ cơ bản
 
-**Prompt (tóm tắt):** Hỏi Claude về branch naming convention và commit message format theo template có trong README.
+**Prompt (tóm tắt):** Yêu cầu Claude thêm `authUtils`, `AuthMiddleware`, `AuthGuard`, `ProtectedRoute`, tạo các trang lỗi và nối router cơ bản cho `login`, `dashboard`, `admin`.
 
-**Kết quả áp dụng:** Có. Tạo branch `docs/DE180942-update-readme`, commit `[DE180942] docs: update README info, add gitignore rules`.
+**Kết quả áp dụng:** Có. Đã kiểm tra lại bằng `npm run lint` và `npm run build`.

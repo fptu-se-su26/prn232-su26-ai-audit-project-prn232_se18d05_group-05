@@ -1,6 +1,4 @@
-# AI Audit Log
-
-## 1. Thông tin chung
+# AI Audit Log – DE180942 Trần Quang Huy
 
 | Thông tin | Nội dung |
 |---|---|
@@ -10,17 +8,15 @@
 | Học kỳ | SU26 |
 | Tên bài tập / Project | Food Link |
 | Tên sinh viên / Nhóm | Trần Quang Huy - Nhóm 5 |
-| MSSV / Danh sách MSSV | DE180942 |
+| MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
-| Ngày bắt đầu | 2026-05-11 |
+| Ngày bắt đầu | 11/5/2026 |
 | Ngày cập nhật gần nhất | 20/5/2026 |
-| Công cụ AI chính | Claude (Claude Code CLI) |
+| Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
 
-## 2. Nhật ký sử dụng AI
-
-### Lần 1 – Cập nhật README và .gitignore
+## Lần 1 – Cập nhật README và .gitignore
 
 | Nội dung | Thông tin |
 |---|---|
@@ -43,7 +39,9 @@
 
 **Kết quả áp dụng:** Có – commit vào branch `docs/DE180942-update-readme`
 
-### Lần 2 – Cấu hình frontend với Tailwind, Vite và PWA
+---
+
+## Lần 2 – Cấu hình frontend với Tailwind, Vite và PWA
 
 | Nội dung | Thông tin |
 |---|---|
@@ -64,7 +62,9 @@
 
 **Kết quả áp dụng:** Có
 
-### Lần 3 – Thêm middleware xác thực và phân quyền
+---
+
+## Lần 3 – Thêm middleware xác thực và phân quyền
 
 | Nội dung | Thông tin |
 |---|---|

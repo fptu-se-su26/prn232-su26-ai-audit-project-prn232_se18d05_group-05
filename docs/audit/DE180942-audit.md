@@ -1,16 +1,26 @@
-# AI Audit Log – DE180942 Trần Quang Huy
+# AI Audit Log
+
+## 1. Thông tin chung
 
 | Thông tin | Nội dung |
 |---|---|
 | Môn học | PRN232 |
+| Mã môn học | PRN232 |
 | Lớp | SE18D05 |
 | Học kỳ | SU26 |
-| MSSV | DE180942 |
+| Tên bài tập / Project | Food Link |
+| Tên sinh viên / Nhóm | Trần Quang Huy - Nhóm 5 |
+| MSSV / Danh sách MSSV | DE180942 |
+| Giảng viên hướng dẫn | Thầy Quang |
+| Ngày bắt đầu | 2026-05-11 |
+| Ngày cập nhật gần nhất | 20/5/2026 |
 | Công cụ AI chính | Claude (Claude Code CLI) |
 
 ---
 
-## Lần 1 – Cập nhật README và .gitignore
+## 2. Nhật ký sử dụng AI
+
+### Lần 1 – Cập nhật README và .gitignore
 
 | Nội dung | Thông tin |
 |---|---|
@@ -32,3 +42,45 @@
 - Quyết định cấu trúc folder `docs/audit/` và `docs/prompts/` tách theo thành viên
 
 **Kết quả áp dụng:** Có – commit vào branch `docs/DE180942-update-readme`
+
+### Lần 2 – Cấu hình frontend với Tailwind, Vite và PWA
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-05-20 |
+| Công cụ AI | Claude |
+| Mục đích | Cấu hình frontend để dùng Tailwind, chỉnh `vite.config.js` và thiết lập PWA |
+| Phần việc | Frontend setup |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Kiểm tra frontend đã có Tailwind hay chưa
+- Cấu hình Tailwind theo hướng PostCSS
+- Cập nhật `vite.config.js` với alias, port `3000`, proxy và PWA
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận lại package cần cài và file config phù hợp với project
+- Chạy `npm run build` để kiểm tra sau khi cấu hình
+
+**Kết quả áp dụng:** Có
+
+### Lần 3 – Thêm middleware xác thực và phân quyền
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-05-20 |
+| Công cụ AI | Claude |
+| Mục đích | Thêm middleware kiểm tra token, role và route bảo vệ cơ bản |
+| Phần việc | Frontend auth |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Tạo `authUtils`, `AuthMiddleware`, `AuthGuard`, `ProtectedRoute`
+- Thêm các trang lỗi `NotFound`, `Unauthorized`, `ServerError`
+- Nối router cơ bản cho `portal`, `login`, `dashboard`, `admin`
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận role hiện tại của dự án chỉ gồm `Admin` và `User`
+- Chạy `npm run lint` và `npm run build` để kiểm tra
+
+**Kết quả áp dụng:** Có

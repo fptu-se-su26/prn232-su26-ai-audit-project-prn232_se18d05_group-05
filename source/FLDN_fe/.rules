@@ -1,0 +1,100 @@
+# Front-End File & Folder Naming Convention
+
+## 1. Cấu trúc thư mục theo phân quyền (Role-based Structure)
+
+Thư mục `pages` và `components` được chia module theo từng nhóm người dùng (role).
+
+| Role | Thư mục Pages | Thư mục Components |
+| :--- | :--- | :--- |
+| **Accountant** | `src/pages/accountant/` | `src/components/accountant/` |
+| **Admin** | `src/pages/admin/` | `src/components/admin/` |
+| **Staff** | `src/pages/bakery/` | `src/components/bakery/` |
+| **Production** | `src/pages/production/` | `src/components/production/` |
+
+*Lưu ý: Tên thư mục role nên viết thường (lowercase).*
+
+---
+
+## 2. Cấu trúc file theo trang (Page Convention)
+
+Mỗi màn hình/trang chia thành 2 phần: **Page** và **Components**.
+
+### A. Page
+- **Vị trí:** `src/pages/<role-name>/<PageName>Page.jsx`
+- **Quy tắc đặt tên file:** `PascalCase` và luôn có hậu tố `Page` ở cuối.
+- **Vai trò:** Chứa **toàn bộ logic** của trang — state management, API calls, handlers, mutations. Import và compose các component từ thư mục `components` để render UI. Đây là nơi duy nhất được phép gọi service và xử lý dữ liệu.
+
+**Ví dụ:** `src/pages/accountant/LowStockSettingsPage.jsx`
+```jsx
+import { useState, useEffect } from "react";
+import { Card, Tabs } from "antd";
+import { InventoryWarningSettingsService } from "../../services/InventoryWarningSettingsService";
+import LowStockProductTab from "../../components/accountant/lowStockSettings/LowStockProductTab";
+import LowStockIngredientTab from "../../components/accountant/lowStockSettings/LowStockIngredientTab";
+
+const LowStockSettingsPage = () => {
+  const [productData, setProductData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // gọi API tại đây
+  }, []);
+
+  return (
+    <Card>
+      <Tabs items={[
+        { key: "product", children: <LowStockProductTab data={productData} loading={loading} /> },
+      ]} />
+    </Card>
+  );
+};
+
+export default LowStockSettingsPage;
+```
+
+### B. Components
+- **Vị trí:** `src/components/<role-name>/<featureName>/<ComponentName>.jsx`
+- **Quy tắc đặt tên thư mục feature:** `camelCase` (ví dụ: `lowStockSettings`, `productionDashboard`).
+- **Quy tắc đặt tên file component:** `PascalCase` (ví dụ: `LowStockProductTab.jsx`, `ProductionTabTable.jsx`).
+- **Vai trò:** Thuần túy là UI — chỉ nhận dữ liệu và handlers qua props, không tự gọi API, không giữ state nghiệp vụ. Chỉ chịu trách nhiệm render giao diện.
+
+**Ví dụ:** `src/components/accountant/lowStockSettings/LowStockProductTab.jsx`
+```jsx
+const LowStockProductTab = ({ data = [], loading = false, error = null }) => (
+  <Spin spinning={loading}>
+    <Table rowKey="productId" dataSource={data} columns={columns} />
+  </Spin>
+);
+
+export default LowStockProductTab;
+```
+
+### C. Khai báo Route
+- **Quy tắc:** Khi khai báo route trong `appRoute.js`, **chỉ được phép** import từ thư mục `pages`.
+- **Tuyệt đối KHÔNG** import trực tiếp component từ thư mục `components` vào file khai báo route.
+
+**Ví dụ đúng:**
+```javascript
+import LowStockSettingsPage from "../pages/accountant/LowStockSettingsPage.jsx";
+```
+
+---
+
+## 3. Quy tắc đặt tên
+
+| Đối tượng | Quy tắc | Ví dụ |
+| :--- | :--- | :--- |
+| File Page | `PascalCase` + hậu tố `Page` | `LowStockSettingsPage.jsx` |
+| File Component | `PascalCase` | `LowStockProductTab.jsx` |
+| Thư mục feature | `camelCase` | `lowStockSettings/` |
+| Thư mục role | `lowercase` | `accountant/` |
+| File Service | `PascalCase` + hậu tố `Service` | `InventoryWarningSettingsService.js` |
+
+---
+
+## 4. Quy tắc Service
+
+- **Vị trí:** `src/services/<Name>Service.js`
+- **Vai trò:** Tập hợp các method gọi API thông qua `axiosInstance`. Không chứa logic UI.
+- Các API route được khai báo tập trung tại `src/config/routeConfig.js`.
+- Các đường dẫn trang được khai báo tập trung tại `src/routes/RoutePath.js`.

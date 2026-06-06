@@ -22,6 +22,8 @@
 |---:|---|---|---|---|
 | 1 | 2026-05-20 | Claude | Cấu hình frontend với Tailwind, Vite, PWA | Có |
 | 2 | 2026-05-20 | Claude | Thêm middleware xác thực và phân quyền | Có |
+| 3 | 2026-06-06 | Claude | Cấu hình pnpm cho frontend | Có |
+| 4 | 2026-06-06 | Claude | Cài TanStack Query và tailwind-merge | Có |
 
 ---
 
@@ -42,3 +44,23 @@
 **Prompt (tóm tắt):** Yêu cầu Claude thêm `authUtils`, `AuthMiddleware`, `AuthGuard`, `ProtectedRoute`, tạo các trang lỗi và nối router cơ bản cho `login`, `dashboard`, `admin`.
 
 **Kết quả áp dụng:** Có. Đã kiểm tra lại bằng `npm run lint` và `npm run build`.
+
+---
+
+## Prompt 3 – Cấu hình pnpm
+
+**Mục đích:** Chuyển package manager từ npm sang pnpm
+
+**Prompt (tóm tắt):** Yêu cầu Claude config pnpm cho project FE — thêm `packageManager` field, tạo `.npmrc`, xóa `package-lock.json` và cài lại bằng pnpm.
+
+**Kết quả áp dụng:** Có. `pnpm-lock.yaml` được tạo, `package-lock.json` đã xóa.
+
+---
+
+## Prompt 4 – Cài TanStack Query và tailwind-merge
+
+**Mục đích:** Thêm TanStack Query và utility class cho Tailwind vào project
+
+**Prompt (tóm tắt):** Yêu cầu Claude cài `@tanstack/react-query`, `tailwind-merge`, `clsx`, tạo `queryClient.js` và `cn.js`, wrap app với `QueryClientProvider`.
+
+**Kết quả áp dụng:** Có. App chạy bình thường với provider mới.

@@ -90,6 +90,7 @@
 
 ---
 
+
 ## Prompt 5 – Tạo domain entities và EF configuration
 
 **Mục đích:** Implement toàn bộ domain model từ SQL schema và cấu hình EF Core

@@ -96,6 +96,7 @@
 
 ---
 
+
 ## Lần 2 – Cấu hình frontend với Tailwind, Vite và PWA
 
 | Nội dung | Thông tin |

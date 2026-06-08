@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class ReviewConfiguration : SoftDeleteEntityConfiguration<Review, int>
+public class ReviewConfiguration : SoftDeleteEntityConfiguration<Review, Guid>
 {
     public override void Configure(EntityTypeBuilder<Review> builder)
     {

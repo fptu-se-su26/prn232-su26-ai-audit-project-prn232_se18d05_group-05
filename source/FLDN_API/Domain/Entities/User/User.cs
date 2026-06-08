@@ -1,6 +1,6 @@
 namespace Domain;
 
-public class User : EntityBase<int>, ISoftDeletable
+public class User : EntityBase<Guid>, ISoftDeletable
 {
     public string FullName { get; set; } = default!;
     public string Email { get; set; } = default!;

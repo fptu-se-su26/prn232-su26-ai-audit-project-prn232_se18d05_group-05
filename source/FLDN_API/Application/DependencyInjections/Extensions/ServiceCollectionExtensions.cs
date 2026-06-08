@@ -8,8 +8,7 @@ public static class ServiceCollectionExtensions
     {
         var appAssembly = AssemblyReference.Assembly;
 
-        services.AddServicesFromAssembly(appAssembly)
-                .AddMapsterServices();
+        services.AddMapsterServices();
 
         return services;
     }

@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class DeliveryStatusHistoryConfiguration : BaseEntityConfiguration<DeliveryStatusHistory, int>
+public class DeliveryStatusHistoryConfiguration : BaseEntityConfiguration<DeliveryStatusHistory, Guid>
 {
     public override void Configure(EntityTypeBuilder<DeliveryStatusHistory> builder)
     {

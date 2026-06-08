@@ -1,8 +1,8 @@
 namespace Domain;
 
-public class Payment : EntityBase<int>
+public class Payment : EntityBase<Guid>
 {
-    public int OrderId { get; set; }
+    public Guid OrderId { get; set; }
     public PaymentMethod Method { get; set; }
     public decimal Amount { get; set; }
     public PaymentStatus Status { get; set; }

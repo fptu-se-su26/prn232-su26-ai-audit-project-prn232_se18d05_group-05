@@ -1,8 +1,8 @@
 namespace Domain;
 
-public class PriceHistory : EntityBase<int>
+public class PriceHistory : EntityBase<Guid>
 {
-    public int ProductId { get; set; }
+    public Guid ProductId { get; set; }
     public decimal WholesalePrice { get; set; }
     public decimal RetailPrice { get; set; }
     public DateOnly EffectiveDate { get; set; }

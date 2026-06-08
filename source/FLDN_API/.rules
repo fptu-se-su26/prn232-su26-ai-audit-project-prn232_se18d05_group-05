@@ -1,0 +1,95 @@
+# .NET Dependency Injection Rules
+
+## General
+- Correctness and clarity over speed. Follow Clean Architecture boundaries.
+- Add to existing files before creating new ones.
+- No generic names like `Service`, `Manager`, `Helper` — use `AuthService`, `UserRepository`.
+- Constructor injection only. Prefer primary constructor syntax.
+- Never inject `IServiceProvider` unless absolutely required by the framework.
+
+## RegisterService Attribute
+- All Services and Repositories **must** use `[RegisterService]` — never register manually in `Program.cs`.
+- Register the **interface type**, not the concrete class.
+- Import `using Contract;` always. Add `using Microsoft.Extensions.DependencyInjection;` when specifying a non-default lifetime.
+
+```csharp
+[RegisterService(typeof(IAuthService))]
+public sealed class AuthService(
+    IUserRepository userRepository,
+    IUnitOfWork unitOfWork
+) : IAuthService { }
+```
+
+## Lifetime Rules
+| Lifetime | Use for |
+|----------|---------|
+| `Scoped` *(default)* | Services, Repositories, UnitOfWork, anything depending on `DbContext` |
+| `Singleton` | Stateless helpers — must **not** depend on `DbContext` or Scoped services |
+| `Transient` | Lightweight stateless classes |
+
+## Manual Registration
+Allowed **only** for framework-level infrastructure:
+```csharp
+services.AddDbContext<ApplicationDbContext>();
+services.AddHttpClient();
+services.AddAuthentication();
+services.AddAuthorization();
+services.AddMediatR();
+services.Configure<TOptions>();
+```
+
+## Naming Rules
+| Type | Interface | Implementation |
+|------|-----------|----------------|
+| Service | `IUserService` | `UserService` |
+| Repository | `IUserRepository` | `UserRepository` |
+
+## Clean Architecture Boundaries
+- **Domain** → Entities, Enums, Value Objects.
+- **Application** → Services, Interfaces, Validators, CQRS handlers, business logic.
+- **Infrastructure** → Repositories, DbContext, external providers.
+- **API** → Controllers, Middlewares, Filters.
+- Application must **not** reference Infrastructure.
+- Controllers depend on Services or Mediator — **never** Repositories or DbContext directly.
+
+## Mapping Rules
+- Use **Mapster** for all Entity → Model mapping.
+- Mapping config lives in Application layer.
+- Never map manually in Controllers or Repositories.
+- Use `entity.Adapt<TModel>()` or `queryable.ProjectToType<TModel>()` for projections.
+
+## Service Rules
+- Contains business logic. Coordinates Repositories, UnitOfWork, and external services.
+- Returns **Models** or Result objects — never raw Entities.
+- Does not use `DbContext` directly if a Repository already exists.
+- Calls `EnsureSaveAsync` **once** via UnitOfWork extension — not inside Repository methods. Throws `DatabaseOperationException` automatically if no rows affected.
+
+## Repository Rules
+- Data access only — no business logic, no API calls, no Model responses.
+- Works with Entities only — mapping to Models is Service responsibility.
+
+## Async Rules
+- `async/await` for all DB and external calls.
+- Method names end with `Async`.
+- Always pass `CancellationToken`.
+- Never use `.Result` or `.Wait()`.
+
+## Error Handling
+Never throw generic `Exception`. Use custom exceptions:
+
+| Exception | Status | When |
+|-----------|--------|------|
+| `BadRequestException` | 400 | Invalid request |
+| `UnauthorizedException` | 401 | Not authenticated |
+| `ForbiddenException` | 403 | Not authorized |
+| `NotFoundException` | 404 | Entity not found |
+| `ConflictException` | 409 | Resource conflict |
+| `TooManyRequestException` | 429 | Rate limit exceeded |
+| `DatabaseOperationException` | 500 | DB operation failed |
+
+All inherit from `AppException` in `Contract/Exceptions/`.
+
+## Validation
+- Use FluentValidation — validators in Application layer, logic stays out of Controllers.
+- `FluentValidationFilter` (API/Filters) intercepts requests and returns 400 automatically.
+- Business validation requiring DB checks goes in Services.

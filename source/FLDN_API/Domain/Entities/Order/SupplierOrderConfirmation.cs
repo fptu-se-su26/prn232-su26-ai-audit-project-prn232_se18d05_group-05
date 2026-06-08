@@ -1,9 +1,9 @@
 namespace Domain;
 
-public class SupplierOrderConfirmation : EntityBase<int>
+public class SupplierOrderConfirmation : EntityBase<Guid>
 {
-    public int OrderId { get; set; }
-    public int SupplierId { get; set; }
+    public Guid OrderId { get; set; }
+    public Guid SupplierId { get; set; }
     public ConfirmationStatus Status { get; set; }
     public string? Reason { get; set; }
     public DateTimeOffset? ConfirmedAt { get; set; }

@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class WalletTransactionConfiguration : BaseEntityConfiguration<WalletTransaction, int>
+public class WalletTransactionConfiguration : BaseEntityConfiguration<WalletTransaction, Guid>
 {
     public override void Configure(EntityTypeBuilder<WalletTransaction> builder)
     {

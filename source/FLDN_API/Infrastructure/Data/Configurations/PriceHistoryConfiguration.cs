@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class PriceHistoryConfiguration : BaseEntityConfiguration<PriceHistory, int>
+public class PriceHistoryConfiguration : BaseEntityConfiguration<PriceHistory, Guid>
 {
     public override void Configure(EntityTypeBuilder<PriceHistory> builder)
     {

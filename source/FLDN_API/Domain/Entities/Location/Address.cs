@@ -2,12 +2,12 @@ namespace Domain;
 
 public class Address : ISoftDeletable
 {
-    public int AddressId { get; set; }
-    public int UserId { get; set; }
+    public Guid AddressId { get; set; }
+    public Guid UserId { get; set; }
     public string ReceiverName { get; set; } = default!;
     public string ReceiverPhone { get; set; } = default!;
     public string FullAddress { get; set; } = default!;
-    public int DistrictId { get; set; }
+    public Guid DistrictId { get; set; }
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
     public bool IsDefault { get; set; }

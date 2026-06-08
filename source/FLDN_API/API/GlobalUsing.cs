@@ -9,4 +9,6 @@ global using Microsoft.AspNetCore.Mvc;
 global using System.Reflection;
 global using AspNetCoreRateLimit;
 global using FluentValidation;
+global using Microsoft.Extensions.Options;
+global using Microsoft.AspNetCore.Authorization;
 

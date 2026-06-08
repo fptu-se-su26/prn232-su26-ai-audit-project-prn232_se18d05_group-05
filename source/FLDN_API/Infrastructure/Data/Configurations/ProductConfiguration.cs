@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class ProductConfiguration : SoftDeleteEntityConfiguration<Product, int>
+public class ProductConfiguration : SoftDeleteEntityConfiguration<Product, Guid>
 {
     public override void Configure(EntityTypeBuilder<Product> builder)
     {

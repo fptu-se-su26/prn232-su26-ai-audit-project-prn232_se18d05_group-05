@@ -11,7 +11,7 @@
 | MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 08/6/2026 |
+| Ngày cập nhật gần nhất | 09/6/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -65,6 +65,34 @@
 - Xác nhận connection string remote database
 
 **Kết quả áp dụng:** Có – migration `InitialCreate` đã apply lên DB, branch `feat/DE180942-define-domain-entities`
+
+---
+
+## Lần 7 – Implement Auth Module UC03–UC06
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-06-09 |
+| Công cụ AI | Claude |
+| Mục đích | Implement đầy đủ auth: login, logout, verify email, forgot/reset password |
+| Phần việc | Backend – Auth |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- `POST /api/auth/login` — stateless JWT, RefreshToken lưu Redis + HttpOnly cookie
+- `POST /api/auth/logout` — revoke RefreshToken khỏi Redis, xóa cookie
+- `GET /api/auth/verify-email` — kích hoạt tài khoản qua link email (TTL 10 phút)
+- `POST /api/auth/forgot-password` + `POST /api/auth/reset-password` — token Redis 10 phút, gửi mail qua Quartz background job
+- Register cập nhật: `IsActive = false` cho đến khi verify email
+- Tạo `AppConstants`, `EmailTemplates`, `SwaggerExtensions` (JWT Bearer)
+- Tạo DTOs, validators (FluentValidation) cho tất cả endpoints
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận chiến lược lưu token: AccessToken stateless, RefreshToken Redis
+- Điều chỉnh TTL verify email từ 24h xuống 10 phút
+- Đổi BaseUrl sang localhost để test local
+
+**Kết quả áp dụng:** Có – build 0 lỗi, branch `feat/DE180942-auth-module`
 
 ---
 

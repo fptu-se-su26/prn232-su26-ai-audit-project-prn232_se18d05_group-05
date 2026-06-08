@@ -214,14 +214,14 @@ Viết tại đây...
 ## Ngày thực hiện
 
 ```text
-DD/MM/YYYY
+08/06/2026
 ```
 
 ## Đã hoàn thành
 
-- [ ] Tạo project structure
-- [ ] Cài đặt database connection
-- [ ] Xây dựng backend
+- [x] Tạo project structure
+- [x] Cài đặt database connection
+- [x] Xây dựng backend
 - [ ] Xây dựng frontend
 - [ ] Xây dựng authentication/authorization
 - [ ] Xử lý CRUD
@@ -236,33 +236,33 @@ DD/MM/YYYY
 
 | STT | Nội dung thay đổi | Người thực hiện | File/Module liên quan | Minh chứng |
 |---:|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Tạo 34 domain entity class từ SQL schema | DE180942 | `Domain/Entities/` | commit fda0d0d |
+| 2 | Tạo 15 enum | DE180942 | `Domain/Enums/` | commit fda0d0d |
+| 3 | Tạo 31 EF Core configuration class | DE180942 | `Infrastructure/Data/Configurations/` | commit fda0d0d |
+| 4 | Cập nhật ApplicationDbContext | DE180942 | `Infrastructure/ApplicationDbContext.cs` | commit fda0d0d |
+| 5 | Tạo và apply migration InitialCreate lên remote DB | DE180942 | `Infrastructure/Migrations/` | commit fda0d0d |
 
 ## AI có hỗ trợ không?
 
-- [ ] Có
-- [ ] Không
+- [x] Có
 
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Viết tại đây...
+Claude hỗ trợ generate entity class, EF configuration, fix cascade delete cycle và shadow FK warnings.
 ```
 
 ## Commit/Screenshot minh chứng
 
 ```text
-Dán link commit, screenshot hoặc mô tả minh chứng tại đây...
+commit fda0d0d – feat: define domain entities, EF configurations and run initial migration
+commit 48cba0d – chore: ignore AI editor config files
 ```
 
 ## Ghi chú
 
 ```text
-Viết tại đây...
+OTP, PasswordResetToken, RefreshToken không dùng EF — lưu Redis.
 ```
 
 ---

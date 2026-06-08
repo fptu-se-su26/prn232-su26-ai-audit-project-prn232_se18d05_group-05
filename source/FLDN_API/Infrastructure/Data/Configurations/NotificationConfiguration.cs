@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class NotificationConfiguration : BaseEntityConfiguration<Notification, int>
+public class NotificationConfiguration : BaseEntityConfiguration<Notification, Guid>
 {
     public override void Configure(EntityTypeBuilder<Notification> builder)
     {

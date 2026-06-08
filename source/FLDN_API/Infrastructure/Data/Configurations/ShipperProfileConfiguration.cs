@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class ShipperProfileConfiguration : SoftDeleteEntityConfiguration<ShipperProfile, int>
+public class ShipperProfileConfiguration : SoftDeleteEntityConfiguration<ShipperProfile, Guid>
 {
     public override void Configure(EntityTypeBuilder<ShipperProfile> builder)
     {

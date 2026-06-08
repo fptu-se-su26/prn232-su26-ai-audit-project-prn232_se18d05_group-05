@@ -1,8 +1,8 @@
 namespace Domain;
 
-public class Batch : EntityBase<int>
+public class Batch : EntityBase<Guid>
 {
-    public int ProductId { get; set; }
+    public Guid ProductId { get; set; }
     public string BatchCode { get; set; } = default!;
     public decimal Quantity { get; set; }
     public decimal RemainingQty { get; set; }

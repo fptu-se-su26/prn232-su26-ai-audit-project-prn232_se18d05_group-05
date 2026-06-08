@@ -2,10 +2,10 @@ namespace Domain;
 
 public class Delivery
 {
-    public int DeliveryId { get; set; }
-    public int OrderId { get; set; }
-    public int? ShipperId { get; set; }
-    public int? ZoneId { get; set; }
+    public Guid DeliveryId { get; set; }
+    public Guid OrderId { get; set; }
+    public Guid? ShipperId { get; set; }
+    public Guid? ZoneId { get; set; }
     public DeliveryStatus Status { get; set; }
     public DateTimeOffset? AssignedAt { get; set; }
     public DateTimeOffset? PickedUpAt { get; set; }

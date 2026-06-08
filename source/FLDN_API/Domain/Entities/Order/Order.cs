@@ -1,10 +1,10 @@
 namespace Domain;
 
-public class Order : EntityBase<int>
+public class Order : EntityBase<Guid>
 {
-    public int CustomerId { get; set; }
-    public int AddressId { get; set; }
-    public int? VoucherId { get; set; }
+    public Guid CustomerId { get; set; }
+    public Guid AddressId { get; set; }
+    public Guid? VoucherId { get; set; }
     public decimal TotalAmount { get; set; }
     public decimal DiscountAmount { get; set; }
     public decimal ShippingFee { get; set; }

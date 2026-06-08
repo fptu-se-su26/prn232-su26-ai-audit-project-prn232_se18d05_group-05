@@ -9,9 +9,11 @@ builder.Services
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerWithJwtSecurity();
 
 var app = builder.Build();
+
+await app.ApplyMigrationsAndSeedAsync();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

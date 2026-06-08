@@ -8,6 +8,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddControllers(options =>
         {
+            options.Filters.Add<FluentValidationFilter>();
         })
         .AddJsonOptions(options =>
         {

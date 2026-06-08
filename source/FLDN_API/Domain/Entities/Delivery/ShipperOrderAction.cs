@@ -1,9 +1,9 @@
 namespace Domain;
 
-public class ShipperOrderAction : EntityBase<int>
+public class ShipperOrderAction : EntityBase<Guid>
 {
-    public int DeliveryId { get; set; }
-    public int ShipperId { get; set; }
+    public Guid DeliveryId { get; set; }
+    public Guid ShipperId { get; set; }
     public ShipperActionType Action { get; set; }
     public string? Reason { get; set; }
 

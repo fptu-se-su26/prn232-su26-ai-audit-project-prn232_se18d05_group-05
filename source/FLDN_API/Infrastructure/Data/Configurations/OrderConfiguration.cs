@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class OrderConfiguration : BaseEntityConfiguration<Order, int>
+public class OrderConfiguration : BaseEntityConfiguration<Order, Guid>
 {
     public override void Configure(EntityTypeBuilder<Order> builder)
     {

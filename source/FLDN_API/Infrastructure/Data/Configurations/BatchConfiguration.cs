@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class BatchConfiguration : BaseEntityConfiguration<Batch, int>
+public class BatchConfiguration : BaseEntityConfiguration<Batch, Guid>
 {
     public override void Configure(EntityTypeBuilder<Batch> builder)
     {

@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class QRCodeConfiguration : BaseEntityConfiguration<QRCode, int>
+public class QRCodeConfiguration : BaseEntityConfiguration<QRCode, Guid>
 {
     public override void Configure(EntityTypeBuilder<QRCode> builder)
     {

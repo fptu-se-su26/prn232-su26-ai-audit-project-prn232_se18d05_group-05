@@ -11,7 +11,7 @@
 | MSSV / Danh sách MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 08/6/2026 |
+| Ngày cập nhật gần nhất | 09/6/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -25,6 +25,8 @@
 | 3 | 2026-06-06 | Claude | Cấu hình pnpm cho frontend | Có |
 | 4 | 2026-06-06 | Claude | Cài TanStack Query và tailwind-merge | Có |
 | 5 | 2026-06-08 | Claude | Tạo domain entities, EF config và migration | Có |
+| 6 | 2026-06-09 | Claude | Implement login, logout, verify email (UC03–UC04) | Có |
+| 7 | 2026-06-09 | Claude | Implement forgot/reset password + refactor auth utils (UC05–UC06) | Có |
 
 ---
 
@@ -67,6 +69,27 @@
 **Kết quả áp dụng:** Có. App chạy bình thường với provider mới.
 
 ---
+
+## Prompt 6 – Implement login, logout, verify email
+
+**Mục đích:** Implement UC03 login, UC04 logout, và email verification sau register
+
+**Prompt (tóm tắt):** Yêu cầu Claude implement `POST /api/auth/login` trả AccessToken (stateless JWT) + RefreshToken lưu Redis, `POST /api/auth/logout` revoke token, `GET /api/auth/verify-email` kích hoạt tài khoản. Register đổi `IsActive = false`, gửi verify link qua Quartz background job. Thêm Swagger JWT Bearer config.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi.
+
+---
+
+## Prompt 7 – Implement forgot/reset password và refactor
+
+**Mục đích:** Implement UC05–UC06 và tách AppConstants, EmailTemplates ra riêng
+
+**Prompt (tóm tắt):** Yêu cầu Claude implement `POST /api/auth/forgot-password` sinh reset token Redis 10 phút gửi email background, `POST /api/auth/reset-password` validate token hash password mới. Tách `BuildVerifyEmailBody` ra `Contract/Templates/EmailTemplates.cs`, tạo `AppConstants` lưu BaseUrl và Redis key helpers. Sửa TTL verify email xuống 10 phút.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi.
+
+---
+
 
 ## Prompt 5 – Tạo domain entities và EF configuration
 

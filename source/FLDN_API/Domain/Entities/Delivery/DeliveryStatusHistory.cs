@@ -1,12 +1,12 @@
 namespace Domain;
 
-public class DeliveryStatusHistory : EntityBase<int>
+public class DeliveryStatusHistory : EntityBase<Guid>
 {
-    public int DeliveryId { get; set; }
+    public Guid DeliveryId { get; set; }
     public DeliveryStatus Status { get; set; }
     public string? Note { get; set; }
     public string? ImageUrl { get; set; }
-    public int? UpdatedBy { get; set; }
+    public Guid? UpdatedBy { get; set; }
 
     // Navigation
     public Delivery Delivery { get; set; } = default!;

@@ -1,5 +1,5 @@
-using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Collections.Concurrent;
 
 namespace Infrastructure;
 
@@ -11,6 +11,9 @@ public sealed class UnitOfWork : IUnitOfWork
     private IDbContextTransaction? _transaction;
 
     public UnitOfWork(ApplicationDbContext db) => _db = db;
+
+    public IUserRepository Users
+        => (IUserRepository)_repos.GetOrAdd(nameof(Users), _ => new UserRepository(_db));
 
     public IGenericRepository<T> Repository<T>() where T : EntityBase<Guid>
         => (IGenericRepository<T>)_repos.GetOrAdd(typeof(T).Name, _ => new GenericRepository<T>(_db));

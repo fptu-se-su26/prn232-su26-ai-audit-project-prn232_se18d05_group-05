@@ -1,9 +1,9 @@
 namespace Domain;
 
-public class Product : EntityBase<int>, ISoftDeletable
+public class Product : EntityBase<Guid>, ISoftDeletable
 {
-    public int SupplierId { get; set; }
-    public int CategoryId { get; set; }
+    public Guid SupplierId { get; set; }
+    public Guid CategoryId { get; set; }
     public string Name { get; set; } = default!;
     public string? Description { get; set; }
     public decimal WholesalePrice { get; set; }

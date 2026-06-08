@@ -1,10 +1,10 @@
 namespace Domain;
 
-public class Review : EntityBase<int>, ISoftDeletable
+public class Review : EntityBase<Guid>, ISoftDeletable
 {
-    public int OrderItemId { get; set; }
-    public int CustomerId { get; set; }
-    public int ProductId { get; set; }
+    public Guid OrderItemId { get; set; }
+    public Guid CustomerId { get; set; }
+    public Guid ProductId { get; set; }
     public byte Rating { get; set; }
     public string? Comment { get; set; }
     public string? ImageUrl { get; set; }

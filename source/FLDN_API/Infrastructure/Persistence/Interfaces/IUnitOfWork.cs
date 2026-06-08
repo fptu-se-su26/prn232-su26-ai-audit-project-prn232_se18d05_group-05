@@ -5,7 +5,7 @@ public interface IUnitOfWork : IDisposable
     IGenericRepository<T> Repository<T>() where T : EntityBase<Guid>;
 
     #region System Reposittory
-
+    IUserRepository Users { get; }
     #endregion
 
     // Transaction 

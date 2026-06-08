@@ -1,8 +1,8 @@
 namespace Domain;
 
-public class Cart : EntityBase<int>
+public class Cart : EntityBase<Guid>
 {
-    public int CustomerId { get; set; }
+    public Guid CustomerId { get; set; }
 
     // Navigation
     public User Customer { get; set; } = default!;

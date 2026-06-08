@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class UserConfiguration : SoftDeleteEntityConfiguration<User, int>
+public class UserConfiguration : SoftDeleteEntityConfiguration<User, Guid>
 {
     public override void Configure(EntityTypeBuilder<User> builder)
     {
@@ -18,7 +18,7 @@ public class UserConfiguration : SoftDeleteEntityConfiguration<User, int>
         builder.HasIndex(u => u.Email).IsUnique();
         builder.HasIndex(u => u.Phone).IsUnique();
 
-        builder.HasMany(u => u.UserRoles).WithOne(ur => ur.User).HasForeignKey(ur => ur.UserId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(u => u.UserRoles).WithOne(ur => ur.User).HasForeignKey(ur => ur.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(u => u.Orders).WithOne(o => o.Customer).HasForeignKey(o => o.CustomerId).OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(u => u.Addresses).WithOne(a => a.User).HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(u => u.SupplierProfile).WithOne(sp => sp.User).HasForeignKey<SupplierProfile>(sp => sp.UserId).OnDelete(DeleteBehavior.Restrict);

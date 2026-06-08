@@ -2,11 +2,11 @@ namespace Domain;
 
 public class OrderItem
 {
-    public int OrderItemId { get; set; }
-    public int OrderId { get; set; }
-    public int ProductId { get; set; }
-    public int BatchId { get; set; }
-    public int SupplierId { get; set; }
+    public Guid OrderItemId { get; set; }
+    public Guid OrderId { get; set; }
+    public Guid ProductId { get; set; }
+    public Guid BatchId { get; set; }
+    public Guid SupplierId { get; set; }
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal SubTotal { get; set; }

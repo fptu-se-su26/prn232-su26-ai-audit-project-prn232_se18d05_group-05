@@ -1,11 +1,11 @@
 namespace Domain;
 
-public class OrderStatusHistory : EntityBase<int>
+public class OrderStatusHistory : EntityBase<Guid>
 {
-    public int OrderId { get; set; }
+    public Guid OrderId { get; set; }
     public OrderStatus Status { get; set; }
     public string? Note { get; set; }
-    public int? CreatedBy { get; set; }
+    public Guid? CreatedBy { get; set; }
 
     // Navigation
     public Order Order { get; set; } = default!;

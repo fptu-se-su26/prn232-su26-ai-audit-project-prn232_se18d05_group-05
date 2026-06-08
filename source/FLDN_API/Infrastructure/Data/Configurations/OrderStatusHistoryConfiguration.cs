@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class OrderStatusHistoryConfiguration : BaseEntityConfiguration<OrderStatusHistory, int>
+public class OrderStatusHistoryConfiguration : BaseEntityConfiguration<OrderStatusHistory, Guid>
 {
     public override void Configure(EntityTypeBuilder<OrderStatusHistory> builder)
     {

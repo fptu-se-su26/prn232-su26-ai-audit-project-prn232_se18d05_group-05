@@ -2,10 +2,10 @@ namespace Domain;
 
 public class VoucherUsage
 {
-    public int VoucherUsageId { get; set; }
-    public int VoucherId { get; set; }
-    public int UserId { get; set; }
-    public int OrderId { get; set; }
+    public Guid VoucherUsageId { get; set; }
+    public Guid VoucherId { get; set; }
+    public Guid UserId { get; set; }
+    public Guid OrderId { get; set; }
     public DateTimeOffset UsedAt { get; set; }
 
     // Navigation

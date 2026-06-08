@@ -11,7 +11,7 @@
 | MSSV / Danh sách MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 20/5/2026 |
+| Ngày cập nhật gần nhất | 08/6/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -24,6 +24,7 @@
 | 2 | 2026-05-20 | Claude | Thêm middleware xác thực và phân quyền | Có |
 | 3 | 2026-06-06 | Claude | Cấu hình pnpm cho frontend | Có |
 | 4 | 2026-06-06 | Claude | Cài TanStack Query và tailwind-merge | Có |
+| 5 | 2026-06-08 | Claude | Tạo domain entities, EF config và migration | Có |
 
 ---
 
@@ -64,3 +65,13 @@
 **Prompt (tóm tắt):** Yêu cầu Claude cài `@tanstack/react-query`, `tailwind-merge`, `clsx`, tạo `queryClient.js` và `cn.js`, wrap app với `QueryClientProvider`.
 
 **Kết quả áp dụng:** Có. App chạy bình thường với provider mới.
+
+---
+
+## Prompt 5 – Tạo domain entities và EF configuration
+
+**Mục đích:** Implement toàn bộ domain model từ SQL schema và cấu hình EF Core
+
+**Prompt (tóm tắt):** Yêu cầu Claude đọc SQL schema 33 bảng, tạo entity class với `EntityBase`, `ISoftDeletable`, navigation properties hợp lý. Sau đó tạo EF configuration kế thừa `BaseEntityConfiguration` / `SoftDeleteEntityConfiguration`, cập nhật `ApplicationDbContext`, chạy migration và `database update`.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, migration apply thành công lên remote DB.

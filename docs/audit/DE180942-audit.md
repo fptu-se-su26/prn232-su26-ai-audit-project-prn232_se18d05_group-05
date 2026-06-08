@@ -11,7 +11,7 @@
 | MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 20/5/2026 |
+| Ngày cập nhật gần nhất | 08/6/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -38,6 +38,33 @@
 - Quyết định cấu trúc folder `docs/audit/` và `docs/prompts/` tách theo thành viên
 
 **Kết quả áp dụng:** Có – commit vào branch `docs/DE180942-update-readme`
+
+---
+
+## Lần 6 – Định nghĩa Domain Entities và EF Core Configuration
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-06-08 |
+| Công cụ AI | Claude |
+| Mục đích | Tạo toàn bộ domain models và cấu hình EF Core, chạy migration |
+| Phần việc | Backend – Domain & Infrastructure |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Tạo 34 entity class trong `Domain/Entities/` từ SQL schema (User, Product, Order, Delivery, v.v.)
+- Tạo 15 enum trong `Domain/Enums/`
+- Tạo 31 EF configuration class trong `Infrastructure/Data/Configurations/`
+- Cập nhật `ApplicationDbContext` với đầy đủ DbSet
+- Fix lỗi cascade delete cycle, shadow FK warnings
+- Chạy `dotnet ef migrations add InitialCreate` và `database update` thành công
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận SQL schema và quyết định entity nào dùng `ISoftDeletable`
+- Kiểm tra build 0 lỗi trước khi migration
+- Xác nhận connection string remote database
+
+**Kết quả áp dụng:** Có – migration `InitialCreate` đã apply lên DB, branch `feat/DE180942-define-domain-entities`
 
 ---
 

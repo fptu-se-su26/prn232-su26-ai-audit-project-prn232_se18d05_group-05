@@ -9,9 +9,9 @@ internal static class RedisExtensions
         var baseUrl = configuration["Upstash:BaseUrl"] ?? throw new InvalidOperationException("Upstash:BaseUrl is required");
         var token = configuration["Upstash:Token"] ?? throw new InvalidOperationException("Upstash:Token is required");
 
-        services.AddHttpClient<IRedisCacheService, RedisCacheService>(client =>
+        services.AddHttpClient(nameof(RedisCacheService), client =>
         {
-            client.BaseAddress = new Uri(baseUrl);
+            client.BaseAddress = new Uri(baseUrl.EndsWith("/") ? baseUrl : baseUrl + "/");
             client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
         })

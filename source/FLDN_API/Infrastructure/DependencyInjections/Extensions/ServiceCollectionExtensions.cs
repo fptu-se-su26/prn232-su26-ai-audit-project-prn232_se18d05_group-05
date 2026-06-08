@@ -1,6 +1,6 @@
 ﻿namespace Infrastructure;
 
-public static class ServiceCollectionExtensions 
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -16,11 +16,8 @@ public static class ServiceCollectionExtensions
                 .AddJwtService(jwtOptions)
                 .AddRedisCache(configuration)
                 .AddQuartzService(configuration)
-                .AddCloudinaryService(configuration);
-
-        // Quét và đăng ký các class có attribute [RegisterService]
-        services.AddServicesFromAssembly(typeof(AssemblyReference).Assembly);
-
+                .AddCloudinaryService(configuration)
+                .AddServicesFromAssembly(typeof(AssemblyReference).Assembly);
         return services;
     }
 }

@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class VoucherConfiguration : BaseEntityConfiguration<Voucher, int>
+public class VoucherConfiguration : BaseEntityConfiguration<Voucher, Guid>
 {
     public override void Configure(EntityTypeBuilder<Voucher> builder)
     {

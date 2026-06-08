@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class ShipperOrderActionConfiguration : BaseEntityConfiguration<ShipperOrderAction, int>
+public class ShipperOrderActionConfiguration : BaseEntityConfiguration<ShipperOrderAction, Guid>
 {
     public override void Configure(EntityTypeBuilder<ShipperOrderAction> builder)
     {

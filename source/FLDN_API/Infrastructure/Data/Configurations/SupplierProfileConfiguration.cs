@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class SupplierProfileConfiguration : SoftDeleteEntityConfiguration<SupplierProfile, int>
+public class SupplierProfileConfiguration : SoftDeleteEntityConfiguration<SupplierProfile, Guid>
 {
     public override void Configure(EntityTypeBuilder<SupplierProfile> builder)
     {

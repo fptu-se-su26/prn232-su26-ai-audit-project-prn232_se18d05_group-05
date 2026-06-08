@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class PaymentConfiguration : BaseEntityConfiguration<Payment, int>
+public class PaymentConfiguration : BaseEntityConfiguration<Payment, Guid>
 {
     public override void Configure(EntityTypeBuilder<Payment> builder)
     {

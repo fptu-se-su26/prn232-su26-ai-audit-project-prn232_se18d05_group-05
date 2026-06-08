@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class CartItemConfiguration : BaseEntityConfiguration<CartItem, int>
+public class CartItemConfiguration : BaseEntityConfiguration<CartItem, Guid>
 {
     public override void Configure(EntityTypeBuilder<CartItem> builder)
     {

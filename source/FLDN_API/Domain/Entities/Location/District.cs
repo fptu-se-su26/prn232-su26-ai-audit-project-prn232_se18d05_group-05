@@ -2,7 +2,7 @@ namespace Domain;
 
 public class District
 {
-    public int DistrictId { get; set; }
+    public Guid DistrictId { get; set; }
     public string Name { get; set; } = default!;
     public string Code { get; set; } = default!;
 

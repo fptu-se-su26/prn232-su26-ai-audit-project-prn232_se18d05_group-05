@@ -1,11 +1,11 @@
 namespace Domain;
 
-public class CartItem : EntityBase<int>
+public class CartItem : EntityBase<Guid>
 {
-    public int CartId { get; set; }
-    public int ProductId { get; set; }
-    public int SupplierId { get; set; }
-    public int? SelectedBatchId { get; set; }
+    public Guid CartId { get; set; }
+    public Guid ProductId { get; set; }
+    public Guid SupplierId { get; set; }
+    public Guid? SelectedBatchId { get; set; }
     public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
 

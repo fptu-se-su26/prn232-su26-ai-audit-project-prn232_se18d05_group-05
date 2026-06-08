@@ -1,6 +1,6 @@
 namespace Domain;
 
-public class Voucher : EntityBase<int>
+public class Voucher : EntityBase<Guid>
 {
     public string Code { get; set; } = default!;
     public string VoucherName { get; set; } = default!;
@@ -14,7 +14,7 @@ public class Voucher : EntityBase<int>
     public DateTimeOffset EndDate { get; set; }
     public bool IsFlashSale { get; set; }
     public bool IsActive { get; set; }
-    public int CreatedBy { get; set; }
+    public Guid CreatedBy { get; set; }
 
     // Navigation
     public User CreatedByUser { get; set; } = default!;

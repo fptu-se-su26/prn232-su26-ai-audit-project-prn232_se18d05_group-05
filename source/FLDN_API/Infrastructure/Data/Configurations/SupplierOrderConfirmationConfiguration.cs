@@ -1,6 +1,6 @@
 namespace Infrastructure;
 
-public class SupplierOrderConfirmationConfiguration : BaseEntityConfiguration<SupplierOrderConfirmation, int>
+public class SupplierOrderConfirmationConfiguration : BaseEntityConfiguration<SupplierOrderConfirmation, Guid>
 {
     public override void Configure(EntityTypeBuilder<SupplierOrderConfirmation> builder)
     {

@@ -1,4 +1,4 @@
-﻿using TriggerBuilder = Quartz.TriggerBuilder;
+using TriggerBuilder = Quartz.TriggerBuilder;
 
 namespace Infrastructure;
 

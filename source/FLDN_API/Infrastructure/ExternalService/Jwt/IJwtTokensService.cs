@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 namespace Infrastructure;
 
 public interface IJwtTokensService
@@ -10,4 +11,3 @@ public interface IJwtTokensService
     // Token for email verification
     string GenerateEmailVerifyToken();
 }
-

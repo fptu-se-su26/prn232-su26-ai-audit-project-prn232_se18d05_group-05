@@ -1,4 +1,4 @@
-﻿namespace Contract;
+﻿namespace Infrastructure;
 
 public static class AutoInjectionExtensions
 {

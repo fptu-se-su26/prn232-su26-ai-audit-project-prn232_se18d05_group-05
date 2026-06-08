@@ -1,4 +1,4 @@
-﻿namespace Infrastructure;
+namespace Infrastructure;
 
 [RegisterService(typeof(IPasswordHasher))]
 public class BcryptPasswordHasher : IPasswordHasher

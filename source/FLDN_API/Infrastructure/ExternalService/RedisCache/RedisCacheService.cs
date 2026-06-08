@@ -1,9 +1,9 @@
-﻿using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Infrastructure;
 
+[RegisterService(typeof(IRedisCacheService))]
 public class RedisCacheService : IRedisCacheService
 {
     private readonly HttpClient _http;
@@ -17,14 +17,9 @@ public class RedisCacheService : IRedisCacheService
 
     private sealed record UpstashResp(JsonElement? Result, string? Error);
 
-    public RedisCacheService(HttpClient http, IConfiguration config)
+    public RedisCacheService(IHttpClientFactory httpClientFactory)
     {
-        _http = http;
-        var baseUrl = config["Upstash:BaseUrl"] ?? throw new Exception("Upstash BaseUrl missing");
-        var token = config["Upstash:Token"] ?? throw new Exception("Upstash Token missing");
-
-        _http.BaseAddress = new Uri(baseUrl.EndsWith("/") ? baseUrl : baseUrl + "/");
-        _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        _http = httpClientFactory.CreateClient(nameof(RedisCacheService));
     }
 
     public async Task SetRecordAsync<T>(string key, T value, TimeSpan? expiry = null)

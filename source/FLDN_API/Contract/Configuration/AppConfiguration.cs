@@ -33,15 +33,4 @@ public class AppConfiguration(IConfiguration configuration) : IAppConfiguration
 
         return cloudinaryOptions;
     }
-
-    //public string? GetSqlServerConnectionString()
-    // => _configuration.GetConnectionString(AppConstants.SqlServerConnection) ?? throw new Exception("An unexpected error occurred.");
-
-    //public string? GetSqlServerForDapperConnectionString()
-    // => _configuration.GetConnectionString(AppConstants.SqlServerForDapperConnection) ?? throw new Exception("An unexpected error occurred.");
-
-    //public string? GetEnvironment()
-    //{
-    //    return _hostEnvironment.EnvironmentName;
-    //}
 }

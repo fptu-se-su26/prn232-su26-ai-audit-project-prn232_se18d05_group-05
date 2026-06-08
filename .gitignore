@@ -436,3 +436,11 @@ appsettings.Production.json
 
 # Obsidian
 .obsidian/
+
+# AI editor configs (Cursor, Cline, OpenCode, Windsurf, Copilot, Claude)
+.cursor/
+.clinerules/
+.opencode/
+.windsurf/
+.github/copilot-instructions.md
+AGENTS.md

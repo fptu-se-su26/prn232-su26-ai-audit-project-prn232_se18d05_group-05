@@ -11,7 +11,7 @@
 | MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 09/6/2026 |
+| Ngày cập nhật gần nhất | 11/6/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -96,6 +96,32 @@
 
 ---
 
+## Lần 8 – Implement Admin Module UC08–UC11
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-06-11 |
+| Công cụ AI | Claude |
+| Mục đích | Implement 17 API endpoints quản trị: user, supplier, category, voucher |
+| Phần việc | Backend – Admin |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- UC08: CRUD user (list, detail, lock/unlock, reset password) – 5 endpoints
+- UC09: Supplier approval (list, detail, approve/reject, update fee) – 5 endpoints
+- UC10: Category management (list tree, create, update, soft-delete) – 4 endpoints
+- UC11: Voucher management (list, create, update, toggle) – 4 endpoints
+- Tạo DTOs, FluentValidation validators, Mapster mapping config
+- Refactor cấu trúc: move services từ Infrastructure lên Application, move interfaces sang Application/Abstractions
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Quyết định cấu trúc folder: Services chia Interface/Implementation trong Application
+- Xác nhận Category entity không extend EntityBase nên cần custom repository
+- Kiểm tra build 0 lỗi 0 warnings
+
+**Kết quả áp dụng:** Có – build 0 lỗi, branch `feat/DE180942-admin-module`
+
+---
 
 ## Lần 2 – Cấu hình frontend với Tailwind, Vite và PWA
 

@@ -11,6 +11,5 @@ public class PriceHistoryConfiguration : BaseEntityConfiguration<PriceHistory, G
         builder.HasOne(ph => ph.Product).WithMany(p => p.PriceHistories).HasForeignKey(ph => ph.ProductId).OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(ph => ph.WholesalePrice).HasPrecision(12, 2);
-        builder.Property(ph => ph.RetailPrice).HasPrecision(12, 2);
     }
 }

@@ -1,6 +1,6 @@
 namespace Domain;
 
-public enum ShipperActionType
+public enum LogisticsActionType
 {
     Accepted,
     Rejected

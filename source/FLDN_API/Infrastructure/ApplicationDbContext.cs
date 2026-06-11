@@ -11,7 +11,7 @@ public class ApplicationDbContext : DbContext
 
     // Location
     public DbSet<District> Districts => Set<District>();
-    public DbSet<DeliveryZone> DeliveryZones => Set<DeliveryZone>();
+    public DbSet<DistributionZone> DistributionZones => Set<DistributionZone>();
     public DbSet<Address> Addresses => Set<Address>();
 
     // Supplier
@@ -26,33 +26,17 @@ public class ApplicationDbContext : DbContext
     public DbSet<Batch> Batches => Set<Batch>();
     public DbSet<QRCode> QRCodes => Set<QRCode>();
 
-    // Cart
-    public DbSet<Cart> Carts => Set<Cart>();
-    public DbSet<CartItem> CartItems => Set<CartItem>();
+    // SupplyRequest
+    public DbSet<SupplyRequest> SupplyRequests => Set<SupplyRequest>();
+    public DbSet<SupplyRequestItem> SupplyRequestItems => Set<SupplyRequestItem>();
+    public DbSet<SupplyRequestStatusHistory> SupplyRequestStatusHistories => Set<SupplyRequestStatusHistory>();
+    public DbSet<SupplierConfirmation> SupplierConfirmations => Set<SupplierConfirmation>();
 
-    // Payment / Voucher
-    public DbSet<Voucher> Vouchers => Set<Voucher>();
-    public DbSet<VoucherUsage> VoucherUsages => Set<VoucherUsage>();
-    public DbSet<Wallet> Wallets => Set<Wallet>();
-    public DbSet<WalletTransaction> WalletTransactions => Set<WalletTransaction>();
-
-    // Order
-    public DbSet<Order> Orders => Set<Order>();
-    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
-    public DbSet<OrderStatusHistory> OrderStatusHistories => Set<OrderStatusHistory>();
-    public DbSet<SupplierOrderConfirmation> SupplierOrderConfirmations => Set<SupplierOrderConfirmation>();
-
-    // Payment
-    public DbSet<Payment> Payments => Set<Payment>();
-
-    // Review
-    public DbSet<Review> Reviews => Set<Review>();
-
-    // Delivery
-    public DbSet<ShipperProfile> ShipperProfiles => Set<ShipperProfile>();
-    public DbSet<Delivery> Deliveries => Set<Delivery>();
-    public DbSet<ShipperOrderAction> ShipperOrderActions => Set<ShipperOrderAction>();
-    public DbSet<DeliveryStatusHistory> DeliveryStatusHistories => Set<DeliveryStatusHistory>();
+    // Shipment
+    public DbSet<LogisticsProfile> LogisticsProfiles => Set<LogisticsProfile>();
+    public DbSet<Shipment> Shipments => Set<Shipment>();
+    public DbSet<LogisticsAction> LogisticsActions => Set<LogisticsAction>();
+    public DbSet<ShipmentStatusHistory> ShipmentStatusHistories => Set<ShipmentStatusHistory>();
 
     // Notification
     public DbSet<Notification> Notifications => Set<Notification>();

@@ -1,11 +1,12 @@
 namespace Infrastructure;
 
-public class RoleConfiguration : IEntityTypeConfiguration<Role>
+public class RoleConfiguration : BaseEntityConfiguration<Role, Guid>
 {
-    public void Configure(EntityTypeBuilder<Role> builder)
+    public override void Configure(EntityTypeBuilder<Role> builder)
     {
+        base.Configure(builder);
+
         builder.ToTable("Roles");
-        builder.HasKey(r => r.Id);
 
         builder.Property(r => r.RoleName).IsRequired().HasMaxLength(50);
         builder.Property(r => r.Description).IsRequired(false).HasMaxLength(255);

@@ -29,7 +29,7 @@ public sealed class AdminCategoryService(
 
         var category = new Category
         {
-            CategoryId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Name = request.Name,
             Description = request.Description,
             ImageUrl = request.ImageUrl,
@@ -43,7 +43,7 @@ public sealed class AdminCategoryService(
 
         return new CreateCategoryResponse
         {
-            CategoryId = category.CategoryId,
+            CategoryId = category.Id,
             Name = category.Name
         };
     }
@@ -53,7 +53,7 @@ public sealed class AdminCategoryService(
         var category = await unitOfWork.Categories.GetByIdAsync(id, ct)
             ?? throw new NotFoundException("Category not found.");
 
-        if (await unitOfWork.Categories.AnyAsync(c => c.Name == request.Name && c.CategoryId != id && !c.IsDeleted, ct))
+        if (await unitOfWork.Categories.AnyAsync(c => c.Name == request.Name && c.Id != id && !c.IsDeleted, ct))
             throw new ConflictException("Category name already exists.");
 
         category.Name = request.Name;
@@ -78,7 +78,7 @@ public sealed class AdminCategoryService(
 
     private static CategoryResponse MapCategory(Category category) => new()
     {
-        CategoryId = category.CategoryId,
+        CategoryId = category.Id,
         Name = category.Name,
         ParentCategoryId = category.ParentCategoryId,
         IsActive = category.IsActive,

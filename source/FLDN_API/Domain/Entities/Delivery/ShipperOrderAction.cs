@@ -1,13 +1,13 @@
 namespace Domain;
 
-public class ShipperOrderAction : EntityBase<Guid>
+public class LogisticsAction : EntityBase<Guid>
 {
-    public Guid DeliveryId { get; set; }
-    public Guid ShipperId { get; set; }
-    public ShipperActionType Action { get; set; }
+    public Guid ShipmentId { get; set; }
+    public Guid LogisticsOperatorId { get; set; }
+    public LogisticsActionType Action { get; set; }
     public string? Reason { get; set; }
 
     // Navigation
-    public Delivery Delivery { get; set; } = default!;
-    public ShipperProfile Shipper { get; set; } = default!;
+    public Shipment Shipment { get; set; } = default!;
+    public LogisticsProfile LogisticsOperator { get; set; } = default!;
 }

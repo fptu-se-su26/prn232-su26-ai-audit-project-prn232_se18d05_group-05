@@ -19,12 +19,10 @@ public class UserConfiguration : SoftDeleteEntityConfiguration<User, Guid>
         builder.HasIndex(u => u.Phone).IsUnique();
 
         builder.HasMany(u => u.UserRoles).WithOne(ur => ur.User).HasForeignKey(ur => ur.UserId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasMany(u => u.Orders).WithOne(o => o.Customer).HasForeignKey(o => o.CustomerId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(u => u.SupplyRequests).WithOne(sr => sr.DistributionPoint).HasForeignKey(sr => sr.DistributionPointId).OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(u => u.Addresses).WithOne(a => a.User).HasForeignKey(a => a.UserId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(u => u.SupplierProfile).WithOne(sp => sp.User).HasForeignKey<SupplierProfile>(sp => sp.UserId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(u => u.ShipperProfile).WithOne(sp => sp.User).HasForeignKey<ShipperProfile>(sp => sp.UserId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(u => u.Wallet).WithOne(w => w.User).HasForeignKey<Wallet>(w => w.UserId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(u => u.Cart).WithOne(c => c.Customer).HasForeignKey<Cart>(c => c.CustomerId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(u => u.LogisticsProfile).WithOne(lp => lp.User).HasForeignKey<LogisticsProfile>(lp => lp.UserId).OnDelete(DeleteBehavior.Restrict);
         builder.HasMany(u => u.Notifications).WithOne(n => n.User).HasForeignKey(n => n.UserId).OnDelete(DeleteBehavior.Restrict);
     }
 }

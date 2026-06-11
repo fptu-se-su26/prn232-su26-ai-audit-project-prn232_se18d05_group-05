@@ -1,11 +1,12 @@
 namespace Infrastructure;
 
-public class ProductImageConfiguration : IEntityTypeConfiguration<ProductImage>
+public class ProductImageConfiguration : BaseEntityConfiguration<ProductImage, Guid>
 {
-    public void Configure(EntityTypeBuilder<ProductImage> builder)
+    public override void Configure(EntityTypeBuilder<ProductImage> builder)
     {
+        base.Configure(builder);
+
         builder.ToTable("ProductImages");
-        builder.HasKey(pi => pi.ImageId);
 
         builder.HasOne(pi => pi.Product).WithMany(p => p.ProductImages).HasForeignKey(pi => pi.ProductId).OnDelete(DeleteBehavior.Restrict);
 

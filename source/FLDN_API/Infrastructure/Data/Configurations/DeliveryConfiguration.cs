@@ -1,26 +1,26 @@
 namespace Infrastructure;
 
-public class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
+public class ShipmentConfiguration : BaseEntityConfiguration<Shipment, Guid>
 {
-    public void Configure(EntityTypeBuilder<Delivery> builder)
+    public override void Configure(EntityTypeBuilder<Shipment> builder)
     {
-        builder.ToTable("Deliveries");
-        builder.HasKey(d => d.DeliveryId);
+        base.Configure(builder);
 
-        builder.HasIndex(d => d.OrderId).IsUnique();
+        builder.ToTable("Shipments");
 
-        builder.HasOne(d => d.Order).WithOne().HasForeignKey<Delivery>(d => d.OrderId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(d => d.Shipper).WithMany(sp => sp.Deliveries).HasForeignKey(d => d.ShipperId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(d => d.Zone).WithMany().HasForeignKey(d => d.ZoneId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
-        builder.HasMany(d => d.StatusHistories).WithOne(dsh => dsh.Delivery).HasForeignKey(dsh => dsh.DeliveryId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasMany(d => d.ShipperOrderActions).WithOne(a => a.Delivery).HasForeignKey(a => a.DeliveryId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(s => s.SupplyRequestId).IsUnique();
 
-        builder.Property(d => d.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
-        builder.Property(d => d.FailReason).IsRequired(false).HasMaxLength(500);
-        builder.Property(d => d.ConfirmImageUrl).IsRequired(false).HasMaxLength(500);
-        builder.Property(d => d.Note).IsRequired(false).HasMaxLength(500);
-        builder.Property(d => d.ShippingFee).HasPrecision(12, 2).HasDefaultValue(0);
-        builder.Property(d => d.ShipperEarning).HasPrecision(12, 2).HasDefaultValue(0);
-        builder.Property(d => d.EstimatedDistance).IsRequired(false).HasPrecision(8, 2);
+        builder.HasOne(s => s.SupplyRequest).WithOne().HasForeignKey<Shipment>(s => s.SupplyRequestId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(s => s.LogisticsOperator).WithMany(lp => lp.Shipments).HasForeignKey(s => s.LogisticsOperatorId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(s => s.Zone).WithMany().HasForeignKey(s => s.ZoneId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(s => s.StatusHistories).WithOne(sh => sh.Shipment).HasForeignKey(sh => sh.ShipmentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(s => s.LogisticsActions).WithOne(a => a.Shipment).HasForeignKey(a => a.ShipmentId).OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.Property(s => s.FailReason).IsRequired(false).HasMaxLength(500);
+        builder.Property(s => s.ConfirmImageUrl).IsRequired(false).HasMaxLength(500);
+        builder.Property(s => s.Note).IsRequired(false).HasMaxLength(500);
+        builder.Property(s => s.ShippingFee).HasPrecision(12, 2).HasDefaultValue(0);
+        builder.Property(s => s.EstimatedDistance).IsRequired(false).HasPrecision(8, 2);
     }
 }

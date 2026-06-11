@@ -15,11 +15,15 @@
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="Mapster" Version="10.0.7" />
     <PackageReference Include="Mapster.DependencyInjection" Version="10.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.27" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="MappingProfiles\" />
+    <Folder Include="Services\Interfaces\" />
+    <Folder Include="Services\Implementation\" />
+    <Folder Include="Validators\" />
   </ItemGroup>
 
 </Project>

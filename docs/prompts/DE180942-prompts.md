@@ -11,7 +11,7 @@
 | MSSV / Danh sách MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 09/6/2026 |
+| Ngày cập nhật gần nhất | 11/6/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -27,6 +27,7 @@
 | 5 | 2026-06-08 | Claude | Tạo domain entities, EF config và migration | Có |
 | 6 | 2026-06-09 | Claude | Implement login, logout, verify email (UC03–UC04) | Có |
 | 7 | 2026-06-09 | Claude | Implement forgot/reset password + refactor auth utils (UC05–UC06) | Có |
+| 8 | 2026-06-11 | Claude | Implement admin module UC08–UC11 (17 endpoints) | Có |
 
 ---
 
@@ -90,6 +91,16 @@
 
 ---
 
+
+## Prompt 8 – Implement Admin Module UC08–UC11
+
+**Mục đích:** Implement 17 API endpoints quản trị cho admin: quản lý user, duyệt supplier, quản lý category và voucher
+
+**Prompt (tóm tắt):** Yêu cầu Claude implement admin module gồm UC08 (list/lock/unlock/reset password user), UC09 (list/approve/reject supplier, update fee), UC10 (CRUD category dạng tree), UC11 (CRUD voucher, toggle active). Tạo DTOs, validators, mapping config. Refactor cấu trúc project: move service lên Application layer, tách interface sang Abstractions, tạo repository riêng cho từng entity.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.
+
+---
 
 ## Prompt 5 – Tạo domain entities và EF configuration
 

@@ -17,7 +17,9 @@ public static class ServiceCollectionExtensions
                 .AddRedisCache(configuration)
                 .AddQuartzService(configuration)
                 .AddCloudinaryService(configuration)
-                .AddServicesFromAssembly(typeof(AssemblyReference).Assembly);
+                .AddServicesFromAssembly(
+                    typeof(AssemblyReference).Assembly,
+                    typeof(Application.AssemblyReference).Assembly);
         return services;
     }
 }

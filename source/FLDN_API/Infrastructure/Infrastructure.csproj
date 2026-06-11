@@ -36,7 +36,7 @@
 
 	<ItemGroup>
 		<Folder Include="Persistence\Implementations\Systems\" />
-		<Folder Include="Persistence\Interfaces\Systems\" />
+		<Folder Include="Persistence\Interfaces\" />
 	</ItemGroup>
 
 </Project>

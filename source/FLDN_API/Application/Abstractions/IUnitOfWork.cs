@@ -7,7 +7,6 @@ public interface IUnitOfWork : IDisposable
     IUserRepository Users { get; }
     ICategoryRepository Categories { get; }
     ISupplierProfileRepository SupplierProfiles { get; }
-    IVoucherRepository Vouchers { get; }
 
     Task<int> SaveChangesAsync(CancellationToken ct = default);
     Task BeginTransactionAsync(CancellationToken ct = default);

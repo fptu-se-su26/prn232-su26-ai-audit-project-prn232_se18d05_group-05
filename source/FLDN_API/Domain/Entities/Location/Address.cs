@@ -1,8 +1,7 @@
 namespace Domain;
 
-public class Address : ISoftDeletable
+public class Address : EntityBase<Guid>, ISoftDeletable
 {
-    public Guid AddressId { get; set; }
     public Guid UserId { get; set; }
     public string ReceiverName { get; set; } = default!;
     public string ReceiverPhone { get; set; } = default!;

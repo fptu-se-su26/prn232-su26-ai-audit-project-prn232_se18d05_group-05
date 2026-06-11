@@ -8,7 +8,7 @@ public sealed class CategoryRepository(ApplicationDbContext db) : ICategoryRepos
     private readonly DbSet<Category> _dbSet = db.Set<Category>();
 
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken ct = default)
-        => await _dbSet.FirstOrDefaultAsync(c => c.CategoryId == id, ct);
+        => await _dbSet.FirstOrDefaultAsync(c => c.Id == id, ct);
 
     public async Task<List<Category>> GetAllAsync(CancellationToken ct = default)
         => await _dbSet.Include(c => c.SubCategories).Where(c => !c.IsDeleted).ToListAsync(ct);

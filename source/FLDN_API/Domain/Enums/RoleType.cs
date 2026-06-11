@@ -4,6 +4,6 @@ public enum RoleType
 {
     Admin = 1,
     Supplier = 2,
-    Customer = 3,
-    Shipper = 4
+    DistributionPoint = 3,
+    LogisticsOperator = 4
 }

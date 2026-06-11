@@ -7,7 +7,6 @@ public class Product : EntityBase<Guid>, ISoftDeletable
     public string Name { get; set; } = default!;
     public string? Description { get; set; }
     public decimal WholesalePrice { get; set; }
-    public decimal RetailPrice { get; set; }
     public string Unit { get; set; } = default!;
     public string? PackagingStandard { get; set; }
     public bool IsActive { get; set; }

@@ -6,8 +6,7 @@ namespace API;
 public sealed class AdminController(
     IAdminUserService adminUserService,
     IAdminSupplierService adminSupplierService,
-    IAdminCategoryService adminCategoryService,
-    IAdminVoucherService adminVoucherService
+    IAdminCategoryService adminCategoryService
 ) : ControllerBase
 {
     // ──────────────────────────────────────────────
@@ -120,39 +119,5 @@ public sealed class AdminController(
     {
         await adminCategoryService.DeleteCategoryAsync(id, ct);
         return Ok(ApiResponse<object>.OkMessage("Đã ẩn danh mục"));
-    }
-
-    // ──────────────────────────────────────────────
-    // UC11 – Voucher Management
-    // ──────────────────────────────────────────────
-
-    [HttpGet("vouchers")]
-    public async Task<IActionResult> GetVouchers([FromQuery] VoucherListRequest request, CancellationToken ct)
-    {
-        var result = await adminVoucherService.GetVouchersAsync(request, ct);
-        return Ok(ApiResponse<PagedResult<VoucherResponse>>.Ok(result));
-    }
-
-    [HttpPost("vouchers")]
-    public async Task<IActionResult> CreateVoucher([FromBody] CreateVoucherRequest request, CancellationToken ct)
-    {
-        var adminId = User.GetUserId();
-        var result = await adminVoucherService.CreateVoucherAsync(request, adminId, ct);
-        return StatusCode(StatusCodes.Status201Created,
-            ApiResponse<CreateVoucherResponse>.Ok(result, BusinessMessages.CreatedSuccessfully("voucher"), StatusCodes.Status201Created));
-    }
-
-    [HttpPut("vouchers/{id:guid}")]
-    public async Task<IActionResult> UpdateVoucher(Guid id, [FromBody] UpdateVoucherRequest request, CancellationToken ct)
-    {
-        await adminVoucherService.UpdateVoucherAsync(id, request, ct);
-        return Ok(ApiResponse<object>.OkMessage("Đã cập nhật voucher"));
-    }
-
-    [HttpPut("vouchers/{id:guid}/toggle")]
-    public async Task<IActionResult> ToggleVoucher(Guid id, CancellationToken ct)
-    {
-        var isActive = await adminVoucherService.ToggleVoucherAsync(id, ct);
-        return Ok(ApiResponse<object>.Ok(new { isActive }));
     }
 }

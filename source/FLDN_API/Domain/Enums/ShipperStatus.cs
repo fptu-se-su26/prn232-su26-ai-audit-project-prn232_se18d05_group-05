@@ -1,8 +1,8 @@
 namespace Domain;
 
-public enum ShipperStatus
+public enum LogisticsOperatorStatus
 {
     Available,
-    Delivering,
+    InTransit,
     Off
 }

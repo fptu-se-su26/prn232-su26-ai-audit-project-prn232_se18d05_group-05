@@ -1,13 +1,13 @@
 namespace Domain;
 
-public class OrderStatusHistory : EntityBase<Guid>
+public class SupplyRequestStatusHistory : EntityBase<Guid>
 {
-    public Guid OrderId { get; set; }
-    public OrderStatus Status { get; set; }
+    public Guid SupplyRequestId { get; set; }
+    public SupplyRequestStatus Status { get; set; }
     public string? Note { get; set; }
     public Guid? CreatedBy { get; set; }
 
     // Navigation
-    public Order Order { get; set; } = default!;
+    public SupplyRequest SupplyRequest { get; set; } = default!;
     public User? CreatedByUser { get; set; }
 }

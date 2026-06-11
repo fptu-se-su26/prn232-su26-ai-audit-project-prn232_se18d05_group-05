@@ -1,8 +1,7 @@
 namespace Domain;
 
-public class ProductImage
+public class ProductImage : EntityBase<Guid>
 {
-    public Guid ImageId { get; set; }
     public Guid ProductId { get; set; }
     public string ImageUrl { get; set; } = default!;
     public bool IsMain { get; set; }

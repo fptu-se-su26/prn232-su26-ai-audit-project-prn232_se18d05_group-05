@@ -1,27 +1,25 @@
 namespace Domain;
 
-public class Delivery
+public class Shipment : EntityBase<Guid>
 {
-    public Guid DeliveryId { get; set; }
-    public Guid OrderId { get; set; }
-    public Guid? ShipperId { get; set; }
+    public Guid SupplyRequestId { get; set; }
+    public Guid? LogisticsOperatorId { get; set; }
     public Guid? ZoneId { get; set; }
-    public DeliveryStatus Status { get; set; }
+    public ShipmentStatus Status { get; set; }
     public DateTimeOffset? AssignedAt { get; set; }
     public DateTimeOffset? PickedUpAt { get; set; }
-    public DateTimeOffset? DeliveredAt { get; set; }
+    public DateTimeOffset? ArrivedAt { get; set; }
     public DateTimeOffset? FailedAt { get; set; }
     public string? FailReason { get; set; }
     public string? ConfirmImageUrl { get; set; }
     public decimal ShippingFee { get; set; }
-    public decimal ShipperEarning { get; set; }
     public decimal? EstimatedDistance { get; set; }
     public string? Note { get; set; }
 
     // Navigation
-    public Order Order { get; set; } = default!;
-    public ShipperProfile? Shipper { get; set; }
-    public DeliveryZone? Zone { get; set; }
-    public ICollection<ShipperOrderAction> ShipperOrderActions { get; set; } = [];
-    public ICollection<DeliveryStatusHistory> StatusHistories { get; set; } = [];
+    public SupplyRequest SupplyRequest { get; set; } = default!;
+    public LogisticsProfile? LogisticsOperator { get; set; }
+    public DistributionZone? Zone { get; set; }
+    public ICollection<LogisticsAction> LogisticsActions { get; set; } = [];
+    public ICollection<ShipmentStatusHistory> StatusHistories { get; set; } = [];
 }

@@ -28,6 +28,7 @@
 | 6 | 2026-06-09 | Claude | Implement login, logout, verify email (UC03–UC04) | Có |
 | 7 | 2026-06-09 | Claude | Implement forgot/reset password + refactor auth utils (UC05–UC06) | Có |
 | 8 | 2026-06-11 | Claude | Implement admin module UC08–UC11 (17 endpoints) | Có |
+| 9 | 2026-06-11 | Claude | Refactor scope: xóa e-commerce entities, rename Order→SupplyRequest, Delivery→Shipment, đồng bộ EntityBase cho toàn bộ entities | Có |
 
 ---
 
@@ -109,3 +110,13 @@
 **Prompt (tóm tắt):** Yêu cầu Claude đọc SQL schema 33 bảng, tạo entity class với `EntityBase`, `ISoftDeletable`, navigation properties hợp lý. Sau đó tạo EF configuration kế thừa `BaseEntityConfiguration` / `SoftDeleteEntityConfiguration`, cập nhật `ApplicationDbContext`, chạy migration và `database update`.
 
 **Kết quả áp dụng:** Có. Build 0 lỗi, migration apply thành công lên remote DB.
+
+---
+
+## Prompt 9 – Refactor scope: chuyển từ TMĐT sang quản lý nguồn cung
+
+**Mục đích:** Align codebase với đúng scope hệ thống FoodLink — quản lý nguồn cung thực phẩm TP. Đà Nẵng, không phải bán hàng B2C
+
+**Prompt (tóm tắt):** Yêu cầu Claude xóa toàn bộ e-commerce entities (Cart, Voucher, Wallet, Payment, Review), rename Order→SupplyRequest, Delivery→Shipment, Shipper→LogisticsOperator, DeliveryZone→DistributionZone. Chuẩn hóa tất cả entities kế thừa `EntityBase<Guid>`, configurations dùng `BaseEntityConfiguration`/`SoftDeleteEntityConfiguration`. Thêm `ISoftDeletable` cho master data (DistributionZone, Category, Address). Cập nhật enum values, seed data, DbContext, services liên quan.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.

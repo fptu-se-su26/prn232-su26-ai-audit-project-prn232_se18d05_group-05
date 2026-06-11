@@ -1,11 +1,11 @@
 namespace Domain;
 
-public enum DeliveryStatus
+public enum ShipmentStatus
 {
-    WaitingForShipper,
+    Pending,
     Assigned,
     PickedUp,
-    Delivering,
-    Delivered,
+    InTransit,
+    Arrived,
     Failed
 }

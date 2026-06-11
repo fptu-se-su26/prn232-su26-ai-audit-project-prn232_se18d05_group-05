@@ -1,7 +1,7 @@
 namespace Domain;
 
-public enum DeliveryType
+public enum FulfillmentType
 {
-    Immediate,
+    Standard,
     Scheduled
 }

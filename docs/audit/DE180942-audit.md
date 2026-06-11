@@ -123,6 +123,33 @@
 
 ---
 
+## Lần 9 – Refactor scope: chuyển domain từ TMĐT sang quản lý nguồn cung
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-06-11 |
+| Công cụ AI | Claude |
+| Mục đích | Align codebase với đúng scope FoodLink — quản lý nguồn cung thực phẩm TP. Đà Nẵng |
+| Phần việc | Backend – Domain refactor |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Xóa toàn bộ e-commerce entities: Cart, CartItem, Voucher, VoucherUsage, Wallet, WalletTransaction, Payment, Review
+- Rename: Order→SupplyRequest, Delivery→Shipment, ShipperProfile→LogisticsProfile, DeliveryZone→DistributionZone
+- Chuẩn hóa tất cả entities kế thừa `EntityBase<Guid>`, bỏ custom PK fields
+- Update tất cả EF configurations dùng `BaseEntityConfiguration` / `SoftDeleteEntityConfiguration`
+- Thêm `ISoftDeletable` cho DistributionZone, Category, Address
+- Cập nhật enums, seed data, DbContext, AdminController, CategoryRepository, AdminCategoryService
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận scope thực của hệ thống (supply chain, không phải B2C)
+- Quyết định entities nào nên có ISoftDeletable
+- Kiểm tra build 0 lỗi 0 warnings sau refactor
+
+**Kết quả áp dụng:** Có – build 0 lỗi, 0 warnings, branch `feat/DE180942-admin-module`
+
+---
+
 ## Lần 2 – Cấu hình frontend với Tailwind, Vite và PWA
 
 | Nội dung | Thông tin |

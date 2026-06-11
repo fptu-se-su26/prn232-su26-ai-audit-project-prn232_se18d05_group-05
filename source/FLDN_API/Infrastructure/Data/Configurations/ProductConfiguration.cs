@@ -18,7 +18,6 @@ public class ProductConfiguration : SoftDeleteEntityConfiguration<Product, Guid>
         builder.Property(p => p.Name).IsRequired().HasMaxLength(255);
         builder.Property(p => p.Description).IsRequired(false).HasMaxLength(2000);
         builder.Property(p => p.WholesalePrice).HasPrecision(12, 2);
-        builder.Property(p => p.RetailPrice).HasPrecision(12, 2);
         builder.Property(p => p.Unit).IsRequired().HasMaxLength(50);
         builder.Property(p => p.PackagingStandard).IsRequired(false).HasMaxLength(255);
         builder.Property(p => p.IsActive).HasDefaultValue(true);

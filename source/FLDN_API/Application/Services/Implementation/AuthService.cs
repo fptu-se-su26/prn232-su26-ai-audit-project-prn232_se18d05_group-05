@@ -20,8 +20,8 @@ public sealed class AuthService(
         if (await unitOfWork.Users.AnyAsync(u => u.Phone == request.Phone, ct))
             throw new ConflictException("Phone number already registered.");
 
-        var customerRole = await unitOfWork.Repository<Role>().FindAsync(r => r.RoleName == nameof(RoleType.Customer), ct)
-            ?? throw new NotFoundException("Customer role not found.");
+        var distributionPointRole = await unitOfWork.Repository<Role>().FindAsync(r => r.RoleName == nameof(RoleType.DistributionPoint), ct)
+            ?? throw new NotFoundException("DistributionPoint role not found.");
 
         var user = new User
         {
@@ -39,7 +39,7 @@ public sealed class AuthService(
         await unitOfWork.Repository<UserRole>().AddAsync(new UserRole
         {
             UserId = user.Id,
-            RoleId = customerRole.Id
+            RoleId = distributionPointRole.Id
         });
         await unitOfWork.EnsureSaveAsync(ct);
 

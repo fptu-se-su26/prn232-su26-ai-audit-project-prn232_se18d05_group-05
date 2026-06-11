@@ -1,13 +1,14 @@
 namespace Infrastructure;
 
-public class DeliveryZoneConfiguration : IEntityTypeConfiguration<DeliveryZone>
+public class DistributionZoneConfiguration : SoftDeleteEntityConfiguration<DistributionZone, Guid>
 {
-    public void Configure(EntityTypeBuilder<DeliveryZone> builder)
+    public override void Configure(EntityTypeBuilder<DistributionZone> builder)
     {
-        builder.ToTable("DeliveryZones");
-        builder.HasKey(z => z.ZoneId);
+        base.Configure(builder);
 
-        builder.HasOne(z => z.District).WithMany(d => d.DeliveryZones).HasForeignKey(z => z.DistrictId).OnDelete(DeleteBehavior.Restrict);
+        builder.ToTable("DistributionZones");
+
+        builder.HasOne(z => z.District).WithMany(d => d.DistributionZones).HasForeignKey(z => z.DistrictId).OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(z => z.ZoneName).IsRequired().HasMaxLength(150);
         builder.Property(z => z.ShippingFee).IsRequired().HasPrecision(12, 2).HasDefaultValue(0);

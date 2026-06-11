@@ -1,18 +1,18 @@
 namespace Infrastructure;
 
-public class DeliveryStatusHistoryConfiguration : BaseEntityConfiguration<DeliveryStatusHistory, Guid>
+public class ShipmentStatusHistoryConfiguration : BaseEntityConfiguration<ShipmentStatusHistory, Guid>
 {
-    public override void Configure(EntityTypeBuilder<DeliveryStatusHistory> builder)
+    public override void Configure(EntityTypeBuilder<ShipmentStatusHistory> builder)
     {
         base.Configure(builder);
 
-        builder.ToTable("DeliveryStatusHistories");
+        builder.ToTable("ShipmentStatusHistories");
 
-        builder.HasOne(dsh => dsh.Delivery).WithMany(d => d.StatusHistories).HasForeignKey(dsh => dsh.DeliveryId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(dsh => dsh.UpdatedByUser).WithMany().HasForeignKey(dsh => dsh.UpdatedBy).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(sh => sh.Shipment).WithMany(s => s.StatusHistories).HasForeignKey(sh => sh.ShipmentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(sh => sh.UpdatedByUser).WithMany().HasForeignKey(sh => sh.UpdatedBy).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
 
-        builder.Property(dsh => dsh.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
-        builder.Property(dsh => dsh.Note).IsRequired(false).HasMaxLength(500);
-        builder.Property(dsh => dsh.ImageUrl).IsRequired(false).HasMaxLength(500);
+        builder.Property(sh => sh.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.Property(sh => sh.Note).IsRequired(false).HasMaxLength(500);
+        builder.Property(sh => sh.ImageUrl).IsRequired(false).HasMaxLength(500);
     }
 }

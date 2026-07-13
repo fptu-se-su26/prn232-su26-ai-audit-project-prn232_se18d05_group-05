@@ -8,12 +8,15 @@ function LoginPage() {
 
   const handleLogin = (role) => {
     setAuthToken(createDevToken(role))
-    navigate(role === ROLES.ADMIN ? RoutePath.ADMIN : RoutePath.DASHBOARD, { replace: true })
+    let target = RoutePath.DASHBOARD
+    if (role === ROLES.ADMIN) target = RoutePath.ADMIN
+    else if (role === ROLES.SHIPPER) target = RoutePath.SHIPPER_DASHBOARD
+    navigate(target, { replace: true })
   }
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-16 text-white">
-      <div className="mx-auto flex max-w-3xl flex-col gap-8 rounded-3xl border border-white/10 bg-white/5 p-10 shadow-2xl shadow-slate-950/30">
+      <div className="mx-auto flex max-w-4xl flex-col gap-8 rounded-3xl border border-white/10 bg-white/5 p-10 shadow-2xl shadow-slate-950/30">
         <div className="space-y-3">
           <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-1 text-sm font-medium text-emerald-200">
             Food Link Access
@@ -27,7 +30,7 @@ function LoginPage() {
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <button
             type="button"
             onClick={() => handleLogin(ROLES.STAFF)}
@@ -43,6 +46,14 @@ function LoginPage() {
           >
             <span className="block text-lg font-semibold text-fuchsia-100">Dang nhap Admin</span>
             <span className="mt-1 block text-sm text-slate-300">Chuyen toi khu vuc quan tri</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleLogin(ROLES.SHIPPER)}
+            className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-5 py-4 text-left transition hover:bg-emerald-400/20"
+          >
+            <span className="block text-lg font-semibold text-emerald-100">Dang nhap Shipper</span>
+            <span className="mt-1 block text-sm text-slate-300">Chuyen toi khu vuc van chuyen</span>
           </button>
         </div>
       </div>

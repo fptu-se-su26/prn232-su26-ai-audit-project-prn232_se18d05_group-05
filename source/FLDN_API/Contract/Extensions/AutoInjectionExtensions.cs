@@ -1,4 +1,7 @@
-﻿namespace Infrastructure;
+using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Contract;
 
 public static class AutoInjectionExtensions
 {
@@ -18,7 +21,7 @@ public static class AutoInjectionExtensions
                 var attribute = type.GetCustomAttribute<RegisterServiceAttribute>();
                 if (attribute == null) continue;
 
-                // Đăng ký theo Lifetime đã cấu hình
+                // Register based on configuration
                 switch (attribute.Lifetime)
                 {
                     case ServiceLifetime.Transient:

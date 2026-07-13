@@ -1,8 +1,8 @@
-﻿namespace API;
+namespace API;
 
 public static class ClaimsPrincipalExtensions
 {
-    public static Guid GetUserId(this ClaimsPrincipal principal)
+    public static int GetUserId(this ClaimsPrincipal principal)
     {
         if (principal == null)
             throw new ArgumentNullException(nameof(principal));
@@ -14,7 +14,7 @@ public static class ClaimsPrincipalExtensions
         if (string.IsNullOrWhiteSpace(userIdString))
             throw new UnauthorizedException("Không xác định được danh tính người dùng.");
 
-        return Guid.Parse(userIdString);
+        return int.Parse(userIdString);
     }
 
     public static string GetUserEmail(this ClaimsPrincipal principal)

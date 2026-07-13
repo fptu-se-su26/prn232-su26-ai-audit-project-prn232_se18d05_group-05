@@ -2,6 +2,7 @@ import { ROLES } from '../middleware/roles'
 import LoginPage from '../pages/auth/LoginPage'
 import AdminDashboardPage from '../pages/dashboard/AdminDashboardPage'
 import UserDashboardPage from '../pages/dashboard/UserDashboardPage'
+import ShipperDashboardPage from '../pages/dashboard/ShipperDashboardPage'
 import ServerErrorPage from '../pages/errors/ServerErrorPage'
 import UnauthorizedPage from '../pages/errors/UnauthorizedPage'
 import PortalPage from '../pages/public/PortalPage'
@@ -37,5 +38,10 @@ export const protectedRoutes = [
     path: RoutePath.ADMIN,
     component: AdminDashboardPage,
     roles: [ROLES.ADMIN],
+  },
+  {
+    path: RoutePath.SHIPPER_DASHBOARD,
+    component: ShipperDashboardPage,
+    roles: [ROLES.SHIPPER],
   },
 ]

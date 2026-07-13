@@ -1,6 +1,7 @@
 export const ROLES = {
    STAFF: "User",
    ADMIN: "Admin",
+   SHIPPER: "Shipper",
 };
 
 // Mảng tất cả các role để dễ dàng kiểm tra

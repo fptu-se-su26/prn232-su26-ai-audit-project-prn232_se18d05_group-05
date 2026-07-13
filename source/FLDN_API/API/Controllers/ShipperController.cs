@@ -187,6 +187,33 @@ public class ShipperController : ControllerBase
         });
     }
 
+    [HttpPut("profile/status")]
+    public async Task<IActionResult> ToggleShipperStatus([FromBody] ToggleStatusRequest request)
+    {
+        int userId;
+        try
+        {
+            userId = GetCurrentUserId();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+
+        var shipper = await GetOrCreateShipperProfileAsync(userId);
+
+        if (!Enum.TryParse<ShipperStatus>(request.Status, true, out var newStatus))
+        {
+            return BadRequest(new { message = "Trạng thái tài xế không hợp lệ." });
+        }
+
+        shipper.Status = newStatus;
+        _context.ShipperProfiles.Update(shipper);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Cập nhật trạng thái trực tuyến thành công.", status = shipper.Status.ToString() });
+    }
+
     [HttpPut("deliveries/{id}/accept")]
     public async Task<IActionResult> AcceptDelivery(int id)
     {
@@ -202,6 +229,9 @@ public class ShipperController : ControllerBase
 
         var shipper = await GetOrCreateShipperProfileAsync(userId);
 
+        if (shipper.Status == ShipperStatus.Off)
+            return BadRequest(new { message = "Tài khoản của bạn đang tắt hoạt động (Offline). Vui lòng bật trực tuyến để nhận đơn." });
+
         var delivery = await _context.Deliveries
             .Include(d => d.Order)
             .FirstOrDefaultAsync(d => d.DeliveryId == id);
@@ -216,6 +246,10 @@ public class ShipperController : ControllerBase
         delivery.ShipperId = shipper.Id;
         delivery.Status = DeliveryStatus.Assigned;
         delivery.AssignedAt = DateTimeOffset.UtcNow;
+
+        // Update shipper status to Delivering
+        shipper.Status = ShipperStatus.Delivering;
+        _context.ShipperProfiles.Update(shipper);
 
         // Log history
         var history = new DeliveryStatusHistory
@@ -325,6 +359,11 @@ public class ShipperController : ControllerBase
 
         return Ok(new { message = "Cập nhật trạng thái thành công.", status = delivery.Status.ToString() });
     }
+}
+
+public class ToggleStatusRequest
+{
+    public required string Status { get; set; }
 }
 
 public class UpdateStatusRequest

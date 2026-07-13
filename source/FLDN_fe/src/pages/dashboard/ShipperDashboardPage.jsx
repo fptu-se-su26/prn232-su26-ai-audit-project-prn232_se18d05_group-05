@@ -24,6 +24,35 @@ function ShipperDashboardPage() {
   const [note, setNote] = useState('')
   const [confirmImageUrl, setConfirmImageUrl] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
+  const [statusChanging, setStatusChanging] = useState(false)
+
+  // Toggle Shipper Online/Offline Status
+  const toggleOnlineStatus = async () => {
+    if (!shipperInfo) return
+    setStatusChanging(true)
+    const targetStatus = shipperInfo.status === 'Off' ? 'Available' : 'Off'
+    try {
+      const response = await fetch(`${API_BASE}/shipper/profile/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-User-Id': getShipperUserId()
+        },
+        body: JSON.stringify({ status: targetStatus })
+      })
+
+      if (!response.ok) {
+        throw new Error('Cập nhật trạng thái trực tuyến thất bại.')
+      }
+
+      const data = await response.json()
+      setShipperInfo(prev => ({ ...prev, status: data.status }))
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setStatusChanging(false)
+    }
+  }
 
   // Get current Shipper User ID from localStorage or default to 1 (seeded shipper)
   const getShipperUserId = () => {
@@ -242,6 +271,17 @@ function ShipperDashboardPage() {
                   <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-medium">
                     🎫 {shipperInfo.licensePlate}
                   </span>
+                  <button
+                    onClick={toggleOnlineStatus}
+                    disabled={statusChanging}
+                    className={`text-xs px-3 py-0.5 rounded-full font-bold transition flex items-center gap-1 ${
+                      shipperInfo.status === 'Off'
+                        ? 'bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20'
+                        : 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
+                    }`}
+                  >
+                    <span>{shipperInfo.status === 'Off' ? '🔴 Ngoại tuyến (Off)' : '🟢 Trực tuyến (Available)'}</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -406,13 +446,22 @@ function ShipperDashboardPage() {
                     {/* Actions */}
                     <div className="w-full mt-4 flex justify-end gap-2">
                       {delivery.status === 'WaitingForShipper' && (
-                        <button
-                          onClick={() => handleAcceptDelivery(delivery.deliveryId)}
-                          disabled={actionLoading}
-                          className="w-full md:w-auto rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 text-sm transition"
-                        >
-                          Nhận đơn giao này
-                        </button>
+                        <div className="flex flex-col items-end gap-1 w-full md:w-auto">
+                          {shipperInfo?.status === 'Off' && (
+                            <span className="text-xs text-red-400 italic mb-1">Hãy Bật Trực Tuyến để nhận đơn</span>
+                          )}
+                          <button
+                            onClick={() => handleAcceptDelivery(delivery.deliveryId)}
+                            disabled={actionLoading || shipperInfo?.status === 'Off'}
+                            className={`w-full md:w-auto rounded-xl font-bold px-5 py-2.5 text-sm transition ${
+                              shipperInfo?.status === 'Off'
+                                ? 'bg-slate-800 border border-slate-700 text-slate-500 cursor-not-allowed'
+                                : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                            }`}
+                          >
+                            Nhận đơn giao này
+                          </button>
+                        </div>
                       )}
 
                       {delivery.status === 'Assigned' && (

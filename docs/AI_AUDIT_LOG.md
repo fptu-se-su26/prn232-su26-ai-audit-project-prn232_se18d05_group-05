@@ -125,56 +125,63 @@ Viết tại đây...
 
 ---
 
-### Lần sử dụng AI số 2
+### Lần sử dụng AI số 2 (Log #02)
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích sử dụng |  |
-| Phần việc liên quan | Requirement / Design / Database / Frontend / Backend / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỗ trợ ý tưởng / Hỗ trợ một phần / Hỗ trợ nhiều / Sinh chính nội dung |
+| Ngày sử dụng | 2026-07-19 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Triển khai UC27 - Nhận lô hàng vận chuyển (Logistics Operator) |
+| Phần việc liên quan | Backend |
+| Mức độ sử dụng | Hỗ trợ nhiều / Sinh chính nội dung |
 
 #### 4.1. Prompt đã sử dụng
 
 ```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
+tiếp tục làm uc 27 nhận lô hàng vận chuyển làm backend cho tôi chỉ làm uc 27 thôi ko làm mấy khác . viết prompt vào audit_log
 ```
 
 #### 4.2. Kết quả AI gợi ý
 
-```text
-Viết tại đây...
-```
+## Log #02
+- Date: 2026-07-19
+- Author: Group 05
+- AI Tool: Antigravity
+- Purpose: Implement UC27 - Accept a shipment for Logistics Operator
+- Prompt Reference: Prompt above
+- AI Output Summary: Suggested creating `LogisticsModels.cs` (with `LogisticsAcceptResponse`), `ILogisticsService.cs`, `LogisticsService.cs` (with `AcceptShipmentAsync`), and `ShipperController.cs` (with `AcceptDelivery` endpoint) to assign a shipment to the current logistics operator and record a status history.
+- Human Decision: Restricted accepting to only `Pending` shipments, and logged a status history entry with updated status `Assigned`.
+- Applied To:
+  - `Domain/Models/Logistics/LogisticsModels.cs`
+  - `Application/Services/Interfaces/ILogisticsService.cs`
+  - `Application/Services/Implementation/LogisticsService.cs`
+  - `API/Controllers/ShipperController.cs`
+- Verification: Built solution successfully via `dotnet build` with 0 errors.
 
 #### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
 
-```text
-Viết tại đây...
-```
+Sử dụng cấu trúc code của Service Interface, Logic truy xuất EF Core trong Service Implementation, tạo bản ghi `ShipmentStatusHistory`, và endpoint routing `PUT /api/shipper/deliveries/{id}/accept`.
 
 #### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
 
-```text
-Viết tại đây...
-```
+- Tích hợp điều kiện kiểm tra trạng thái của lô hàng: chỉ những lô hàng ở trạng thái `Pending` mới có thể nhận.
+- Đảm bảo lưu đúng thông tin `UpdatedBy` trong lịch sử trạng thái của lô hàng.
 
 #### 4.5. Minh chứng
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit |  |
-| File liên quan |  |
-| Screenshot |  |
-| Kết quả chạy/test |  |
-| Link video demo |  |
-| Ghi chú khác |  |
+| Link commit | Chưa push / Dev local |
+| File liên quan | [LogisticsModels.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/Domain/Models/Logistics/LogisticsModels.cs), [ILogisticsService.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/Application/Services/Interfaces/ILogisticsService.cs), [LogisticsService.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/Application/Services/Implementation/LogisticsService.cs), [ShipperController.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/API/Controllers/ShipperController.cs) |
+| Screenshot | N/A |
+| Kết quả chạy/test | Build thành công (0 Errors, 0 Warnings) |
+| Link video demo | N/A |
+| Ghi chú khác | N/A |
 
 #### 4.6. Nhận xét cá nhân/nhóm
 
-```text
-Viết tại đây...
-```
+Nhóm đã nắm rõ cách thức ghi lại lịch sử trạng thái (`ShipmentStatusHistory`) mỗi khi thay đổi trạng thái của lô hàng nhằm phục vụ cho luồng nghiệp vụ giám sát chuỗi cung ứng thực phẩm.
+
 
 ---
 

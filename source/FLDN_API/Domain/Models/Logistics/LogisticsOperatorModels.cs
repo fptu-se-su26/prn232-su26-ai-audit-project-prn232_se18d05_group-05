@@ -24,3 +24,15 @@ public sealed class ShipmentSummaryResponse
     public decimal TotalItems { get; set; }
     public DateTimeOffset? AssignedAt { get; set; }
 }
+
+public sealed class AcceptShipmentRequest
+{
+    public Guid ShipmentId { get; set; }
+}
+
+public sealed class AcceptShipmentResponse
+{
+    public Guid ShipmentId { get; set; }
+    public DateTimeOffset AcceptedAt { get; set; }
+    public string CurrentStatus { get; set; } = default!;
+}

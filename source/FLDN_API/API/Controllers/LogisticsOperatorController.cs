@@ -12,4 +12,11 @@ public sealed class LogisticsOperatorController(ILogisticsOperatorService logist
         var result = await logisticsOperatorService.GetShipmentsAsync(request, ct);
         return Ok(ApiResponse<PagedResult<ShipmentSummaryResponse>>.Ok(result));
     }
+
+    [HttpPut("shipments/{id:guid}/accept")]
+    public async Task<IActionResult> AcceptShipment([FromRoute] Guid id, CancellationToken ct)
+    {
+        var result = await logisticsOperatorService.AcceptShipmentAsync(id, ct);
+        return Ok(ApiResponse<AcceptShipmentResponse>.Ok(result));
+    }
 }

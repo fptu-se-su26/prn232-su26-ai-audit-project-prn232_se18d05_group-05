@@ -1,11 +1,16 @@
 using Contract;
 using Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace Application;
 
 [RegisterService(typeof(ILogisticsOperatorService))]
-public sealed class LogisticsOperatorService(IUnitOfWork unitOfWork) : ILogisticsOperatorService
+public sealed class LogisticsOperatorService(
+    IUnitOfWork unitOfWork,
+    IHttpContextAccessor httpContextAccessor
+) : ILogisticsOperatorService
 {
     public async Task<PagedResult<ShipmentSummaryResponse>> GetShipmentsAsync(
         ShipmentListRequest request,
@@ -81,6 +86,58 @@ public sealed class LogisticsOperatorService(IUnitOfWork unitOfWork) : ILogistic
             TotalCount = totalCount,
             Page = request.Page,
             PageSize = request.PageSize
+        };
+    }
+
+    public async Task<AcceptShipmentResponse> AcceptShipmentAsync(
+        Guid shipmentId,
+        CancellationToken cancellationToken)
+    {
+        var user = httpContextAccessor.HttpContext?.User;
+        var currentId = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                     ?? user?.FindFirst("sub")?.Value
+                     ?? user?.FindFirst("id")?.Value;
+
+        if (string.IsNullOrEmpty(currentId) || !Guid.TryParse(currentId, out var userId))
+        {
+            throw new UnauthorizedException("User ID is missing or invalid.");
+        }
+
+        // 1. Get the logistics operator profile for the current user
+        var profile = await unitOfWork.Repository<LogisticsProfile>().FindAsync(lp => lp.UserId == userId && !lp.IsDeleted, cancellationToken)
+            ?? throw new NotFoundException("Logistics operator profile not found.");
+
+        // 2. Get the shipment
+        var shipment = await unitOfWork.Repository<Shipment>().GetByIdAsync(shipmentId)
+            ?? throw new NotFoundException("Shipment not found.");
+
+        // 3. Verify status is Pending (WaitingForPickup)
+        if (shipment.Status != ShipmentStatus.Pending)
+        {
+            throw new ConflictException("Lô hàng không ở trạng thái chờ lấy hàng.");
+        }
+
+        // 4. Verify shipment has not been accepted by another shipper
+        if (shipment.LogisticsOperatorId != null)
+        {
+            throw new ConflictException("Lô hàng đã được nhận bởi một đơn vị vận chuyển khác.");
+        }
+
+        // 5. Update shipment details
+        shipment.LogisticsOperatorId = profile.Id;
+        shipment.AssignedAt = DateTimeOffset.UtcNow;
+        shipment.Status = ShipmentStatus.Assigned;
+
+        unitOfWork.Repository<Shipment>().Update(shipment);
+
+        // 6. Save changes
+        await unitOfWork.EnsureSaveAsync(cancellationToken);
+
+        return new AcceptShipmentResponse
+        {
+            ShipmentId = shipment.Id,
+            AcceptedAt = shipment.AssignedAt.Value,
+            CurrentStatus = "Delivering"
         };
     }
 }

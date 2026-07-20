@@ -1,13 +1,12 @@
 namespace Domain;
 
-public enum OrderStatus
+public enum SupplyRequestStatus
 {
     Pending,
-    Confirmed,
-    Preparing,
-    ReadyToShip,
-    Shipping,
-    Delivered,
-    Cancelled,
-    Refunded
+    Approved,
+    Dispatched,
+    InTransit,
+    Received,
+    Rejected,
+    Cancelled
 }

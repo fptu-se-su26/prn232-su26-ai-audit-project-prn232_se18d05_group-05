@@ -1,11 +1,12 @@
 namespace Infrastructure;
 
-public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
+public class InventoryConfiguration : BaseEntityConfiguration<Inventory, Guid>
 {
-    public void Configure(EntityTypeBuilder<Inventory> builder)
+    public override void Configure(EntityTypeBuilder<Inventory> builder)
     {
+        base.Configure(builder);
+
         builder.ToTable("Inventory");
-        builder.HasKey(i => i.InventoryId);
 
         builder.HasIndex(i => i.ProductId).IsUnique();
 

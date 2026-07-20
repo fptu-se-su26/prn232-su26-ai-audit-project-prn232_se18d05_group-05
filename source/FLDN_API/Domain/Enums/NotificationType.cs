@@ -2,9 +2,8 @@ namespace Domain;
 
 public enum NotificationType
 {
-    OrderStatus,
-    DeliveryAlert,
+    SupplyRequestStatus,
+    ShipmentAlert,
     ExpiryWarning,
-    Promotion,
     System
 }

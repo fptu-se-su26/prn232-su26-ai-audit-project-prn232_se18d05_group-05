@@ -11,7 +11,7 @@
 | MSSV / Danh sách MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 20/7/2026 |
+| Ngày cập nhật gần nhất | 11/6/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -27,7 +27,8 @@
 | 5 | 2026-06-08 | Claude | Tạo domain entities, EF config và migration | Có |
 | 6 | 2026-06-09 | Claude | Implement login, logout, verify email (UC03–UC04) | Có |
 | 7 | 2026-06-09 | Claude | Implement forgot/reset password + refactor auth utils (UC05–UC06) | Có |
-| 8 | 2026-07-20 | Claude | Fix Guid/int mismatch, refactor ClaimsPrincipalExtensions, tạo lại migration | Có |
+| 8 | 2026-06-11 | Claude | Implement admin module UC08–UC11 (17 endpoints) | Có |
+| 9 | 2026-06-11 | Claude | Refactor scope: xóa e-commerce entities, rename Order→SupplyRequest, Delivery→Shipment, đồng bộ EntityBase cho toàn bộ entities | Có |
 
 ---
 
@@ -92,6 +93,16 @@
 ---
 
 
+## Prompt 8 – Implement Admin Module UC08–UC11
+
+**Mục đích:** Implement 17 API endpoints quản trị cho admin: quản lý user, duyệt supplier, quản lý category và voucher
+
+**Prompt (tóm tắt):** Yêu cầu Claude implement admin module gồm UC08 (list/lock/unlock/reset password user), UC09 (list/approve/reject supplier, update fee), UC10 (CRUD category dạng tree), UC11 (CRUD voucher, toggle active). Tạo DTOs, validators, mapping config. Refactor cấu trúc project: move service lên Application layer, tách interface sang Abstractions, tạo repository riêng cho từng entity.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.
+
+---
+
 ## Prompt 5 – Tạo domain entities và EF configuration
 
 **Mục đích:** Implement toàn bộ domain model từ SQL schema và cấu hình EF Core
@@ -102,7 +113,17 @@
 
 ---
 
-## Prompt 8 – Fix Guid/int mismatch và refactor auth
+## Prompt 9 – Refactor scope: chuyển từ TMĐT sang quản lý nguồn cung
+
+**Mục đích:** Align codebase với đúng scope hệ thống FoodLink — quản lý nguồn cung thực phẩm TP. Đà Nẵng, không phải bán hàng B2C
+
+**Prompt (tóm tắt):** Yêu cầu Claude xóa toàn bộ e-commerce entities (Cart, Voucher, Wallet, Payment, Review), rename Order→SupplyRequest, Delivery→Shipment, Shipper→LogisticsOperator, DeliveryZone→DistributionZone. Chuẩn hóa tất cả entities kế thừa `EntityBase<Guid>`, configurations dùng `BaseEntityConfiguration`/`SoftDeleteEntityConfiguration`. Thêm `ISoftDeletable` cho master data (DistributionZone, Category, Address). Cập nhật enum values, seed data, DbContext, services liên quan.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.
+
+---
+
+## Prompt 10 – Fix Guid/int mismatch và refactor auth
 
 **Mục đích:** Đồng nhất kiểu Guid, fix `InvalidCastException`, chuẩn hoá extension đọc claim
 

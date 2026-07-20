@@ -11,7 +11,7 @@
 | MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 20/7/2026 |
+| Ngày cập nhật gần nhất | 11/6/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -96,29 +96,57 @@
 
 ---
 
-## Lần 8 – Refactor ClaimsPrincipalExtensions, đồng nhất Guid, fix migration
+## Lần 8 – Implement Admin Module UC08–UC11
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày | 2026-07-20 |
+| Ngày | 2026-06-11 |
 | Công cụ AI | Claude |
-| Mục đích | Đồng nhất kiểu Guid cho toàn bộ entity, fix lỗi `InvalidCastException` do DB cũ dùng int, tạo lại migration, chuẩn hoá `ClaimsPrincipalExtensions` |
-| Phần việc | Backend – Infrastructure & Auth |
+| Mục đích | Implement 17 API endpoints quản trị: user, supplier, category, voucher |
+| Phần việc | Backend – Admin |
 | Mức độ sử dụng | AI hỗ trợ nhiều |
 
 **Việc AI hỗ trợ:**
-- Phát hiện và fix lỗi merge conflict sau `git pull main` — giữ `ShipperController` version service-layer mới
-- Xoá `ShipperSeedController` cũ không tương thích với schema mới
-- Sửa `UserCredentials.Id` và `GetUserId()` từ `int` sang `Guid` cho đồng bộ với `User : EntityBase<Guid>`
-- Xoá migration cũ (dùng int PK), tạo lại `InitialCreate` với toàn bộ Guid PK
-- Refactor `ClaimsPrincipalExtensions.GetUserId()` đọc claim `Sub` / `NameIdentifier` bằng `Guid.TryParse` — theo pattern từ WMS-API
+- UC08: CRUD user (list, detail, lock/unlock, reset password) – 5 endpoints
+- UC09: Supplier approval (list, detail, approve/reject, update fee) – 5 endpoints
+- UC10: Category management (list tree, create, update, soft-delete) – 4 endpoints
+- UC11: Voucher management (list, create, update, toggle) – 4 endpoints
+- Tạo DTOs, FluentValidation validators, Mapster mapping config
+- Refactor cấu trúc: move services từ Infrastructure lên Application, move interfaces sang Application/Abstractions
 
 **Phần tự kiểm tra / chỉnh sửa:**
-- Quyết định đồng nhất về Guid thay vì giữ int (do DB remote sẽ tạo lại)
-- Xác nhận xoá migration cũ và tạo lại là an toàn
-- Quyết định giữ `MigrateAsync()` comment — chạy migration thủ công
+- Quyết định cấu trúc folder: Services chia Interface/Implementation trong Application
+- Xác nhận Category entity không extend EntityBase nên cần custom repository
+- Kiểm tra build 0 lỗi 0 warnings
 
-**Kết quả áp dụng:** Có – build 0 lỗi, migration mới tạo thành công
+**Kết quả áp dụng:** Có – build 0 lỗi, branch `feat/DE180942-admin-module`
+
+---
+
+## Lần 9 – Refactor scope: chuyển domain từ TMĐT sang quản lý nguồn cung
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-06-11 |
+| Công cụ AI | Claude |
+| Mục đích | Align codebase với đúng scope FoodLink — quản lý nguồn cung thực phẩm TP. Đà Nẵng |
+| Phần việc | Backend – Domain refactor |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Xóa toàn bộ e-commerce entities: Cart, CartItem, Voucher, VoucherUsage, Wallet, WalletTransaction, Payment, Review
+- Rename: Order→SupplyRequest, Delivery→Shipment, ShipperProfile→LogisticsProfile, DeliveryZone→DistributionZone
+- Chuẩn hóa tất cả entities kế thừa `EntityBase<Guid>`, bỏ custom PK fields
+- Update tất cả EF configurations dùng `BaseEntityConfiguration` / `SoftDeleteEntityConfiguration`
+- Thêm `ISoftDeletable` cho DistributionZone, Category, Address
+- Cập nhật enums, seed data, DbContext, AdminController, CategoryRepository, AdminCategoryService
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận scope thực của hệ thống (supply chain, không phải B2C)
+- Quyết định entities nào nên có ISoftDeletable
+- Kiểm tra build 0 lỗi 0 warnings sau refactor
+
+**Kết quả áp dụng:** Có – build 0 lỗi, 0 warnings, branch `feat/DE180942-admin-module`
 
 ---
 
@@ -212,3 +240,28 @@
 - Kiểm tra app chạy không lỗi sau khi thêm provider
 
 **Kết quả áp dụng:** Có
+---
+
+## Lần 10 – Refactor ClaimsPrincipalExtensions, đồng nhất Guid, fix migration
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-20 |
+| Công cụ AI | Claude |
+| Mục đích | Fix lỗi `InvalidCastException` do mismatch Guid/int, tạo lại migration, chuẩn hoá extension đọc claim từ JWT |
+| Phần việc | Backend – Infrastructure & Auth |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Fix merge conflict sau `git pull main` — giữ `ShipperController` version service-layer
+- Xoá `ShipperSeedController` cũ không tương thích schema mới
+- Sửa `UserCredentials.Id` và `GetUserId()` từ `int` sang `Guid`
+- Xoá migration cũ, tạo lại `InitialCreate` với toàn bộ Guid PK
+- Refactor `ClaimsPrincipalExtensions.GetUserId()` đọc `Sub`/`NameIdentifier` bằng `Guid.TryParse` theo pattern WMS-API
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Quyết định đồng nhất Guid thay vì giữ int (DB remote sẽ tạo lại)
+- Xác nhận xoá migration cũ là an toàn
+- Quyết định giữ `MigrateAsync()` comment — chạy migration thủ công
+
+**Kết quả áp dụng:** Có – build 0 lỗi, migration mới tạo thành công

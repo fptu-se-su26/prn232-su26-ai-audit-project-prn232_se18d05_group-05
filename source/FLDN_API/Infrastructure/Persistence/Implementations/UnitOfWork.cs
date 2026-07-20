@@ -15,6 +15,12 @@ public sealed class UnitOfWork : IUnitOfWork
     public IUserRepository Users
         => (IUserRepository)_repos.GetOrAdd(nameof(Users), _ => new UserRepository(_db));
 
+    public ICategoryRepository Categories
+        => (ICategoryRepository)_repos.GetOrAdd(nameof(Categories), _ => new CategoryRepository(_db));
+
+    public ISupplierProfileRepository SupplierProfiles
+        => (ISupplierProfileRepository)_repos.GetOrAdd(nameof(SupplierProfiles), _ => new SupplierProfileRepository(_db));
+
     public IGenericRepository<T> Repository<T>() where T : EntityBase<Guid>
         => (IGenericRepository<T>)_repos.GetOrAdd(typeof(T).Name, _ => new GenericRepository<T>(_db));
 

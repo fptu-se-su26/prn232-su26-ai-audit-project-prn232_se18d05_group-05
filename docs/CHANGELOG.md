@@ -245,6 +245,8 @@ Viết tại đây...
 | 7 | Thiết lập Supplier Service & Interface | DE180148 | `Application/Services/` | commit của DE180148 |
 | 8 | Tạo SupplierModels cho các request/response DTO | DE180148 | `Domain/Models/Supplier/` | commit của DE180148 |
 | 9 | Tạo tài liệu AI Audit log và Prompt log cá nhân | DE180148 | `docs/audit/`, `docs/prompts/` | commit của DE180148 |
+| 10 | Triển khai UC26, UC27, UC29, UC30 cho Logistics Operator | DE180079 | `Domain/Models/Logistics/`, `Application/Services/`, `API/Controllers/` | commit của DE180079 |
+| 11 | Tạo tài liệu AI Audit log và Prompt log cá nhân cho Leader | DE180079 | `docs/audit/`, `docs/prompts/` | commit của DE180079 |
 
 ## AI có hỗ trợ không?
 
@@ -255,6 +257,7 @@ Nếu có, mô tả AI đã hỗ trợ phần nào:
 ```text
 - Claude hỗ trợ generate entity class, EF configuration, fix cascade delete cycle và shadow FK warnings (DE180942).
 - Gemini hỗ trợ rà soát cấu trúc git và đồng bộ các tài liệu AI Audit cá nhân (DE180148).
+- Gemini hỗ trợ triển khai các Use Case UC26, UC27, UC29, UC30 cho Logistics Operator và tạo tài liệu AI Audit log cá nhân cho Leader (DE180079).
 ```
 
 ## Commit/Screenshot minh chứng

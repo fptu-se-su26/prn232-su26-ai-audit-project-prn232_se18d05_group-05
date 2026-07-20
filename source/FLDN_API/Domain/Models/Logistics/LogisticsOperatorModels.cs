@@ -1,6 +1,12 @@
 using Domain;
 
-namespace Contract;
+namespace Contract.LogisticsOperator;
+
+public class PagedRequest
+{
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+}
 
 public sealed class ShipmentListRequest : PagedRequest
 {
@@ -23,4 +29,50 @@ public sealed class ShipmentSummaryResponse
     public ShipmentStatus ShipmentStatus { get; set; }
     public decimal TotalItems { get; set; }
     public DateTimeOffset? AssignedAt { get; set; }
+}
+
+public sealed class AcceptShipmentRequest
+{
+    public Guid ShipmentId { get; set; }
+}
+
+public sealed class AcceptShipmentResponse
+{
+    public Guid ShipmentId { get; set; }
+    public DateTimeOffset AcceptedAt { get; set; }
+    public string CurrentStatus { get; set; } = default!;
+}
+
+public sealed class UpdateShipmentStatusRequest
+{
+    public Guid ShipmentId { get; set; }
+    public ShipmentStatus ShipmentStatus { get; set; }
+    public decimal? Latitude { get; set; }
+    public decimal? Longitude { get; set; }
+    public string? Note { get; set; }
+}
+
+public sealed class ShipmentTrackingResponse
+{
+    public Guid ShipmentId { get; set; }
+    public ShipmentStatus CurrentStatus { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public Guid UpdatedBy { get; set; }
+}
+
+public sealed class ConfirmDeliveryRequest
+{
+    public Guid ShipmentId { get; set; }
+    public string ReceiverName { get; set; } = default!;
+    public string ReceiverPhone { get; set; } = default!;
+    public string? DeliveryNote { get; set; }
+    public string? DeliveryImageUrl { get; set; }
+}
+
+public sealed class DeliveryCompletedResponse
+{
+    public Guid ShipmentId { get; set; }
+    public ShipmentStatus ShipmentStatus { get; set; }
+    public DateTimeOffset DeliveredAt { get; set; }
+    public Guid DeliveredBy { get; set; }
 }

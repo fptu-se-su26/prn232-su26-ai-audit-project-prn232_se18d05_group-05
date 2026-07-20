@@ -6,6 +6,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpContextAccessor();
         services.AddControllers(options =>
         {
             options.Filters.Add<FluentValidationFilter>();

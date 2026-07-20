@@ -7,7 +7,7 @@ public static class ApplicationBuilderExtensions
         await using var scope = app.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        await db.Database.MigrateAsync();
+        //await db.Database.MigrateAsync();
 
         if (app.Environment.IsDevelopment())
             await AppData.SeedAsync(db);

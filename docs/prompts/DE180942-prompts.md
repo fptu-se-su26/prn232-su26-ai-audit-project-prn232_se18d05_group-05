@@ -11,7 +11,7 @@
 | MSSV / Danh sách MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 09/6/2026 |
+| Ngày cập nhật gần nhất | 20/7/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -27,6 +27,7 @@
 | 5 | 2026-06-08 | Claude | Tạo domain entities, EF config và migration | Có |
 | 6 | 2026-06-09 | Claude | Implement login, logout, verify email (UC03–UC04) | Có |
 | 7 | 2026-06-09 | Claude | Implement forgot/reset password + refactor auth utils (UC05–UC06) | Có |
+| 8 | 2026-07-20 | Claude | Fix Guid/int mismatch, refactor ClaimsPrincipalExtensions, tạo lại migration | Có |
 
 ---
 
@@ -98,3 +99,13 @@
 **Prompt (tóm tắt):** Yêu cầu Claude đọc SQL schema 33 bảng, tạo entity class với `EntityBase`, `ISoftDeletable`, navigation properties hợp lý. Sau đó tạo EF configuration kế thừa `BaseEntityConfiguration` / `SoftDeleteEntityConfiguration`, cập nhật `ApplicationDbContext`, chạy migration và `database update`.
 
 **Kết quả áp dụng:** Có. Build 0 lỗi, migration apply thành công lên remote DB.
+
+---
+
+## Prompt 8 – Fix Guid/int mismatch và refactor auth
+
+**Mục đích:** Đồng nhất kiểu Guid, fix `InvalidCastException`, chuẩn hoá extension đọc claim
+
+**Prompt (tóm tắt):** Sau khi pull main về phát hiện lỗi `System.InvalidCastException: Unable to cast System.Int32 to System.Guid` khi tạo tài khoản. Yêu cầu Claude tìm nguyên nhân — do `UserCredentials.Id` và `GetUserId()` vẫn dùng `int` trong khi entity `User : EntityBase<Guid>`. Yêu cầu đổi toàn bộ về Guid, xoá migration cũ, tạo lại `InitialCreate`. Sau đó refactor `ClaimsPrincipalExtensions` theo pattern WMS-API: đọc claim `JwtRegisteredClaimNames.Sub`, dùng `Guid.TryParse` thay vì `Guid.Parse`.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, migration mới tạo thành công.

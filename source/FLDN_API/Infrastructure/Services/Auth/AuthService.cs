@@ -1,7 +1,6 @@
-using Application;
 using Mapster;
 
-namespace Infrastructure;
+namespace Application;
 
 [RegisterService(typeof(IAuthService))]
 public sealed class AuthService(
@@ -21,9 +20,6 @@ public sealed class AuthService(
         if (await unitOfWork.Users.AnyAsync(u => u.Phone == request.Phone, ct))
             throw new ConflictException("Phone number already registered.");
 
-        var customerRole = await unitOfWork.Repository<Role>().FindAsync(r => r.RoleName == nameof(RoleType.Customer), ct)
-            ?? throw new NotFoundException("Customer role not found.");
-
         var user = new User
         {
             FullName = request.FullName,
@@ -40,7 +36,7 @@ public sealed class AuthService(
         await unitOfWork.Repository<UserRole>().AddAsync(new UserRole
         {
             UserId = user.Id,
-            RoleId = customerRole.Id
+            RoleId = distributionPointRole.Id
         });
         await unitOfWork.EnsureSaveAsync(ct);
 
@@ -111,7 +107,7 @@ public sealed class AuthService(
     public async Task ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default)
     {
         var user = await unitOfWork.Users.FindAsync(u => u.Email == request.Email, ct);
-        if (user is null) return; // không leak user existence
+        if (user is null) return;
 
         var resetToken = jwtTokensService.GenerateEmailVerifyToken();
         await redisCache.SetRecordAsync(
@@ -172,5 +168,4 @@ public sealed class AuthService(
 
         await redisCache.RemoveRecordAsync(key);
     }
-
 }

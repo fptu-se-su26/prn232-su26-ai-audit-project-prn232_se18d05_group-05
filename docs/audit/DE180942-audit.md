@@ -11,7 +11,7 @@
 | MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 09/6/2026 |
+| Ngày cập nhật gần nhất | 20/7/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -96,6 +96,31 @@
 
 ---
 
+## Lần 8 – Refactor ClaimsPrincipalExtensions, đồng nhất Guid, fix migration
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-20 |
+| Công cụ AI | Claude |
+| Mục đích | Đồng nhất kiểu Guid cho toàn bộ entity, fix lỗi `InvalidCastException` do DB cũ dùng int, tạo lại migration, chuẩn hoá `ClaimsPrincipalExtensions` |
+| Phần việc | Backend – Infrastructure & Auth |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Phát hiện và fix lỗi merge conflict sau `git pull main` — giữ `ShipperController` version service-layer mới
+- Xoá `ShipperSeedController` cũ không tương thích với schema mới
+- Sửa `UserCredentials.Id` và `GetUserId()` từ `int` sang `Guid` cho đồng bộ với `User : EntityBase<Guid>`
+- Xoá migration cũ (dùng int PK), tạo lại `InitialCreate` với toàn bộ Guid PK
+- Refactor `ClaimsPrincipalExtensions.GetUserId()` đọc claim `Sub` / `NameIdentifier` bằng `Guid.TryParse` — theo pattern từ WMS-API
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Quyết định đồng nhất về Guid thay vì giữ int (do DB remote sẽ tạo lại)
+- Xác nhận xoá migration cũ và tạo lại là an toàn
+- Quyết định giữ `MigrateAsync()` comment — chạy migration thủ công
+
+**Kết quả áp dụng:** Có – build 0 lỗi, migration mới tạo thành công
+
+---
 
 ## Lần 2 – Cấu hình frontend với Tailwind, Vite và PWA
 

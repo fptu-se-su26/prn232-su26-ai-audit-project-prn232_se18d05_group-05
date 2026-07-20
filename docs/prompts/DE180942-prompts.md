@@ -120,3 +120,13 @@
 **Prompt (tóm tắt):** Yêu cầu Claude xóa toàn bộ e-commerce entities (Cart, Voucher, Wallet, Payment, Review), rename Order→SupplyRequest, Delivery→Shipment, Shipper→LogisticsOperator, DeliveryZone→DistributionZone. Chuẩn hóa tất cả entities kế thừa `EntityBase<Guid>`, configurations dùng `BaseEntityConfiguration`/`SoftDeleteEntityConfiguration`. Thêm `ISoftDeletable` cho master data (DistributionZone, Category, Address). Cập nhật enum values, seed data, DbContext, services liên quan.
 
 **Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.
+
+---
+
+## Prompt 10 – Fix Guid/int mismatch và refactor auth
+
+**Mục đích:** Đồng nhất kiểu Guid, fix `InvalidCastException`, chuẩn hoá extension đọc claim
+
+**Prompt (tóm tắt):** Sau khi pull main về phát hiện lỗi `System.InvalidCastException: Unable to cast System.Int32 to System.Guid` khi tạo tài khoản. Yêu cầu Claude tìm nguyên nhân — do `UserCredentials.Id` và `GetUserId()` vẫn dùng `int` trong khi entity `User : EntityBase<Guid>`. Yêu cầu đổi toàn bộ về Guid, xoá migration cũ, tạo lại `InitialCreate`. Sau đó refactor `ClaimsPrincipalExtensions` theo pattern WMS-API: đọc claim `JwtRegisteredClaimNames.Sub`, dùng `Guid.TryParse` thay vì `Guid.Parse`.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, migration mới tạo thành công.

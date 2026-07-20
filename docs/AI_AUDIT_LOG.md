@@ -185,56 +185,63 @@ Nhóm đã nắm rõ cách thức ghi lại lịch sử trạng thái (`Shipment
 
 ---
 
-### Lần sử dụng AI số 3
+### Lần sử dụng AI số 3 (Log #03)
 
 | Nội dung | Thông tin |
 |---|---|
-| Ngày sử dụng |  |
-| Công cụ AI | ChatGPT / Gemini / Claude / GitHub Copilot / Cursor / Antigravity / Khác |
-| Mục đích sử dụng |  |
-| Phần việc liên quan | Requirement / Design / Database / Frontend / Backend / Testing / Debug / Report / Presentation / Other |
-| Mức độ sử dụng | Hỗ trợ ý tưởng / Hỗ trợ một phần / Hỗ trợ nhiều / Sinh chính nội dung |
+| Ngày sử dụng | 2026-07-20 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Triển khai UC29 - Cập nhật trạng thái vận chuyển (Logistics Operator) |
+| Phần việc liên quan | Backend |
+| Mức độ sử dụng | Hỗ trợ nhiều / Sinh chính nội dung |
 
 #### 4.1. Prompt đã sử dụng
 
 ```text
-Dán nguyên văn prompt đã hỏi AI tại đây.
+tiếp tục làm be  uc 29 cập nhật trạng thái vận chuyển 
 ```
 
 #### 4.2. Kết quả AI gợi ý
 
-```text
-Viết tại đây...
-```
+## Log #03
+- Date: 2026-07-20
+- Author: Group 05
+- AI Tool: Antigravity
+- Purpose: Implement UC29 - Update shipment delivery status for Logistics Operator
+- Prompt Reference: Prompt above
+- AI Output Summary: Suggested creating `UpdateShipmentStatusRequest` and `UpdateShipmentStatusResponse` in `LogisticsModels.cs`, updating `ILogisticsService.cs` and `LogisticsService.cs` with status transitions (`PickedUp`, `Delivering`/`InTransit`, `Failed`), and adding a PUT endpoint at `/api/shipper/deliveries/{id}/status` in `ShipperController.cs`.
+- Human Decision: Mapped `Delivering` to DB enum `InTransit` and synced `Shipment.Status` changes to transition corresponding `SupplyRequest.Status` (`Dispatched`, `InTransit`, `Cancelled`), while appending state history records for both entities.
+- Applied To:
+  - `Domain/Models/Logistics/LogisticsModels.cs`
+  - `Application/Services/Interfaces/ILogisticsService.cs`
+  - `Application/Services/Implementation/LogisticsService.cs`
+  - `API/Controllers/ShipperController.cs`
+- Verification: Built solution successfully via `dotnet build` with 0 errors.
 
 #### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
 
-```text
-Viết tại đây...
-```
+Sử dụng cấu trúc DTO Requests/Responses, định nghĩa Service Interface, Logic đồng bộ trạng thái Shipment với SupplyRequest và thêm bản ghi lịch sử trạng thái trong Service Implementation, cùng với endpoint PUT trong Controller.
 
 #### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
 
-```text
-Viết tại đây...
-```
+- Tích hợp điều kiện kiểm tra nghiêm ngặt về quyền sở hữu lô hàng (`LogisticsOperatorId == profile.Id`) để tránh lỗi shipper này cập nhật đơn của shipper khác.
+- Kiểm soát quy tắc chuyển đổi trạng thái logic (ví dụ: chỉ cho phép chuyển sang `PickedUp` từ `Assigned`).
 
 #### 4.5. Minh chứng
 
 | Loại minh chứng | Nội dung |
 |---|---|
-| Link commit |  |
-| File liên quan |  |
-| Screenshot |  |
-| Kết quả chạy/test |  |
-| Link video demo |  |
-| Ghi chú khác |  |
+| Link commit | Chưa push / Dev local |
+| File liên quan | [LogisticsModels.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/Domain/Models/Logistics/LogisticsModels.cs), [ILogisticsService.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/Application/Services/Interfaces/ILogisticsService.cs), [LogisticsService.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/Application/Services/Implementation/LogisticsService.cs), [ShipperController.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/API/Controllers/ShipperController.cs) |
+| Screenshot | N/A |
+| Kết quả chạy/test | Build thành công (0 Errors, 0 Warnings) |
+| Link video demo | N/A |
+| Ghi chú khác | N/A |
 
 #### 4.6. Nhận xét cá nhân/nhóm
 
-```text
-Viết tại đây...
-```
+Nhóm đã hiểu rõ luồng liên kết nghiệp vụ: trạng thái vận chuyển thay đổi sẽ tác động trực tiếp và làm thay đổi trạng thái của Đơn yêu cầu cung ứng (`SupplyRequest`) tương ứng.
+
 
 ---
 

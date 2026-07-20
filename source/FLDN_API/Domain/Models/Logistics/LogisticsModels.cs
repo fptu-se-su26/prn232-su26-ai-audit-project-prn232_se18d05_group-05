@@ -22,3 +22,12 @@ public sealed class UpdateShipmentStatusResponse
     public DateTimeOffset UpdatedAt { get; set; }
 }
 
+public sealed class LogisticsCompleteResponse
+{
+    public Guid DeliveryId { get; set; }
+    public string Status { get; set; } = "Delivered";
+    public string ConfirmImageUrl { get; set; } = default!;
+    public DateTimeOffset DeliveredAt { get; set; }
+}
+
+

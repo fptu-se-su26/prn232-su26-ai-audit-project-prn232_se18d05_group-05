@@ -245,7 +245,67 @@ Nhóm đã hiểu rõ luồng liên kết nghiệp vụ: trạng thái vận chu
 
 ---
 
+### Lần sử dụng AI số 4 (Log #04)
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày sử dụng | 2026-07-20 |
+| Công cụ AI | Antigravity |
+| Mục đích sử dụng | Triển khai UC30 - Xác nhận giao hàng (Logistics Operator) |
+| Phần việc liên quan | Backend |
+| Mức độ sử dụng | Hỗ trợ nhiều / Sinh chính nội dung |
+
+#### 4.1. Prompt đã sử dụng
+
+```text
+tiếp tục làm be uc 30 xác nhận giao hàng 
+```
+
+#### 4.2. Kết quả AI gợi ý
+
+## Log #04
+- Date: 2026-07-20
+- Author: Group 05
+- AI Tool: Antigravity
+- Purpose: Implement UC30 - Confirm delivery/complete shipment with photo upload for Logistics Operator
+- Prompt Reference: Prompt above
+- AI Output Summary: Suggested creating `LogisticsCompleteResponse` in `LogisticsModels.cs`, updating `ILogisticsService.cs` and `LogisticsService.cs` (with `CompleteShipmentAsync`), and modifying `ShipperController.cs` to inject `ICloudinaryService` and receive `IFormFile confirmImage` to upload before completing the shipment.
+- Human Decision: Handled uploading using `ICloudinaryService` inside the API layer to keep `IFormFile` out of the Application layer, and transitioned `SupplyRequest.Status` to `Received` while saving history.
+- Applied To:
+  - `Domain/Models/Logistics/LogisticsModels.cs`
+  - `Application/Services/Interfaces/ILogisticsService.cs`
+  - `Application/Services/Implementation/LogisticsService.cs`
+  - `API/Controllers/ShipperController.cs`
+- Verification: Built solution successfully via `dotnet build` with 0 errors.
+
+#### 4.3. Phần sinh viên/nhóm đã sử dụng từ AI
+
+Sử dụng cấu trúc `LogisticsCompleteResponse` DTO, định nghĩa interface, logic nghiệp vụ cập nhật trạng thái `Arrived` (cho Shipment) & `Received` (cho SupplyRequest), và tích hợp gọi `UploadPhotoAsync` của `ICloudinaryService` trong controller.
+
+#### 4.4. Phần sinh viên/nhóm tự chỉnh sửa hoặc cải tiến
+
+- Tách rời việc xử lý `IFormFile` và `ICloudinaryService` tại lớp Controller nhằm đảm bảo nguyên tắc Clean Architecture (Application layer không bị phụ thuộc vào thư viện ASP.NET Core Http).
+- Bổ sung xác thực kiểm tra nếu ảnh `confirmImage` tải lên bị rỗng.
+
+#### 4.5. Minh chứng
+
+| Loại minh chứng | Nội dung |
+|---|---|
+| Link commit | Chưa push / Dev local |
+| File liên quan | [LogisticsModels.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/Domain/Models/Logistics/LogisticsModels.cs), [ILogisticsService.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/Application/Services/Interfaces/ILogisticsService.cs), [LogisticsService.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/Application/Services/Implementation/LogisticsService.cs), [ShipperController.cs](file:///d:/Ky%208/PRN232/project/prn232-su26-ai-audit-project-prn232_se18d05_group-05/source/FLDN_API/API/Controllers/ShipperController.cs) |
+| Screenshot | N/A |
+| Kết quả chạy/test | Build thành công (0 Errors, 0 Warnings) |
+| Link video demo | N/A |
+| Ghi chú khác | N/A |
+
+#### 4.6. Nhận xét cá nhân/nhóm
+
+Nhóm đã biết cách phối hợp sử dụng các dịch vụ bên ngoài (như Cloudinary để lưu trữ ảnh) cùng với xử lý dữ liệu database trên một luồng API thống nhất.
+
+---
+
 ## 5. Bảng tổng hợp mức độ sử dụng AI
+
 
 Đánh dấu mức độ AI hỗ trợ ở từng hạng mục.
 

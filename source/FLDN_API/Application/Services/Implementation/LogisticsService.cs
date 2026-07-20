@@ -144,5 +144,77 @@ public sealed class LogisticsService(IUnitOfWork unitOfWork) : ILogisticsService
             UpdatedAt = DateTimeOffset.UtcNow
         };
     }
+
+    public async Task<LogisticsCompleteResponse> CompleteShipmentAsync(Guid userId, Guid shipmentId, string confirmImageUrl, CancellationToken ct = default)
+    {
+        // 1. Get the logistics operator profile for the current user
+        var profile = await unitOfWork.Repository<LogisticsProfile>().FindAsync(lp => lp.UserId == userId && !lp.IsDeleted, ct)
+            ?? throw new NotFoundException("Logistics operator profile not found.");
+
+        // 2. Get the shipment and include its related supply request
+        var shipment = await unitOfWork.Repository<Shipment>().GetQueryable()
+            .Include(s => s.SupplyRequest)
+            .FirstOrDefaultAsync(s => s.Id == shipmentId, ct)
+            ?? throw new NotFoundException("Logistics shipment not found.");
+
+        // 3. Verify that the shipment is assigned to the current logistics operator
+        if (shipment.LogisticsOperatorId != profile.Id)
+        {
+            throw new ForbiddenException("Bạn không có quyền xác nhận hoàn thành cho lô hàng này.");
+        }
+
+        // 4. Verify state transition (must be in transit to be completed)
+        if (shipment.Status != ShipmentStatus.InTransit)
+        {
+            throw new ConflictException("Lô hàng phải ở trạng thái đang vận chuyển (InTransit) mới có thể xác nhận giao hàng.");
+        }
+
+        // 5. Update shipment details
+        shipment.Status = ShipmentStatus.Arrived;
+        shipment.ArrivedAt = DateTimeOffset.UtcNow;
+        shipment.ConfirmImageUrl = confirmImageUrl;
+        
+        // 6. Update corresponding supply request details
+        shipment.SupplyRequest.Status = SupplyRequestStatus.Received;
+
+        unitOfWork.Repository<Shipment>().Update(shipment);
+        unitOfWork.Repository<SupplyRequest>().Update(shipment.SupplyRequest);
+
+        // 7. Add status history entries
+        var shipmentHistory = new ShipmentStatusHistory
+        {
+            Id = Guid.NewGuid(),
+            ShipmentId = shipment.Id,
+            Status = ShipmentStatus.Arrived,
+            Note = "Đơn hàng đã được giao thành công.",
+            ImageUrl = confirmImageUrl,
+            UpdatedBy = userId,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        await unitOfWork.Repository<ShipmentStatusHistory>().AddAsync(shipmentHistory);
+
+        var supplyRequestHistory = new SupplyRequestStatusHistory
+        {
+            Id = Guid.NewGuid(),
+            SupplyRequestId = shipment.SupplyRequestId,
+            Status = SupplyRequestStatus.Received,
+            Note = "Điểm phân phối đã nhận được hàng.",
+            CreatedBy = userId,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        await unitOfWork.Repository<SupplyRequestStatusHistory>().AddAsync(supplyRequestHistory);
+
+        // 8. Save changes
+        await unitOfWork.EnsureSaveAsync(ct);
+
+        return new LogisticsCompleteResponse
+        {
+            DeliveryId = shipment.Id,
+            Status = "Delivered",
+            ConfirmImageUrl = confirmImageUrl,
+            DeliveredAt = shipment.ArrivedAt.Value
+        };
+    }
 }
+
 

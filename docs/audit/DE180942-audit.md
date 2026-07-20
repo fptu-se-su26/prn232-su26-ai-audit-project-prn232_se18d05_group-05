@@ -240,3 +240,28 @@
 - Kiểm tra app chạy không lỗi sau khi thêm provider
 
 **Kết quả áp dụng:** Có
+---
+
+## Lần 10 – Refactor ClaimsPrincipalExtensions, đồng nhất Guid, fix migration
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-20 |
+| Công cụ AI | Claude |
+| Mục đích | Fix lỗi `InvalidCastException` do mismatch Guid/int, tạo lại migration, chuẩn hoá extension đọc claim từ JWT |
+| Phần việc | Backend – Infrastructure & Auth |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Fix merge conflict sau `git pull main` — giữ `ShipperController` version service-layer
+- Xoá `ShipperSeedController` cũ không tương thích schema mới
+- Sửa `UserCredentials.Id` và `GetUserId()` từ `int` sang `Guid`
+- Xoá migration cũ, tạo lại `InitialCreate` với toàn bộ Guid PK
+- Refactor `ClaimsPrincipalExtensions.GetUserId()` đọc `Sub`/`NameIdentifier` bằng `Guid.TryParse` theo pattern WMS-API
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Quyết định đồng nhất Guid thay vì giữ int (DB remote sẽ tạo lại)
+- Xác nhận xoá migration cũ là an toàn
+- Quyết định giữ `MigrateAsync()` comment — chạy migration thủ công
+
+**Kết quả áp dụng:** Có – build 0 lỗi, migration mới tạo thành công

@@ -16,6 +16,12 @@ public class Shipment : EntityBase<Guid>
     public decimal? EstimatedDistance { get; set; }
     public string? Note { get; set; }
 
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public DateTimeOffset? DeliveredAt { get; set; }
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public Guid? DeliveredBy { get; set; }
+
     // Navigation
     public SupplyRequest SupplyRequest { get; set; } = default!;
     public LogisticsProfile? LogisticsOperator { get; set; }

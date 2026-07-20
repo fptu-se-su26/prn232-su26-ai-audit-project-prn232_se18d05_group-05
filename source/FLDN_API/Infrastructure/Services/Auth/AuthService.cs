@@ -20,6 +20,9 @@ public sealed class AuthService(
         if (await unitOfWork.Users.AnyAsync(u => u.Phone == request.Phone, ct))
             throw new ConflictException("Phone number already registered.");
 
+        var distributionPointRole = await unitOfWork.Repository<Role>().FindAsync(r => r.RoleName == nameof(RoleType.DistributionPoint), ct)
+            ?? throw new NotFoundException("DistributionPoint role not found.");
+
         var user = new User
         {
             FullName = request.FullName,

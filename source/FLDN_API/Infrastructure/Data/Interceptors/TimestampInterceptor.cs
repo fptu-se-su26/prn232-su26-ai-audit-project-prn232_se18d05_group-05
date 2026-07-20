@@ -25,7 +25,7 @@ public class TimestampInterceptor : SaveChangesInterceptor
 
     private static void UpdateTimestamps(DbContext context)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7));
 
         var entries = context.ChangeTracker.Entries()
             .Where(e => e.Entity is IEntity &&

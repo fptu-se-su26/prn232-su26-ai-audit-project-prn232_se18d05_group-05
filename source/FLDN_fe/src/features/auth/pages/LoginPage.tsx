@@ -33,7 +33,10 @@ export function LoginPage() {
 
       const user = decodeJwtUser(accessToken)
       setAuth(user, accessToken)
-      router.replace(APP_ROUTES.dashboard)
+
+      const destination =
+        user.role === 'Admin' ? APP_ROUTES.admin.users : APP_ROUTES.dashboard
+      router.replace(destination)
     } catch (error) {
       console.error(error)
       // useLoginMutation.onError already shows toast

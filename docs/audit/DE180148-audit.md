@@ -11,7 +11,7 @@
 | MSSV | DE180148 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 15/06/2026 |
-| Ngày cập nhật gần nhất | 29/06/2026 |
+| Ngày cập nhật gần nhất | 22/07/2026 |
 | Công cụ AI | ChatGPT, Gemini (Antigravity CLI) |
 
 ---
@@ -107,4 +107,28 @@
 - Trực tiếp phê duyệt kế hoạch triển khai để đảm bảo tính an toàn của dự án.
 - Kiểm tra lại các file mã nguồn backend Supplier không chứa thông tin nhạy cảm.
 
-**Kết quả áp dụng:** Có – Đang tiến hành đẩy code lên nhánh `feature/de180148-actor-2-supplier`.
+**Kết quả áp dụng:** Có – Đã đẩy code lên nhánh main.
+
+---
+
+## Lần 5 – Refactor Dọn Dẹp Legacy Controller & Tối Ưu Swagger API
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-22 |
+| Công cụ AI | Gemini (Antigravity CLI) |
+| Mục đích | Loại bỏ hoàn toàn các Controller/Service cũ của Shipper và chuẩn hóa Swagger Schema |
+| Phần việc | Refactoring & API Maintenance |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Phát hiện các API trùng lặp giữa `ShipperController` cũ và `LogisticsOperatorController` mới trên Swagger UI.
+- Tiến hành gỡ bỏ hoàn toàn file controller cũ `ShipperController.cs`, `LogisticsService.cs`, `ILogisticsService.cs` và DTOs cũ để hệ thống chỉ sử dụng thống nhất `LogisticsOperatorController`.
+- Cấu hình `CustomSchemaIds` trong `SwaggerExtensions.cs` để khắc phục triệt để lỗi Swagger 500 khi trùng tên DTOs ở các namespace khác nhau.
+- Hỗ trợ khởi tạo dữ liệu mẫu cho 4 Role trên Database Cloud để phục vụ kiểm thử API trực quan.
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Kiểm tra lại kết quả build solution `FLDN_API.slnx` đạt **Build Succeeded (0 Errors, 0 Warnings)**.
+- Đảm bảo mã nguồn `AppData.cs` đã được dọn dẹp sạch sẽ không chứa dữ liệu hardcode trước khi đẩy git lên `main`.
+
+**Kết quả áp dụng:** Có – Áp dụng vào hệ thống và chuẩn bị commit.

@@ -34,6 +34,8 @@ public static class SwaggerExtensions
                     new List<string>()
                 }
             });
+
+            c.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
         });
 
         return services;

@@ -246,7 +246,8 @@ Viết tại đây...
 | 8 | Tạo SupplierModels cho các request/response DTO | DE180148 | `Domain/Models/Supplier/` | commit của DE180148 |
 | 9 | Tạo tài liệu AI Audit log và Prompt log cá nhân | DE180148 | `docs/audit/`, `docs/prompts/` | commit của DE180148 |
 | 10 | Triển khai UC26, UC27, UC29, UC30 cho Logistics Operator | DE180079 | `Domain/Models/Logistics/`, `Application/Services/`, `API/Controllers/` | commit của DE180079 |
-| 11 | Tạo tài liệu AI Audit log và Prompt log cá nhân cho Leader | DE180079 | `docs/audit/`, `docs/prompts/` | commit của DE180079 |
+| 11 | Refactor loại bỏ ShipperController legacy cũ & tối ưu Swagger CustomSchemaIds | DE180148 | `API/Controllers/ShipperController.cs`, `API/DependencyInjection/Extensions/SwaggerExtensions.cs` | commit của DE180148 |
+| 12 | Tạo tài liệu AI Audit log và Prompt log cá nhân cho Leader | DE180079 | `docs/audit/`, `docs/prompts/` | commit của DE180079 |
 
 ## AI có hỗ trợ không?
 

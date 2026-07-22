@@ -11,7 +11,7 @@
 | MSSV / Danh sách MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 11/6/2026 |
+| Ngày cập nhật gần nhất | 22/7/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -29,6 +29,8 @@
 | 7 | 2026-06-09 | Claude | Implement forgot/reset password + refactor auth utils (UC05–UC06) | Có |
 | 8 | 2026-06-11 | Claude | Implement admin module UC08–UC11 (17 endpoints) | Có |
 | 9 | 2026-06-11 | Claude | Refactor scope: xóa e-commerce entities, rename Order→SupplyRequest, Delivery→Shipment, đồng bộ EntityBase cho toàn bộ entities | Có |
+| 10 | 2026-07-22 | Claude | Migrate FE sang Next.js, implement auth guard, login page, Zustand store, ProtectedRoute | Có |
+| 11 | 2026-07-22 | Claude | Implement admin module FE: sidebar, header, Users/Suppliers/Categories pages với CRUD actions | Có |
 
 ---
 
@@ -113,6 +115,26 @@
 
 ---
 
+## Prompt 10 – Migrate FE sang Next.js và implement Auth module
+
+**Mục đích:** Cấu hình lại toàn bộ frontend từ Vite/React sang Next.js App Router, implement auth với Zustand, Axios, shadcn/ui
+
+**Prompt (tóm tắt):** Yêu cầu Claude config FLDN FE giống cấu trúc WMS FE — cài Next.js 16, Zustand, TanStack Query v5, Zod v4, shadcn/ui. Tạo axios client với withCredentials (HttpOnly cookie), auth store không lưu refreshToken, ProtectedRoute hỗ trợ allowedRoles, LoginPage dùng shadcn form + zod schema. Font Be Vietnam Pro cho context B2B logistics.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, đăng nhập thành công với tài khoản Admin.
+
+---
+
+## Prompt 11 – Implement Admin Module FE
+
+**Mục đích:** Tạo sidebar, header và 3 trang quản trị với bảng dữ liệu và mutation actions
+
+**Prompt (tóm tắt):** Yêu cầu Claude đọc BE source để biết API, tạo admin types/service/hooks (React Query), AppSidebar dùng shadcn Sidebar với nav theo role, AppHeader với logout. UsersTable (lock/unlock), SuppliersTable (approve/reject), CategoriesTable + EditCategoryDialog (chỉnh sửa name, isActive). Layout private bọc SidebarProvider, layout admin bọc role guard Admin-only.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.
+
+---
+
 ## Prompt 9 – Refactor scope: chuyển từ TMĐT sang quản lý nguồn cung
 
 **Mục đích:** Align codebase với đúng scope hệ thống FoodLink — quản lý nguồn cung thực phẩm TP. Đà Nẵng, không phải bán hàng B2C
@@ -123,10 +145,20 @@
 
 ---
 
-## Prompt 10 – Fix Guid/int mismatch và refactor auth
+## Prompt 10 – Migrate FE sang Next.js và implement Auth module
 
-**Mục đích:** Đồng nhất kiểu Guid, fix `InvalidCastException`, chuẩn hoá extension đọc claim
+**Mục đích:** Cấu hình lại toàn bộ frontend từ Vite/React sang Next.js App Router, implement auth với Zustand, Axios, shadcn/ui
 
-**Prompt (tóm tắt):** Sau khi pull main về phát hiện lỗi `System.InvalidCastException: Unable to cast System.Int32 to System.Guid` khi tạo tài khoản. Yêu cầu Claude tìm nguyên nhân — do `UserCredentials.Id` và `GetUserId()` vẫn dùng `int` trong khi entity `User : EntityBase<Guid>`. Yêu cầu đổi toàn bộ về Guid, xoá migration cũ, tạo lại `InitialCreate`. Sau đó refactor `ClaimsPrincipalExtensions` theo pattern WMS-API: đọc claim `JwtRegisteredClaimNames.Sub`, dùng `Guid.TryParse` thay vì `Guid.Parse`.
+**Prompt (tóm tắt):** Yêu cầu Claude config FLDN FE giống cấu trúc WMS FE — cài Next.js 16, Zustand, TanStack Query v5, Zod v4, shadcn/ui. Tạo axios client với withCredentials (HttpOnly cookie), auth store không lưu refreshToken, ProtectedRoute hỗ trợ allowedRoles, LoginPage dùng shadcn form + zod schema. Font Be Vietnam Pro cho context B2B logistics.
 
-**Kết quả áp dụng:** Có. Build 0 lỗi, migration mới tạo thành công.
+**Kết quả áp dụng:** Có. Build 0 lỗi, đăng nhập thành công với tài khoản Admin.
+
+---
+
+## Prompt 11 – Implement Admin Module FE
+
+**Mục đích:** Tạo sidebar, header và 3 trang quản trị với bảng dữ liệu và mutation actions
+
+**Prompt (tóm tắt):** Yêu cầu Claude đọc BE source để biết API, tạo admin types/service/hooks (React Query), AppSidebar dùng shadcn Sidebar với nav theo role, AppHeader với logout. UsersTable (lock/unlock), SuppliersTable (approve/reject), CategoriesTable + EditCategoryDialog (chỉnh sửa name, isActive). Layout private bọc SidebarProvider, layout admin bọc role guard Admin-only.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.

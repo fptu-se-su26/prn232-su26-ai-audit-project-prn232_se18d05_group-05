@@ -1,0 +1,24 @@
+export const API_ENDPOINTS = {
+  auth: {
+    login: '/auth/login',
+    register: '/auth/register',
+    verifyEmail: '/auth/verify-email',
+    logout: '/auth/logout',
+    forgotPassword: '/auth/forgot-password',
+    resetPassword: '/auth/reset-password',
+  },
+  admin: {
+    users: '/admin/users',
+    user: (id: string) => `/admin/users/${id}`,
+    lockUser: (id: string) => `/admin/users/${id}/lock`,
+    unlockUser: (id: string) => `/admin/users/${id}/unlock`,
+    resetUserPassword: (id: string) => `/admin/users/${id}/reset-password`,
+    suppliers: '/admin/suppliers',
+    supplier: (id: string) => `/admin/suppliers/${id}`,
+    approveSupplier: (id: string) => `/admin/suppliers/${id}/approve`,
+    rejectSupplier: (id: string) => `/admin/suppliers/${id}/reject`,
+    supplierFee: (id: string) => `/admin/suppliers/${id}/fee`,
+    categories: '/admin/categories',
+    category: (id: string) => `/admin/categories/${id}`,
+  },
+} as const

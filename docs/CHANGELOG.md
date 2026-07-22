@@ -224,11 +224,11 @@ Viết tại đây...
 - [x] Xây dựng backend
 - [ ] Xây dựng frontend
 - [ ] Xây dựng authentication/authorization
-- [ ] Xử lý CRUD
-- [ ] Xử lý validation
-- [ ] Tích hợp API
+- [x] Xử lý CRUD
+- [x] Xử lý validation
+- [x] Tích hợp API
 - [ ] Xử lý upload/download file
-- [ ] Xử lý lỗi
+- [x] Xử lý lỗi
 - [ ] Tối ưu giao diện
 - [ ] Cập nhật README hướng dẫn chạy
 
@@ -241,6 +241,13 @@ Viết tại đây...
 | 3 | Tạo 31 EF Core configuration class | DE180942 | `Infrastructure/Data/Configurations/` | commit fda0d0d |
 | 4 | Cập nhật ApplicationDbContext | DE180942 | `Infrastructure/ApplicationDbContext.cs` | commit fda0d0d |
 | 5 | Tạo và apply migration InitialCreate lên remote DB | DE180942 | `Infrastructure/Migrations/` | commit fda0d0d |
+| 6 | Xây dựng API Controller cho Supplier | DE180148 | `API/Controllers/SupplierController.cs` | commit của DE180148 |
+| 7 | Thiết lập Supplier Service & Interface | DE180148 | `Application/Services/` | commit của DE180148 |
+| 8 | Tạo SupplierModels cho các request/response DTO | DE180148 | `Domain/Models/Supplier/` | commit của DE180148 |
+| 9 | Tạo tài liệu AI Audit log và Prompt log cá nhân | DE180148 | `docs/audit/`, `docs/prompts/` | commit của DE180148 |
+| 10 | Triển khai UC26, UC27, UC29, UC30 cho Logistics Operator | DE180079 | `Domain/Models/Logistics/`, `Application/Services/`, `API/Controllers/` | commit của DE180079 |
+| 11 | Refactor loại bỏ ShipperController legacy cũ & tối ưu Swagger CustomSchemaIds | DE180148 | `API/Controllers/ShipperController.cs`, `API/DependencyInjection/Extensions/SwaggerExtensions.cs` | commit của DE180148 |
+| 12 | Tạo tài liệu AI Audit log và Prompt log cá nhân cho Leader | DE180079 | `docs/audit/`, `docs/prompts/` | commit của DE180079 |
 
 ## AI có hỗ trợ không?
 
@@ -249,7 +256,9 @@ Viết tại đây...
 Nếu có, mô tả AI đã hỗ trợ phần nào:
 
 ```text
-Claude hỗ trợ generate entity class, EF configuration, fix cascade delete cycle và shadow FK warnings.
+- Claude hỗ trợ generate entity class, EF configuration, fix cascade delete cycle và shadow FK warnings (DE180942).
+- Gemini hỗ trợ rà soát cấu trúc git và đồng bộ các tài liệu AI Audit cá nhân (DE180148).
+- Gemini hỗ trợ triển khai các Use Case UC26, UC27, UC29, UC30 cho Logistics Operator và tạo tài liệu AI Audit log cá nhân cho Leader (DE180079).
 ```
 
 ## Commit/Screenshot minh chứng
@@ -257,6 +266,7 @@ Claude hỗ trợ generate entity class, EF configuration, fix cascade delete cy
 ```text
 commit fda0d0d – feat: define domain entities, EF configurations and run initial migration
 commit 48cba0d – chore: ignore AI editor config files
+commit [DE180148] feat: implement supplier actor backend and update AI audit docs
 ```
 
 ## Ghi chú
@@ -264,6 +274,7 @@ commit 48cba0d – chore: ignore AI editor config files
 ```text
 OTP, PasswordResetToken, RefreshToken không dùng EF — lưu Redis.
 ```
+
 
 ---
 

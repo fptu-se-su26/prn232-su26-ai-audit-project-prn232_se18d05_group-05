@@ -142,3 +142,23 @@
 **Prompt (tóm tắt):** Yêu cầu Claude xóa toàn bộ e-commerce entities (Cart, Voucher, Wallet, Payment, Review), rename Order→SupplyRequest, Delivery→Shipment, Shipper→LogisticsOperator, DeliveryZone→DistributionZone. Chuẩn hóa tất cả entities kế thừa `EntityBase<Guid>`, configurations dùng `BaseEntityConfiguration`/`SoftDeleteEntityConfiguration`. Thêm `ISoftDeletable` cho master data (DistributionZone, Category, Address). Cập nhật enum values, seed data, DbContext, services liên quan.
 
 **Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.
+
+---
+
+## Prompt 10 – Migrate FE sang Next.js và implement Auth module
+
+**Mục đích:** Cấu hình lại toàn bộ frontend từ Vite/React sang Next.js App Router, implement auth với Zustand, Axios, shadcn/ui
+
+**Prompt (tóm tắt):** Yêu cầu Claude config FLDN FE giống cấu trúc WMS FE — cài Next.js 16, Zustand, TanStack Query v5, Zod v4, shadcn/ui. Tạo axios client với withCredentials (HttpOnly cookie), auth store không lưu refreshToken, ProtectedRoute hỗ trợ allowedRoles, LoginPage dùng shadcn form + zod schema. Font Be Vietnam Pro cho context B2B logistics.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, đăng nhập thành công với tài khoản Admin.
+
+---
+
+## Prompt 11 – Implement Admin Module FE
+
+**Mục đích:** Tạo sidebar, header và 3 trang quản trị với bảng dữ liệu và mutation actions
+
+**Prompt (tóm tắt):** Yêu cầu Claude đọc BE source để biết API, tạo admin types/service/hooks (React Query), AppSidebar dùng shadcn Sidebar với nav theo role, AppHeader với logout. UsersTable (lock/unlock), SuppliersTable (approve/reject), CategoriesTable + EditCategoryDialog (chỉnh sửa name, isActive). Layout private bọc SidebarProvider, layout admin bọc role guard Admin-only.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.

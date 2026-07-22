@@ -8,5 +8,6 @@ public enum SupplyRequestStatus
     InTransit,
     Received,
     Rejected,
-    Cancelled
+    Cancelled,
+    Completed
 }

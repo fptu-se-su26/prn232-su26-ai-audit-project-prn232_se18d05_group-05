@@ -11,7 +11,7 @@
 | MSSV | DE180148 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 15/06/2026 |
-| Ngày cập nhật gần nhất | 22/07/2026 |
+| Ngày cập nhật gần nhất | 23/07/2026 |
 | Công cụ AI | ChatGPT, Gemini (Antigravity CLI) |
 
 ---

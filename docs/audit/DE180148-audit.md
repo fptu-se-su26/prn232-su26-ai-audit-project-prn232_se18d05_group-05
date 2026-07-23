@@ -11,7 +11,7 @@
 | MSSV | DE180148 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 15/06/2026 |
-| Ngày cập nhật gần nhất | 22/07/2026 |
+| Ngày cập nhật gần nhất | 23/07/2026 |
 | Công cụ AI | ChatGPT, Gemini (Antigravity CLI) |
 
 ---
@@ -132,3 +132,25 @@
 - Đảm bảo mã nguồn `AppData.cs` đã được dọn dẹp sạch sẽ không chứa dữ liệu hardcode trước khi đẩy git lên `main`.
 
 **Kết quả áp dụng:** Có – Áp dụng vào hệ thống và chuẩn bị commit.
+
+---
+
+## Lần 6 – Refactor Giao Diện Frontend & Cấu Hình Style Toàn Cục (CSS)
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-23 |
+| Công cụ AI | Gemini (Antigravity CLI) |
+| Mục đích | Tối ưu hóa cấu trúc CSS toàn cục cho dự án Next.js Frontend |
+| Phần việc | Frontend – Styles & Layout |
+| Mức độ sử dụng | Hỗ trợ một phần |
+
+**Việc AI hỗ trợ:**
+- Hỗ trợ dọn dẹp các tệp CSS toàn cục dư thừa, gỡ bỏ `globals.css` và hợp nhất quy chuẩn styling vào tệp `index.css`.
+- Cập nhật luồng nhập style trong `layout.tsx` của Next.js để đảm bảo tương thích tốt với Tailwind CSS v4 và Shadcn UI.
+- Kiểm tra trạng thái Git, xử lý rebase và thực hiện commit/push theo quy chuẩn commit message của nhóm.
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Kiểm tra giao diện hiển thị không bị vỡ style, đảm bảo biến font và theme hoạt động trơn tru.
+
+**Kết quả áp dụng:** Có – Đã đẩy thành công lên nhánh main.

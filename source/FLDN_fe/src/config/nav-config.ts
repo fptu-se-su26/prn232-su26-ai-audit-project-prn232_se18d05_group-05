@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, Tag, Users } from 'lucide-react'
+import { LayoutDashboard, Package, Search, Tag, Users } from 'lucide-react'
 import type { UserRole } from './roles'
 import { APP_ROUTES } from '@/routes/app-routes'
 
@@ -17,11 +17,14 @@ export const NAV_CONFIG: Record<UserRole, NavItem[]> = {
   ],
   Supplier: [
     { label: 'Tổng quan', href: APP_ROUTES.dashboard, icon: LayoutDashboard },
+    { label: 'Tìm kiếm sản phẩm', href: APP_ROUTES.products, icon: Search },
   ],
   DistributionPoint: [
     { label: 'Tổng quan', href: APP_ROUTES.dashboard, icon: LayoutDashboard },
+    { label: 'Tìm kiếm sản phẩm', href: APP_ROUTES.products, icon: Search },
   ],
   LogisticsOperator: [
     { label: 'Tổng quan', href: APP_ROUTES.dashboard, icon: LayoutDashboard },
+    { label: 'Tìm kiếm sản phẩm', href: APP_ROUTES.products, icon: Search },
   ],
 }

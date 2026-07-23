@@ -21,4 +21,11 @@ export const API_ENDPOINTS = {
     categories: '/admin/categories',
     category: (id: string) => `/admin/categories/${id}`,
   },
+  products: {
+    list: '/products',
+    search: '/products/search',
+    detail: (id: string) => `/products/${id}`,
+    supplierProducts: '/supplier/products',
+  },
+  categories: '/categories',
 } as const

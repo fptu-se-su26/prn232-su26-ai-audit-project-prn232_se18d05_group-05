@@ -38,7 +38,6 @@ export function LoginPage() {
         user.role === 'Admin' ? APP_ROUTES.admin.users : APP_ROUTES.dashboard
       router.replace(destination)
     } catch (error) {
-      console.error(error)
       // useLoginMutation.onError already shows toast
     }
   }

@@ -8,6 +8,7 @@ export const APP_ROUTES = {
     resetPassword: '/auth/reset-password',
   },
   dashboard: '/dashboard',
+  products: '/products',
   unauthorized: '/unauthorized',
   admin: {
     users: '/admin/users',

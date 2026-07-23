@@ -11,7 +11,7 @@
 | MSSV / Danh sách MSSV | DE180148 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 15/06/2026 |
-| Ngày cập nhật gần nhất | 22/07/2026 |
+| Ngày cập nhật gần nhất | 23/07/2026 |
 | Công cụ AI | ChatGPT, Gemini (Antigravity CLI) |
 
 ---
@@ -25,6 +25,7 @@
 | 3 | 2026-06-25 | ChatGPT | Tạo Supplier API Controller và cấu hình phân quyền | Có |
 | 4 | 2026-06-29 | Gemini | Rà soát Git và tạo tài liệu AI Audit cá nhân theo MSSV | Có |
 | 5 | 2026-07-22 | Gemini | Xóa ShipperController cũ và tối ưu hóa Swagger Schema Generator | Có |
+| 6 | 2026-07-23 | Gemini | Refactor cấu hình style CSS toàn cục và cập nhật Git | Có |
 
 ---
 
@@ -86,3 +87,14 @@ Hãy đọc file README.md để tìm hiểu về convention đặt tên branch 
 Hãy kiểm tra giao diện Swagger UI hiện tại, tôi thấy có 2 nhóm API Shipper và LogisticsOperator bị trùng lặp chức năng. Hãy xóa bỏ controller cũ `ShipperController.cs`, `LogisticsService.cs` để chỉ giữ lại duy nhất `LogisticsOperatorController.cs`. Sau đó bổ sung cấu hình `CustomSchemaIds` trong `SwaggerExtensions.cs` để tránh xung đột tên DTOs gây ra lỗi 500 khi tải `swagger.json`. Cuối cùng kiểm tra build thành công, cập nhật tài liệu AI Audit và thực hiện commit/push code lên `main`.
 
 **Kết quả áp dụng:** Có. Đã dọn dẹp sạch sẽ legacy code và cập nhật tài liệu kiểm thử.
+
+---
+
+## Prompt 6 – Refactor Giao Diện Frontend & Cấu Hình Style Toàn Cục (CSS)
+
+**Mục đích:** Cập nhật quy chuẩn style toàn cục (CSS) cho giao diện Frontend Next.js.
+
+**Prompt (tóm tắt):**
+Tôi mới cập nhật thêm cấu hình style toàn cục cho Frontend, hãy thay thế `globals.css` bằng `index.css`, cập nhật import trong `layout.tsx`. Sau đó cập nhật các tệp tài liệu AI Audit cá nhân `DE180148-audit.md` và `DE180148-prompts.md`, thực hiện commit và đẩy code lên nhánh `main` theo đúng quy trình.
+
+**Kết quả áp dụng:** Có. Áp dụng vào dự án và đồng bộ Git.

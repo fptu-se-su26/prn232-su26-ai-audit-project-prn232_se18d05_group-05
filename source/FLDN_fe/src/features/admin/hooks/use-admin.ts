@@ -5,10 +5,13 @@ import { adminService } from '../services/admin.service'
 import type {
   AdminResetPasswordRequest,
   CreateCategoryRequest,
+  CreateZoneRequest,
+  LogisticsListRequest,
   RejectSupplierRequest,
   SupplierListRequest,
   UpdateCategoryRequest,
   UpdateSupplierFeeRequest,
+  UpdateZoneRequest,
   UserListRequest,
 } from '../types/admin.types'
 
@@ -18,6 +21,11 @@ const QUERY_KEYS = {
   suppliers: (params?: SupplierListRequest) => ['admin', 'suppliers', params] as const,
   supplier: (id: string) => ['admin', 'suppliers', id] as const,
   categories: ['admin', 'categories'] as const,
+  dashboard: ['admin', 'dashboard'] as const,
+  logistics: (params?: LogisticsListRequest) => ['admin', 'logistics', params] as const,
+  logisticsOperator: (id: string) => ['admin', 'logistics', id] as const,
+  zones: ['admin', 'zones'] as const,
+  districts: ['admin', 'districts'] as const,
 }
 
 // ── Users ──────────────────────────────────────────────────────
@@ -190,6 +198,124 @@ export function useDeleteCategoryMutation() {
     onError: (error: ApiErrorResponse) => {
       console.error(error)
       toast.error(error.message ?? 'Không thể ẩn danh mục')
+    },
+  })
+}
+
+// ── Dashboard ──────────────────────────────────────────────────
+
+export function useDashboardQuery() {
+  return useQuery({
+    queryKey: QUERY_KEYS.dashboard,
+    queryFn: () => adminService.getDashboard(),
+  })
+}
+
+// ── Logistics Operators ────────────────────────────────────────
+
+export function useLogisticsQuery(params?: LogisticsListRequest) {
+  return useQuery({
+    queryKey: QUERY_KEYS.logistics(params),
+    queryFn: () => adminService.getLogisticsOperators(params),
+  })
+}
+
+export function useLogisticsOperatorQuery(id: string) {
+  return useQuery({
+    queryKey: QUERY_KEYS.logisticsOperator(id),
+    queryFn: () => adminService.getLogisticsOperatorById(id),
+    enabled: Boolean(id),
+  })
+}
+
+export function useActivateOperatorMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => adminService.activateOperator(id),
+    onSuccess: () => {
+      toast.success('Đã kích hoạt tài xế')
+      queryClient.invalidateQueries({ queryKey: ['admin', 'logistics'] })
+    },
+    onError: (error: ApiErrorResponse) => {
+      console.error(error)
+      toast.error(error.message ?? 'Không thể kích hoạt')
+    },
+  })
+}
+
+export function useDeactivateOperatorMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => adminService.deactivateOperator(id),
+    onSuccess: () => {
+      toast.success('Đã vô hiệu hóa tài xế')
+      queryClient.invalidateQueries({ queryKey: ['admin', 'logistics'] })
+    },
+    onError: (error: ApiErrorResponse) => {
+      console.error(error)
+      toast.error(error.message ?? 'Không thể vô hiệu hóa')
+    },
+  })
+}
+
+// ── Distribution Zones ─────────────────────────────────────────
+
+export function useZonesQuery() {
+  return useQuery({
+    queryKey: QUERY_KEYS.zones,
+    queryFn: () => adminService.getZones(),
+  })
+}
+
+export function useDistrictsQuery() {
+  return useQuery({
+    queryKey: QUERY_KEYS.districts,
+    queryFn: () => adminService.getDistricts(),
+  })
+}
+
+export function useCreateZoneMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: CreateZoneRequest) => adminService.createZone(body),
+    onSuccess: () => {
+      toast.success('Đã tạo vùng giao hàng')
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones })
+    },
+    onError: (error: ApiErrorResponse) => {
+      console.error(error)
+      toast.error(error.message ?? 'Không thể tạo vùng')
+    },
+  })
+}
+
+export function useUpdateZoneMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: UpdateZoneRequest }) =>
+      adminService.updateZone(id, body),
+    onSuccess: () => {
+      toast.success('Đã cập nhật vùng giao hàng')
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones })
+    },
+    onError: (error: ApiErrorResponse) => {
+      console.error(error)
+      toast.error(error.message ?? 'Không thể cập nhật vùng')
+    },
+  })
+}
+
+export function useDeleteZoneMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => adminService.deleteZone(id),
+    onSuccess: () => {
+      toast.success('Đã xóa vùng giao hàng')
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones })
+    },
+    onError: (error: ApiErrorResponse) => {
+      console.error(error)
+      toast.error(error.message ?? 'Không thể xóa vùng')
     },
   })
 }

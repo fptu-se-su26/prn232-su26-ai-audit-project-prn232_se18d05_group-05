@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Lock, Unlock } from 'lucide-react'
+import { Lock, Unlock, KeyRound } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,9 +17,10 @@ import type { UserResponse } from '../../types/admin.types'
 
 interface UsersTableProps {
   readonly users: UserResponse[]
+  readonly onResetPassword: (userId: string) => void
 }
 
-export function UsersTable({ users }: UsersTableProps) {
+export function UsersTable({ users, onResetPassword }: UsersTableProps) {
   const lockMutation = useLockUserMutation()
   const unlockMutation = useUnlockUserMutation()
   const [pendingId, setPendingId] = useState<string | null>(null)
@@ -39,7 +40,7 @@ export function UsersTable({ users }: UsersTableProps) {
           <TableHead>Số điện thoại</TableHead>
           <TableHead>Vai trò</TableHead>
           <TableHead>Trạng thái</TableHead>
-          <TableHead className="w-[80px]" />
+          <TableHead className="w-[100px]" />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -55,19 +56,29 @@ export function UsersTable({ users }: UsersTableProps) {
               </Badge>
             </TableCell>
             <TableCell>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                disabled={pendingId === user.userId}
-                onClick={() => handleToggle(user)}
-                aria-label={user.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
-              >
-                {user.isActive ? (
-                  <Lock className="size-4 text-destructive" />
-                ) : (
-                  <Unlock className="size-4 text-green-600" />
-                )}
-              </Button>
+              <div className="flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={pendingId === user.userId}
+                  onClick={() => handleToggle(user)}
+                  aria-label={user.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+                >
+                  {user.isActive ? (
+                    <Lock className="size-4 text-destructive" />
+                  ) : (
+                    <Unlock className="size-4 text-green-600" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => onResetPassword(user.userId)}
+                  aria-label="Reset mật khẩu"
+                >
+                  <KeyRound className="size-4 text-muted-foreground" />
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         ))}

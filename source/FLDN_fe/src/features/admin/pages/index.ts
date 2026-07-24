@@ -1,3 +1,6 @@
 export { CategoriesPage } from './CategoriesPage'
 export { SuppliersPage } from './SuppliersPage'
 export { UsersPage } from './UsersPage'
+export { DashboardPage } from './DashboardPage'
+export { LogisticsPage } from './LogisticsPage'
+export { ZonesPage } from './ZonesPage'

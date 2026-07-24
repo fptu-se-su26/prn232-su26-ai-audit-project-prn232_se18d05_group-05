@@ -11,7 +11,7 @@
 | MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 22/7/2026 |
+| Ngày cập nhật gần nhất | 24/7/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -199,6 +199,46 @@
 - Xác nhận service trả về `ApiResponse<T>` wrapper → unwrap đúng `.data` trong pages
 
 **Kết quả áp dụng:** Có – build 0 lỗi, 0 warnings, branch `feat/DE180942-admin-module`
+
+---
+
+## Lần 12 – Mở rộng Admin Module: Dashboard, Logistics, Distribution Zones
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-24 |
+| Công cụ AI | Claude |
+| Mục đích | Bổ sung 3 tính năng còn thiếu cho admin module: trang tổng quan với chart, quản lý tài xế logistics, quản lý vùng giao hàng |
+| Phần việc | Backend + Frontend – Admin |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+
+*Backend:*
+- Tạo `AdminDashboardResponse`, `LogisticsListResponse`, `LogisticsDetailResponse`, `LogisticsListRequest`, `DistributionZoneResponse`, `CreateZoneRequest`, `UpdateZoneRequest`, `DistrictResponse` — tất cả namespace `Contract`
+- Implement `AdminDashboardService`: aggregate stats từ Users, SupplierProfiles, LogisticsProfile, SupplyRequest, DistributionZone qua `IUnitOfWork.Repository<T>()`
+- Implement `AdminLogisticsService`: list (phân trang + filter by status), detail, activate (`Status = Available`), deactivate (`Status = Off`)
+- Implement `AdminZoneService`: list (`.ToListAsync()` trước rồi map in-memory để EF không lỗi), CRUD, list districts
+- Thêm 9 endpoint mới vào `AdminController` (dashboard, logistics CRUD, zones CRUD, districts)
+- Fix lỗi: `GetByIdAsync` không có CancellationToken, không có null check vì return type non-nullable, `.Select(MapZone)` phải gọi sau `ToListAsync`
+
+*Frontend:*
+- Thêm types: `AdminDashboardResponse`, `LogisticsOperatorStatus`, `LogisticsListResponse`, `LogisticsDetailResponse`, `DistributionZoneResponse`, `CreateZoneRequest`, `UpdateZoneRequest`, `DistrictResponse`
+- Thêm 10 API endpoints vào `api-endpoints.ts`, 10 method vào `admin.service.ts`
+- Thêm 10 React Query hooks vào `use-admin.ts` (queries + mutations)
+- Tạo `DashboardPage.tsx` với recharts: donut chart nhà cung cấp theo trạng thái, donut chart tài xế, bar ngang đơn hàng; KPI card row trên và dưới; skeleton loading; empty state per chart
+- Tạo `LogisticsPage.tsx` + `LogisticsTable` + `LogisticsDetailSheet`
+- Tạo `ZonesPage.tsx` + `ZonesTable` + `CreateZoneDialog` + `EditZoneDialog` (district dropdown từ API)
+- Cập nhật nav: thêm "Dashboard", "Tài xế logistics", "Vùng giao hàng" với icon Truck/MapPin
+- Fix `AppSidebar` active state: loại trừ `/admin` khỏi prefix match tránh highlight tất cả sub-pages
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận `LogisticsOperatorStatus` enum: `Available, InTransit, Off` — không có Pending/Approved
+- Xác nhận `IGenericRepository.GetByIdAsync` non-nullable, không nhận CancellationToken
+- Kiểm tra recharts đã cài sẵn (`recharts@3.8.0`) — không cần cài thêm
+- Xác nhận sidebar active fix chạy đúng khi navigate giữa các trang admin
+
+**Kết quả áp dụng:** Có – build 0 lỗi, 3 trang admin mới hoạt động, branch `feat/DE180942-admin-module`
 
 ---
 

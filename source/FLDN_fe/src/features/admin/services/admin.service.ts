@@ -2,10 +2,17 @@ import { api } from '@/lib/axios'
 import { API_ENDPOINTS } from '@/routes/api-endpoints'
 import type { ApiResponse } from '@/types/api'
 import type {
+  AdminDashboardResponse,
   AdminResetPasswordRequest,
   CategoryResponse,
   CreateCategoryRequest,
   CreateCategoryResponse,
+  CreateZoneRequest,
+  DistrictResponse,
+  DistributionZoneResponse,
+  LogisticsDetailResponse,
+  LogisticsListRequest,
+  LogisticsListResponse,
   PagedResult,
   RejectSupplierRequest,
   SupplierDetailResponse,
@@ -13,6 +20,7 @@ import type {
   SupplierListResponse,
   UpdateCategoryRequest,
   UpdateSupplierFeeRequest,
+  UpdateZoneRequest,
   UserListRequest,
   UserResponse,
 } from '../types/admin.types'
@@ -89,5 +97,58 @@ export const adminService = {
   deleteCategory: (id: string) =>
     api
       .delete<ApiResponse<unknown>>(API_ENDPOINTS.admin.category(id))
+      .then((r) => r.data),
+
+  // Dashboard
+  getDashboard: () =>
+    api
+      .get<ApiResponse<AdminDashboardResponse>>(API_ENDPOINTS.admin.dashboard)
+      .then((r) => r.data),
+
+  // Logistics Operators
+  getLogisticsOperators: (params?: LogisticsListRequest) =>
+    api
+      .get<ApiResponse<PagedResult<LogisticsListResponse>>>(API_ENDPOINTS.admin.logistics, { params })
+      .then((r) => r.data),
+
+  getLogisticsOperatorById: (id: string) =>
+    api
+      .get<ApiResponse<LogisticsDetailResponse>>(API_ENDPOINTS.admin.logisticsOperator(id))
+      .then((r) => r.data),
+
+  activateOperator: (id: string) =>
+    api
+      .put<ApiResponse<unknown>>(API_ENDPOINTS.admin.activateOperator(id))
+      .then((r) => r.data),
+
+  deactivateOperator: (id: string) =>
+    api
+      .put<ApiResponse<unknown>>(API_ENDPOINTS.admin.deactivateOperator(id))
+      .then((r) => r.data),
+
+  // Distribution Zones
+  getZones: () =>
+    api
+      .get<ApiResponse<DistributionZoneResponse[]>>(API_ENDPOINTS.admin.zones)
+      .then((r) => r.data),
+
+  getDistricts: () =>
+    api
+      .get<ApiResponse<DistrictResponse[]>>(API_ENDPOINTS.admin.districts)
+      .then((r) => r.data),
+
+  createZone: (body: CreateZoneRequest) =>
+    api
+      .post<ApiResponse<DistributionZoneResponse>>(API_ENDPOINTS.admin.zones, body)
+      .then((r) => r.data),
+
+  updateZone: (id: string, body: UpdateZoneRequest) =>
+    api
+      .put<ApiResponse<unknown>>(API_ENDPOINTS.admin.zone(id), body)
+      .then((r) => r.data),
+
+  deleteZone: (id: string) =>
+    api
+      .delete<ApiResponse<unknown>>(API_ENDPOINTS.admin.zone(id))
       .then((r) => r.data),
 }

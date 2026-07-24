@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Be_Vietnam_Pro } from 'next/font/google'
 import { QueryProvider } from '@/providers/query-provider'
 import { Toaster } from 'sonner'
-import './index.css'
+import './globals.css'
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: '--font-be-vietnam-pro',

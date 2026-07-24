@@ -44,8 +44,8 @@ export function EditCategoryDialog({ category, onClose }: EditCategoryDialogProp
     if (category) {
       form.reset({
         name: category.name,
-        description: '',
-        imageUrl: '',
+        description: category.description ?? '',
+        imageUrl: category.imageUrl ?? '',
         isActive: category.isActive,
       })
     }

@@ -11,8 +11,11 @@ export const APP_ROUTES = {
   products: '/products',
   unauthorized: '/unauthorized',
   admin: {
-    users: '/admin/users',
-    suppliers: '/admin/suppliers',
+    dashboard:  '/admin',
+    users:      '/admin/users',
+    suppliers:  '/admin/suppliers',
     categories: '/admin/categories',
+    logistics:  '/admin/logistics',
+    zones:      '/admin/zones',
   },
 } as const

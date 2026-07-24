@@ -22,7 +22,7 @@ export function AppSidebar() {
   const navItems = user?.role ? (NAV_CONFIG[user.role] ?? []) : []
 
   const isActive = (href: string) =>
-    pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+    pathname === href || (href !== '/dashboard' && href !== '/admin' && pathname.startsWith(href))
 
   return (
     <Sidebar collapsible="offcanvas">

@@ -11,7 +11,7 @@
 | MSSV / Danh sách MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 22/7/2026 |
+| Ngày cập nhật gần nhất | 24/7/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -31,6 +31,7 @@
 | 9 | 2026-06-11 | Claude | Refactor scope: xóa e-commerce entities, rename Order→SupplyRequest, Delivery→Shipment, đồng bộ EntityBase cho toàn bộ entities | Có |
 | 10 | 2026-07-22 | Claude | Migrate FE sang Next.js, implement auth guard, login page, Zustand store, ProtectedRoute | Có |
 | 11 | 2026-07-22 | Claude | Implement admin module FE: sidebar, header, Users/Suppliers/Categories pages với CRUD actions | Có |
+| 12 | 2026-07-24 | Claude | Mở rộng admin module: Dashboard stats + charts, Logistics management, Distribution Zones CRUD | Có |
 
 ---
 
@@ -132,6 +133,20 @@
 **Prompt (tóm tắt):** Yêu cầu Claude đọc BE source để biết API, tạo admin types/service/hooks (React Query), AppSidebar dùng shadcn Sidebar với nav theo role, AppHeader với logout. UsersTable (lock/unlock), SuppliersTable (approve/reject), CategoriesTable + EditCategoryDialog (chỉnh sửa name, isActive). Layout private bọc SidebarProvider, layout admin bọc role guard Admin-only.
 
 **Kết quả áp dụng:** Có. Build 0 lỗi, 0 warnings.
+
+---
+
+## Prompt 12 – Mở rộng Admin Module: Dashboard, Logistics, Zones
+
+**Mục đích:** Bổ sung Dashboard tổng quan có chart, trang quản lý tài xế logistics, trang quản lý vùng giao hàng
+
+**Prompt (tóm tắt):**
+
+*Lần 1 — checklist & implement:* Hỏi AI liệt kê admin module còn thiếu gì, sau đó yêu cầu "làm hết luôn". AI implement toàn bộ BE (3 service mới, 9 endpoint) + FE (3 trang, 6 component, 10 hook) trong một lượt: `AdminDashboardService` aggregate stats, `AdminLogisticsService` list/detail/activate/deactivate, `AdminZoneService` CRUD + districts. FE tạo DashboardPage (stat cards), LogisticsPage (table + detail sheet), ZonesPage (table + create/edit dialog với district dropdown từ API). Fix sidebar active state bug khi navigate giữa `/admin` và sub-pages.
+
+*Lần 2 — thêm chart:* Cung cấp screenshot trang Dashboard chỉ có stat cards, yêu cầu "làm chart cho đẹp chút". AI refactor `DashboardPage.tsx` dùng recharts (đã cài sẵn): donut chart cho nhà cung cấp theo trạng thái (Pending/Approved/Rejected — amber/green/red), donut chart tài xế (Available/Off — green/slate), horizontal bar chart đơn hàng (4 trạng thái). Layout 3 tầng: KPI row → Charts row → Secondary KPI row. Custom tooltip, SVG center label hiển thị tổng trong lỗ donut, skeleton loading khớp với layout cuối, empty state text khi data = 0, dark mode qua CSS variables.
+
+**Kết quả áp dụng:** Có. Build 0 lỗi, recharts tích hợp không cần cài thêm dependency.
 
 ---
 

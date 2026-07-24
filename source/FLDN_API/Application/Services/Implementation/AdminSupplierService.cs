@@ -28,6 +28,7 @@ public sealed class AdminSupplierService(
             {
                 SupplierId = s.Id,
                 BusinessName = s.BusinessName,
+                TaxCode = s.TaxCode,
                 Status = s.Status,
                 CreatedAt = s.CreatedAt
             })
@@ -44,8 +45,14 @@ public sealed class AdminSupplierService(
 
     public async Task<SupplierDetailResponse> GetSupplierByIdAsync(Guid id, CancellationToken ct = default)
     {
-        var supplier = await unitOfWork.SupplierProfiles.GetByIdAsync(id);
-        return supplier.Adapt<SupplierDetailResponse>();
+        var supplier = await unitOfWork.SupplierProfiles.GetQueryable()
+            .Include(s => s.ApprovedByUser)
+            .FirstOrDefaultAsync(s => s.Id == id, ct)
+            ?? throw new NotFoundException("Supplier not found.");
+
+        var response = supplier.Adapt<SupplierDetailResponse>();
+        response.ApprovedByName = supplier.ApprovedByUser?.FullName;
+        return response;
     }
 
     public async Task ApproveSupplierAsync(Guid id, Guid approvedBy, CancellationToken ct = default)

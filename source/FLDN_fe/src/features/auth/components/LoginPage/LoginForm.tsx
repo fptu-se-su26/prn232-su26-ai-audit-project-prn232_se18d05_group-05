@@ -21,10 +21,13 @@ export function LoginForm({ form, onSubmit, isLoading }: LoginFormProps) {
   return (
     <div className="flex min-h-dvh items-center justify-center p-4">
       <div className="w-full max-w-sm space-y-6">
-        <header className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Đăng nhập</h1>
+        <header className="space-y-2 text-center flex flex-col items-center">
+          <div className="size-20 flex items-center justify-center p-1 rounded-2xl bg-emerald-50/80 border border-emerald-100/80 shadow-xs mb-1">
+            <img src="/logo.png" alt="FoodLink Đà Nẵng" className="size-full object-contain" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-emerald-950">Đăng nhập</h1>
           <p className="text-sm text-muted-foreground">
-            Nhập thông tin tài khoản để truy cập hệ thống.
+            Hệ thống Cung ứng & Truy xuất Nguồn gốc Thực phẩm Đà Nẵng
           </p>
         </header>
 

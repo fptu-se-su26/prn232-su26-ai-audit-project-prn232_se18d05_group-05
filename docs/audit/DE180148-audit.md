@@ -11,8 +11,30 @@
 | MSSV | DE180148 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 15/06/2026 |
-| Ngày cập nhật gần nhất | 23/07/2026 |
+| Ngày cập nhật gần nhất | 24/07/2026 |
 | Công cụ AI | ChatGPT, Gemini (Antigravity CLI) |
+
+---
+
+## Lần 7 – Tích hợp Logo Chính Thức FoodLink Đà Nẵng Về Frontend
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-24 |
+| Công cụ AI | Gemini (Antigravity CLI) |
+| Mục đích | Tích hợp logo chính thức của dự án FoodLink Đà Nẵng vào các thành phần giao diện Frontend |
+| Phần việc | Frontend UI Branding |
+| Mức độ sử dụng | Hỗ trợ một phần |
+
+**Việc AI hỗ trợ:**
+- Tiếp nhận và sao chép logo chính thức dự án vào thư mục `public/logo.png`.
+- Tích hợp hiển thị thương hiệu logo lên giao diện Đăng nhập (`LoginForm.tsx`) và Thanh điều hướng ứng dụng (`AppSidebar.tsx`).
+- Kiểm tra kết quả đóng gói build dự án và đẩy code lên git repository.
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Kiểm tra tính thẩm mỹ và độ tương thích hiển thị hình ảnh logo trên các kích thước màn hình.
+
+**Kết quả áp dụng:** Có – Đã tích hợp vào giao diện và chuẩn bị commit lên main.
 
 ---
 

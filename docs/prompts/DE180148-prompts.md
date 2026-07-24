@@ -26,6 +26,18 @@
 | 4 | 2026-06-29 | Gemini | Rà soát Git và tạo tài liệu AI Audit cá nhân theo MSSV | Có |
 | 5 | 2026-07-22 | Gemini | Xóa ShipperController cũ và tối ưu hóa Swagger Schema Generator | Có |
 | 6 | 2026-07-23 | Gemini | Refactor cấu hình style CSS toàn cục và cập nhật Git | Có |
+| 7 | 2026-07-24 | Gemini | Tích hợp logo chính thức dự án FoodLink Đà Nẵng vào Frontend | Có |
+
+---
+
+## Prompt 7 – Tích hợp Logo Chính Thức FoodLink Đà Nẵng
+
+**Mục đích:** Tích hợp nhận diện thương hiệu logo chính thức của FoodLink Đà Nẵng vào hệ thống Frontend Next.js.
+
+**Prompt (tóm tắt):**
+Đây logo dự án, hãy đưa logo này vào hệ thống Frontend của dự án (thư mục public/logo.png), sau đó hiển thị logo trên giao diện Đăng nhập và Thanh Sidebar điều hướng ứng dụng. Cuối cùng kiểm tra build thành công, cập nhật tài liệu AI Audit cá nhân và đẩy code lên git.
+
+**Kết quả áp dụng:** Có. Đã lưu logo vào public/logo.png và cập nhật AppSidebar, LoginForm.
 
 ---
 

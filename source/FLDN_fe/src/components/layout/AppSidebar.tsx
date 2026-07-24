@@ -28,15 +28,15 @@ export function AppSidebar() {
     <Sidebar collapsible="offcanvas">
       <SidebarHeader className="border-b px-4 py-3">
         <div className="flex items-center gap-3">
-          <span className="bg-sidebar-accent flex size-8 shrink-0 items-center justify-center rounded-lg">
-            <Truck className="text-sidebar-accent-foreground size-4" aria-hidden="true" />
-          </span>
+          <div className="relative flex size-9 shrink-0 items-center justify-center rounded-lg bg-white p-1 shadow-sm border border-emerald-100">
+            <img src="/logo.png" alt="FoodLink Đà Nẵng" className="size-full object-contain" />
+          </div>
           <div className="min-w-0">
-            <p className="text-sidebar-foreground text-[13px] font-bold leading-tight tracking-widest">
-              FLDN
+            <p className="text-sidebar-foreground text-[13px] font-bold leading-tight tracking-wider text-emerald-700">
+              FoodLink
             </p>
-            <p className="text-sidebar-foreground/50 text-[11px] leading-tight">
-              FoodLink Distribution
+            <p className="text-sidebar-foreground/70 text-[11px] font-semibold leading-tight">
+              Đà Nẵng
             </p>
           </div>
         </div>

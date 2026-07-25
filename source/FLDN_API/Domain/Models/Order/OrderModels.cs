@@ -17,6 +17,12 @@ public sealed class CreateOrderRequest
     public List<CreateOrderItemRequest> Items { get; set; } = [];
 }
 
+public sealed class ConfirmReceiptRequest
+{
+    public bool IsFullReceived { get; set; } = true;
+    public string? Note { get; set; }
+}
+
 public sealed class OrderItemResponse
 {
     public Guid ProductId { get; set; }

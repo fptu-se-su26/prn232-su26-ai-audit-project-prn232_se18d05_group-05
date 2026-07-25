@@ -1,59 +1,66 @@
 export interface PagedResult<T> {
   items: T[]
   totalCount: number
-  page: number
-  pageSize: number
-  totalPages: number
+  pageNumber?: number
+  pageSize?: number
+  totalPages?: number
 }
 
 export interface SupplierProduct {
   id?: string
   productId?: string
-  categoryId: string
+  categoryId?: string
   categoryName?: string
   name: string
   description?: string
-  unitCost: number
-  unit: string
+  unitCost?: number
+  unit?: string
   packagingStandard?: string
-  isActive: boolean
-  quantity?: number
-  reservedQty?: number
+  isActive?: boolean
   availableQuantity?: number
+  quantity?: number
   createdAt?: string
 }
 
 export interface SupplierBatch {
   id?: string
   batchId?: string
+  batchCode: string
   productId: string
   productName?: string
-  batchCode: string
   quantity: number
-  remainingQty: number
-  harvestDate: string
-  manufacturingDate?: string
-  packagingDate?: string
-  expiryDate: string
-  growingRegion?: string
-  certificateType?: string
-  certificateUrl?: string
+  remainingQty?: number
+  harvestDate?: string
+  expiryDate?: string
+  status?: string | number
   qrCodeUrl?: string
-  qrCodeData?: string
+}
+
+export interface SupplierSupplyRequestItem {
+  productId: string
+  productName: string
+  batchId?: string
+  batchCode?: string
+  quantity: number
+  unitPrice?: number
+  subTotal?: number
 }
 
 export interface SupplierSupplyRequest {
+  supplyRequestId?: string
   id?: string
   requestId?: string
-  requestNumber?: string
   distributionPointName: string
-  distributionPointAddress?: string
-  productName: string
-  quantity: number
-  unit: string
-  status: 'Pending' | 'Approved' | 'Rejected' | 'InTransit' | 'Completed'
-  requestedDeliveryDate: string
-  notes?: string
+  status: string | number
+  confirmationStatus?: string | number
+  requestedDeliveryDate?: string
+  supplierSubTotal?: number
+  note?: string
+  items?: SupplierSupplyRequestItem[]
+  // Legacy / fallback fields
+  productName?: string
+  quantity?: number
+  createdAt?: string
 }
 
 export interface CreateProductInput {
@@ -71,7 +78,4 @@ export interface CreateBatchInput {
   quantity: number
   harvestDate: string
   expiryDate: string
-  growingRegion?: string
-  certificateType?: number
-  certificateUrl?: string
 }

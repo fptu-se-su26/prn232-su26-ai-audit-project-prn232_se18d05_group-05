@@ -37,4 +37,12 @@ public sealed class OrderController(
         await orderService.CancelOrderAsync(User.GetUserId(), id, cancelReason, ct);
         return Ok(ApiResponse<object>.OkMessage("Supply request cancelled successfully."));
     }
+
+    [Authorize]
+    [HttpPost("api/orders/{id:guid}/confirm-receipt")]
+    public async Task<IActionResult> ConfirmReceipt(Guid id, [FromBody] ConfirmReceiptRequest request, CancellationToken ct)
+    {
+        await orderService.ConfirmReceiptAsync(User.GetUserId(), id, request, ct);
+        return Ok(ApiResponse<object>.OkMessage("Xác nhận nhận hàng thành công."));
+    }
 }

@@ -200,6 +200,36 @@ public sealed class OrderService(
         await unitOfWork.EnsureSaveAsync(ct);
     }
 
+    public async Task ConfirmReceiptAsync(Guid userId, Guid id, ConfirmReceiptRequest request, CancellationToken ct = default)
+    {
+        var supplyRequest = await unitOfWork.Repository<SupplyRequest>()
+            .GetQueryable()
+            .FirstOrDefaultAsync(r => r.Id == id, ct)
+            ?? throw new NotFoundException("Supply request not found.");
+
+        if (userId != Guid.Empty && supplyRequest.DistributionPointId != userId)
+            throw new ForbiddenException("You are not authorized to confirm receipt for this supply request.");
+
+        supplyRequest.Status = request.IsFullReceived ? SupplyRequestStatus.Completed : SupplyRequestStatus.Received;
+
+        string noteText = request.IsFullReceived
+            ? $"Xác nhận đã nhận đủ 100% hàng hóa. Ghi chú: {request.Note}".Trim()
+            : $"Xác nhận đã nhận hàng (Báo thiếu/hàng hư hỏng). Ghi chú: {request.Note}".Trim();
+
+        var statusHistory = new SupplyRequestStatusHistory
+        {
+            Id = Guid.NewGuid(),
+            SupplyRequestId = supplyRequest.Id,
+            Status = supplyRequest.Status,
+            Note = noteText,
+            CreatedBy = userId != Guid.Empty ? userId : null,
+        };
+
+        unitOfWork.Repository<SupplyRequest>().Update(supplyRequest);
+        await unitOfWork.Repository<SupplyRequestStatusHistory>().AddAsync(statusHistory);
+        await unitOfWork.EnsureSaveAsync(ct);
+    }
+
     private static OrderResponse MapOrderResponse(SupplyRequest request) => new()
     {
         Id = request.Id,

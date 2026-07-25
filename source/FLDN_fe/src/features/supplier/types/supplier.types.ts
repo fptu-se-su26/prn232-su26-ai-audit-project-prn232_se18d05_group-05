@@ -1,3 +1,10 @@
+export interface CategoryItem {
+  categoryId: string
+  id?: string
+  name: string
+  description?: string
+}
+
 export interface PagedResult<T> {
   items: T[]
   totalCount: number
@@ -57,7 +64,6 @@ export interface SupplierSupplyRequest {
   supplierSubTotal?: number
   note?: string
   items?: SupplierSupplyRequestItem[]
-  // Legacy / fallback fields
   productName?: string
   quantity?: number
   createdAt?: string
@@ -70,6 +76,16 @@ export interface CreateProductInput {
   unitCost: number
   unit: string
   packagingStandard?: string
+}
+
+export interface UpdateProductInput {
+  categoryId?: string
+  name: string
+  description?: string
+  unitCost: number
+  unit: string
+  packagingStandard?: string
+  isActive?: boolean
 }
 
 export interface CreateBatchInput {

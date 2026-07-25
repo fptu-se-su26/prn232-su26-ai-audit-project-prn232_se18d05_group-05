@@ -6,6 +6,7 @@ import {
   Boxes,
   CheckCircle2,
   Clock,
+  Eye,
   FileCheck2,
   Filter,
   Loader2,
@@ -25,10 +26,11 @@ import { useSupplierBatches, useSupplierInventory, useSupplierProducts, useSuppl
 export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const { data: productsData, isLoading: isLoadingProducts, refetch: refetchProducts } = useSupplierProducts()
-  const { data: inventoryData, isLoading: isLoadingInventory, refetch: refetchInventory } = useSupplierInventory()
-  const { data: supplyRequestsData, isLoading: isLoadingRequests, refetch: refetchRequests } = useSupplierSupplyRequests()
+  const { data: productsData, isLoading: isLoadingProducts, refetch: refetchProducts, isFetching: isFetchingProducts } = useSupplierProducts()
+  const { data: inventoryData, isLoading: isLoadingInventory, refetch: refetchInventory, isFetching: isFetchingInventory } = useSupplierInventory()
+  const { data: supplyRequestsData, isLoading: isLoadingRequests, refetch: refetchRequests, isFetching: isFetchingRequests } = useSupplierSupplyRequests()
   const { data: batchesData, isLoading: isLoadingBatches } = useSupplierBatches()
 
   const productsList = useMemo(() => productsData ?? [], [productsData])
@@ -36,7 +38,6 @@ export default function DashboardPage() {
   const supplyRequestsList = useMemo(() => supplyRequestsData ?? [], [supplyRequestsData])
   const batchesList = useMemo(() => batchesData ?? [], [batchesData])
 
-  // Calculated Real Metrics
   const activeProductsCount = productsList.filter((p) => p.isActive !== false).length || productsList.length
 
   const totalStockKg = useMemo(() => {
@@ -65,7 +66,6 @@ export default function DashboardPage() {
     })
   }, [batchesList])
 
-  // Filtered Supply Requests for table
   const filteredRequests = useMemo(() => {
     return supplyRequestsList.filter((req) => {
       const reqId = req.supplyRequestId || req.id || req.requestId || ''
@@ -89,11 +89,13 @@ export default function DashboardPage() {
     })
   }, [supplyRequestsList, searchTerm, statusFilter])
 
-  const handleRefreshAll = () => {
-    refetchProducts()
-    refetchInventory()
-    refetchRequests()
+  const handleRefreshAll = async () => {
+    setIsRefreshing(true)
+    await Promise.all([refetchProducts(), refetchInventory(), refetchRequests()])
+    setTimeout(() => setIsRefreshing(false), 500)
   }
+
+  const anyFetching = isRefreshing || isFetchingProducts || isFetchingInventory || isFetchingRequests
 
   return (
     <div className="space-y-8 p-6 font-sans text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
@@ -119,10 +121,11 @@ export default function DashboardPage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleRefreshAll}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white shadow-xs backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
+              disabled={anyFetching}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white shadow-xs backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 disabled:opacity-60"
             >
-              <RefreshCw className="size-3.5" />
-              Làm mới
+              <RefreshCw className={`size-3.5 ${anyFetching ? 'animate-spin text-emerald-300' : ''}`} />
+              {anyFetching ? 'Đang làm mới...' : 'Làm mới'}
             </button>
             <Link
               href="/supplier/products"
@@ -313,7 +316,7 @@ export default function DashboardPage() {
                             {itemNames}
                           </td>
                           <td className="px-5 py-4 text-right font-black text-slate-900">
-                            {totalQty > 0 ? `${totalQty.toLocaleString()} kg` : '100 kg'}
+                            {totalQty > 0 ? `${totalQty.toLocaleString()} kg` : '10 kg'}
                           </td>
                           <td className="px-5 py-4 text-center">
                             <span
@@ -332,13 +335,23 @@ export default function DashboardPage() {
                             </span>
                           </td>
                           <td className="px-5 py-4 text-right">
-                            <Link
-                              href="/supplier/supply-requests"
-                              className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-800 transition-all active:scale-95"
-                            >
-                              <FileCheck2 className="size-3.5" />
-                              Xem & Duyệt
-                            </Link>
+                            {isPending ? (
+                              <Link
+                                href="/supplier/supply-requests"
+                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-800 transition-all active:scale-95"
+                              >
+                                <FileCheck2 className="size-3.5" />
+                                Xem & Duyệt
+                              </Link>
+                            ) : (
+                              <Link
+                                href="/supplier/supply-requests"
+                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-all"
+                              >
+                                <Eye className="size-3.5 text-slate-500" />
+                                Xem chi tiết
+                              </Link>
+                            )}
                           </td>
                         </tr>
                       )

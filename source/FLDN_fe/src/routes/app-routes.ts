@@ -10,6 +10,7 @@ export const APP_ROUTES = {
   dashboard: '/dashboard',
   products: '/products',
   orders: {
+    list: '/orders',
     create: '/orders/create',
   },
   unauthorized: '/unauthorized',

@@ -11,8 +11,57 @@
 | MSSV | DE180148 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 15/06/2026 |
-| Ngày cập nhật gần nhất | 29/06/2026 |
+| Ngày cập nhật gần nhất | 24/07/2026 |
 | Công cụ AI | ChatGPT, Gemini (Antigravity CLI) |
+
+---
+
+## Lần 7 – Tích hợp Logo Chính Thức FoodLink Đà Nẵng Về Frontend
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-24 |
+| Công cụ AI | Gemini (Antigravity CLI) |
+| Mục đích | Tích hợp logo chính thức của dự án FoodLink Đà Nẵng vào các thành phần giao diện Frontend |
+| Phần việc | Frontend UI Branding |
+| Mức độ sử dụng | Hỗ trợ một phần |
+
+**Việc AI hỗ trợ:**
+- Tiếp nhận và sao chép logo chính thức dự án vào thư mục `public/logo.png`.
+- Tích hợp hiển thị thương hiệu logo lên giao diện Đăng nhập (`LoginForm.tsx`) và Thanh điều hướng ứng dụng (`AppSidebar.tsx`).
+- Kiểm tra kết quả đóng gói build dự án và đẩy code lên git repository.
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Kiểm tra tính thẩm mỹ và độ tương thích hiển thị hình ảnh logo trên các kích thước màn hình.
+
+**Kết quả áp dụng:** Có – Đã tích hợp vào giao diện và chuẩn bị commit lên main.
+
+---
+
+## Lần 8 – Triển khai Trọn bộ Giao diện Supplier (Next.js & Stitch UI Design)
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-24 |
+| Công cụ AI | Gemini (Antigravity CLI) |
+| Mục đích | Dựng hoàn chỉnh trọn bộ 4 màn hình Frontend cho vai trò Supplier dựa trên thiết kế chuẩn Google Stitch |
+| Phần việc | Frontend – Supplier UI Pages & Services |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Tiếp nhận và phân tích mã thiết kế UI Google Stitch do sinh viên cung cấp cho vai trò Supplier (Nhà cung cấp).
+- Xây dựng 4 màn hình chuẩn Next.js App Router + Shadcn UI + Tailwind v4:
+  1. `src/app/(private)/dashboard/page.tsx`: Dashboard Bento Grid tổng quan vận hành kho.
+  2. `src/app/(private)/supplier/products/page.tsx`: Quản lý Sản phẩm, Lô hàng & Tạo Mã QR Code Truy xuất nguồn gốc.
+  3. `src/app/(private)/supplier/supply-requests/page.tsx`: Phê duyệt / Từ chối đơn Yêu cầu cung ứng từ Bếp ăn/Siêu thị & Modal xuất kho.
+  4. `src/app/(private)/supplier/analytics/page.tsx`: Báo cáo KPI, Phân tích hiệu suất, Bảng xếp hạng NCC & Biểu đồ Velocity Chart.
+- Xây dựng lớp dịch vụ `supplier.service.ts` và tích hợp các loại kiểu dữ liệu DTO trong `supplier.types.ts`.
+- Cập nhật cấu hình điều hướng Sidebar `nav-config.ts` và hệ thống đường dẫn `app-routes.ts`.
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Chạy lệnh `npm run build` xác nhận đóng gói ứng dụng Next.js đạt kết quả **Compiled successfully (0 TypeScript Errors)**.
+
+**Kết quả áp dụng:** Có – Áp dụng thành công vào hệ thống và sẵn sàng đẩy code lên nhánh main.
 
 ---
 
@@ -107,4 +156,50 @@
 - Trực tiếp phê duyệt kế hoạch triển khai để đảm bảo tính an toàn của dự án.
 - Kiểm tra lại các file mã nguồn backend Supplier không chứa thông tin nhạy cảm.
 
-**Kết quả áp dụng:** Có – Đang tiến hành đẩy code lên nhánh `feature/de180148-actor-2-supplier`.
+**Kết quả áp dụng:** Có – Đã đẩy code lên nhánh main.
+
+---
+
+## Lần 5 – Refactor Dọn Dẹp Legacy Controller & Tối Ưu Swagger API
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-22 |
+| Công cụ AI | Gemini (Antigravity CLI) |
+| Mục đích | Loại bỏ hoàn toàn các Controller/Service cũ của Shipper và chuẩn hóa Swagger Schema |
+| Phần việc | Refactoring & API Maintenance |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Phát hiện các API trùng lặp giữa `ShipperController` cũ và `LogisticsOperatorController` mới trên Swagger UI.
+- Tiến hành gỡ bỏ hoàn toàn file controller cũ `ShipperController.cs`, `LogisticsService.cs`, `ILogisticsService.cs` và DTOs cũ để hệ thống chỉ sử dụng thống nhất `LogisticsOperatorController`.
+- Cấu hình `CustomSchemaIds` trong `SwaggerExtensions.cs` để khắc phục triệt để lỗi Swagger 500 khi trùng tên DTOs ở các namespace khác nhau.
+- Hỗ trợ khởi tạo dữ liệu mẫu cho 4 Role trên Database Cloud để phục vụ kiểm thử API trực quan.
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Kiểm tra lại kết quả build solution `FLDN_API.slnx` đạt **Build Succeeded (0 Errors, 0 Warnings)**.
+- Đảm bảo mã nguồn `AppData.cs` đã được dọn dẹp sạch sẽ không chứa dữ liệu hardcode trước khi đẩy git lên `main`.
+
+**Kết quả áp dụng:** Có – Áp dụng vào hệ thống và chuẩn bị commit.
+
+---
+
+## Lần 6 – Refactor Giao Diện Frontend & Cấu Hình Style Toàn Cục (CSS)
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-23 |
+| Công cụ AI | Gemini (Antigravity CLI) |
+| Mục đích | Tối ưu hóa cấu trúc CSS toàn cục cho dự án Next.js Frontend |
+| Phần việc | Frontend – Styles & Layout |
+| Mức độ sử dụng | Hỗ trợ một phần |
+
+**Việc AI hỗ trợ:**
+- Hỗ trợ dọn dẹp các tệp CSS toàn cục dư thừa, gỡ bỏ `globals.css` và hợp nhất quy chuẩn styling vào tệp `index.css`.
+- Cập nhật luồng nhập style trong `layout.tsx` của Next.js để đảm bảo tương thích tốt với Tailwind CSS v4 và Shadcn UI.
+- Kiểm tra trạng thái Git, xử lý rebase và thực hiện commit/push theo quy chuẩn commit message của nhóm.
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Kiểm tra giao diện hiển thị không bị vỡ style, đảm bảo biến font và theme hoạt động trơn tru.
+
+**Kết quả áp dụng:** Có – Đã đẩy thành công lên nhánh main.

@@ -7,5 +7,7 @@ public enum ShipmentStatus
     PickedUp,
     InTransit,
     Arrived,
-    Failed
+    Failed,
+    Returned,
+    Delivered
 }

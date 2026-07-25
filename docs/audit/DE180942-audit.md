@@ -11,7 +11,7 @@
 | MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 11/6/2026 |
+| Ngày cập nhật gần nhất | 24/7/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -147,6 +147,98 @@
 - Kiểm tra build 0 lỗi 0 warnings sau refactor
 
 **Kết quả áp dụng:** Có – build 0 lỗi, 0 warnings, branch `feat/DE180942-admin-module`
+
+---
+
+## Lần 10 – Cấu hình lại Frontend sang Next.js + implement Auth module FE
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-22 |
+| Công cụ AI | Claude |
+| Mục đích | Migrate FE từ Vite/React sang Next.js 16 App Router, implement auth guard, login page, Zustand store |
+| Phần việc | Frontend – Setup & Auth |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Cài đặt Next.js 16.2, Zustand, Axios, TanStack Query v5, Zod v4, React Hook Form, shadcn/ui
+- Cấu hình `tsconfig.json` path aliases, `next.config.ts`, `globals.css` với font Be Vietnam Pro
+- Tạo `lib/axios.ts` (withCredentials, interceptor redirect 401), `lib/query-client.ts`, `stores/auth.store.ts` (Zustand persist, no refreshToken)
+- Tạo `features/auth/`: schema, service, hooks (useLoginMutation…), LoginForm (shadcn), LoginPage (orchestrator)
+- Tạo `components/ProtectedRoute.tsx` hỗ trợ `allowedRoles`
+- Cấu hình route groups `(public)` và `(private)`, layout với SidebarProvider + AppSidebar + AppHeader
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận FLDN BE dùng HttpOnly cookie cho refresh token → không lưu client-side
+- Kiểm tra đăng nhập thành công với tài khoản Admin thực
+
+**Kết quả áp dụng:** Có – build 0 lỗi, branch `feat/DE180942-admin-module`
+
+---
+
+## Lần 11 – Implement Admin Module FE (Sidebar, Users, Suppliers, Categories)
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-22 |
+| Công cụ AI | Claude |
+| Mục đích | Tạo sidebar, header, và 3 trang quản trị admin với bảng dữ liệu và actions |
+| Phần việc | Frontend – Admin |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Tạo `features/admin/`: types, service (17 API calls), hooks (React Query), page orchestrators, table sub-components
+- Tạo `AppSidebar.tsx` (shadcn Sidebar, nav theo role, active state), `AppHeader.tsx` (logout, user info)
+- UsersTable: hiển thị danh sách user, lock/unlock tài khoản
+- SuppliersTable: hiển thị nhà cung cấp, approve/reject hồ sơ Pending
+- CategoriesTable + EditCategoryDialog: hiển thị danh mục, chỉnh sửa qua Dialog (name, isActive)
+- Layout `(private)` bọc SidebarProvider, layout `(private)/admin` bọc role guard Admin-only
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận `SidebarMenuButton` dùng `render` prop thay vì `asChild` (Aria Kit pattern)
+- Xác nhận service trả về `ApiResponse<T>` wrapper → unwrap đúng `.data` trong pages
+
+**Kết quả áp dụng:** Có – build 0 lỗi, 0 warnings, branch `feat/DE180942-admin-module`
+
+---
+
+## Lần 12 – Mở rộng Admin Module: Dashboard, Logistics, Distribution Zones
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-24 |
+| Công cụ AI | Claude |
+| Mục đích | Bổ sung 3 tính năng còn thiếu cho admin module: trang tổng quan với chart, quản lý tài xế logistics, quản lý vùng giao hàng |
+| Phần việc | Backend + Frontend – Admin |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+
+*Backend:*
+- Tạo `AdminDashboardResponse`, `LogisticsListResponse`, `LogisticsDetailResponse`, `LogisticsListRequest`, `DistributionZoneResponse`, `CreateZoneRequest`, `UpdateZoneRequest`, `DistrictResponse` — tất cả namespace `Contract`
+- Implement `AdminDashboardService`: aggregate stats từ Users, SupplierProfiles, LogisticsProfile, SupplyRequest, DistributionZone qua `IUnitOfWork.Repository<T>()`
+- Implement `AdminLogisticsService`: list (phân trang + filter by status), detail, activate (`Status = Available`), deactivate (`Status = Off`)
+- Implement `AdminZoneService`: list (`.ToListAsync()` trước rồi map in-memory để EF không lỗi), CRUD, list districts
+- Thêm 9 endpoint mới vào `AdminController` (dashboard, logistics CRUD, zones CRUD, districts)
+- Fix lỗi: `GetByIdAsync` không có CancellationToken, không có null check vì return type non-nullable, `.Select(MapZone)` phải gọi sau `ToListAsync`
+
+*Frontend:*
+- Thêm types: `AdminDashboardResponse`, `LogisticsOperatorStatus`, `LogisticsListResponse`, `LogisticsDetailResponse`, `DistributionZoneResponse`, `CreateZoneRequest`, `UpdateZoneRequest`, `DistrictResponse`
+- Thêm 10 API endpoints vào `api-endpoints.ts`, 10 method vào `admin.service.ts`
+- Thêm 10 React Query hooks vào `use-admin.ts` (queries + mutations)
+- Tạo `DashboardPage.tsx` với recharts: donut chart nhà cung cấp theo trạng thái, donut chart tài xế, bar ngang đơn hàng; KPI card row trên và dưới; skeleton loading; empty state per chart
+- Tạo `LogisticsPage.tsx` + `LogisticsTable` + `LogisticsDetailSheet`
+- Tạo `ZonesPage.tsx` + `ZonesTable` + `CreateZoneDialog` + `EditZoneDialog` (district dropdown từ API)
+- Cập nhật nav: thêm "Dashboard", "Tài xế logistics", "Vùng giao hàng" với icon Truck/MapPin
+- Fix `AppSidebar` active state: loại trừ `/admin` khỏi prefix match tránh highlight tất cả sub-pages
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận `LogisticsOperatorStatus` enum: `Available, InTransit, Off` — không có Pending/Approved
+- Xác nhận `IGenericRepository.GetByIdAsync` non-nullable, không nhận CancellationToken
+- Kiểm tra recharts đã cài sẵn (`recharts@3.8.0`) — không cần cài thêm
+- Xác nhận sidebar active fix chạy đúng khi navigate giữa các trang admin
+
+**Kết quả áp dụng:** Có – build 0 lỗi, 3 trang admin mới hoạt động, branch `feat/DE180942-admin-module`
 
 ---
 

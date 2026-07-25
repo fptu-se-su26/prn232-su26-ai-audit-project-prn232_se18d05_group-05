@@ -11,7 +11,7 @@
 | MSSV / Danh sách MSSV | DE180148 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 15/06/2026 |
-| Ngày cập nhật gần nhất | 29/06/2026 |
+| Ngày cập nhật gần nhất | 23/07/2026 |
 | Công cụ AI | ChatGPT, Gemini (Antigravity CLI) |
 
 ---
@@ -24,6 +24,37 @@
 | 2 | 2026-06-20 | ChatGPT | Lập trình logic nghiệp vụ SupplierService | Có |
 | 3 | 2026-06-25 | ChatGPT | Tạo Supplier API Controller và cấu hình phân quyền | Có |
 | 4 | 2026-06-29 | Gemini | Rà soát Git và tạo tài liệu AI Audit cá nhân theo MSSV | Có |
+| 5 | 2026-07-22 | Gemini | Xóa ShipperController cũ và tối ưu hóa Swagger Schema Generator | Có |
+| 6 | 2026-07-23 | Gemini | Refactor cấu hình style CSS toàn cục và cập nhật Git | Có |
+| 7 | 2026-07-24 | Gemini | Tích hợp logo chính thức dự án FoodLink Đà Nẵng vào Frontend | Có |
+| 8 | 2026-07-24 | Gemini | Triển khai trọn bộ giao diện Supplier trên Next.js dựa trên thiết kế Stitch | Có |
+
+---
+
+## Prompt 8 – Triển khai Trọn bộ Giao diện Supplier trên Next.js
+
+**Mục đích:** Xây dựng toàn bộ giao diện Frontend cho Actor 2 Supplier bám sát thiết kế Google Stitch.
+
+**Prompt (tóm tắt):**
+Dưới đây là mã HTML/CSS từ bản vẽ Google Stitch cho hệ thống Supplier. Hãy chuyển đổi mã này thành bộ màn hình chuẩn Next.js (App Router) với Shadcn UI và Tailwind v4:
+1. Màn hình Dashboard Tổng quan vận hành.
+2. Màn hình Quản lý Sản phẩm, Lô hàng & Tạo Mã QR truy xuất.
+3. Màn hình Phê duyệt/Từ chối Yêu cầu cung ứng.
+4. Màn hình Báo cáo KPI & Bảng xếp hạng.
+Sau đó tích hợp API service, kiểm tra build thành công và đẩy code lên main.
+
+**Kết quả áp dụng:** Có. Đã hoàn thành 4 trang màn hình trong src/app/(private)/supplier và src/app/(private)/dashboard.
+
+---
+
+## Prompt 7 – Tích hợp Logo Chính Thức FoodLink Đà Nẵng
+
+**Mục đích:** Tích hợp nhận diện thương hiệu logo chính thức của FoodLink Đà Nẵng vào hệ thống Frontend Next.js.
+
+**Prompt (tóm tắt):**
+Đây logo dự án, hãy đưa logo này vào hệ thống Frontend của dự án (thư mục public/logo.png), sau đó hiển thị logo trên giao diện Đăng nhập và Thanh Sidebar điều hướng ứng dụng. Cuối cùng kiểm tra build thành công, cập nhật tài liệu AI Audit cá nhân và đẩy code lên git.
+
+**Kết quả áp dụng:** Có. Đã lưu logo vào public/logo.png và cập nhật AppSidebar, LoginForm.
 
 ---
 
@@ -73,4 +104,26 @@ Hãy viết một `SupplierController` trong dự án ASP.NET Core API. Lớp n�
 **Prompt (tóm tắt):**
 Hãy đọc file README.md để tìm hiểu về convention đặt tên branch và commit message. Đồng thời kiểm tra trong thư mục docs/audit/ và docs/prompts/ xem các thành viên khác đang làm tài liệu AI log thế nào để viết file tương tự cho tôi (mã số sinh viên DE180148). Sau đó hướng dẫn tôi chuyển sang nhánh git tương ứng để đẩy code backend Supplier lên github.
 
-**Kết quả áp dụng:** Có. Đang thực hiện các bước Checkout branch mới, cập nhật Changelog, Audit log, Prompt log và đẩy code lên git.
+**Kết quả áp dụng:** Có. Đã đẩy code lên nhánh main.
+
+---
+
+## Prompt 5 – Xóa ShipperController cũ và tối ưu hóa Swagger Schema Generator
+
+**Mục đích:** Loại bỏ các API legacy bị trùng lặp trên Swagger UI và xử lý triệt để lỗi Swagger 500 khi quét DTOs.
+
+**Prompt (tóm tắt):**
+Hãy kiểm tra giao diện Swagger UI hiện tại, tôi thấy có 2 nhóm API Shipper và LogisticsOperator bị trùng lặp chức năng. Hãy xóa bỏ controller cũ `ShipperController.cs`, `LogisticsService.cs` để chỉ giữ lại duy nhất `LogisticsOperatorController.cs`. Sau đó bổ sung cấu hình `CustomSchemaIds` trong `SwaggerExtensions.cs` để tránh xung đột tên DTOs gây ra lỗi 500 khi tải `swagger.json`. Cuối cùng kiểm tra build thành công, cập nhật tài liệu AI Audit và thực hiện commit/push code lên `main`.
+
+**Kết quả áp dụng:** Có. Đã dọn dẹp sạch sẽ legacy code và cập nhật tài liệu kiểm thử.
+
+---
+
+## Prompt 6 – Refactor Giao Diện Frontend & Cấu Hình Style Toàn Cục (CSS)
+
+**Mục đích:** Cập nhật quy chuẩn style toàn cục (CSS) cho giao diện Frontend Next.js.
+
+**Prompt (tóm tắt):**
+Tôi mới cập nhật thêm cấu hình style toàn cục cho Frontend, hãy thay thế `globals.css` bằng `index.css`, cập nhật import trong `layout.tsx`. Sau đó cập nhật các tệp tài liệu AI Audit cá nhân `DE180148-audit.md` và `DE180148-prompts.md`, thực hiện commit và đẩy code lên nhánh `main` theo đúng quy trình.
+
+**Kết quả áp dụng:** Có. Áp dụng vào dự án và đồng bộ Git.

@@ -80,6 +80,8 @@ public sealed class AdminCategoryService(
     {
         CategoryId = category.Id,
         Name = category.Name,
+        Description = category.Description,
+        ImageUrl = category.ImageUrl,
         ParentCategoryId = category.ParentCategoryId,
         IsActive = category.IsActive,
         Children = category.SubCategories

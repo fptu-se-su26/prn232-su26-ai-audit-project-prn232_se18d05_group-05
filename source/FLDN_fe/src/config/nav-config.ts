@@ -25,7 +25,6 @@ export const NAV_CONFIG: Record<UserRole, NavItem[]> = {
     { label: 'Sản phẩm & Lô hàng', href: APP_ROUTES.supplier.products, icon: Boxes },
     { label: 'Yêu cầu cung ứng', href: APP_ROUTES.supplier.supplyRequests, icon: Truck },
     { label: 'Báo cáo KPI', href: APP_ROUTES.supplier.analytics, icon: BarChart3 },
-    { label: 'Quản lý yêu cầu', href: APP_ROUTES.orders.list, icon: ClipboardList },
   ],
   DistributionPoint: [
     { label: 'Tổng quan', href: APP_ROUTES.dashboard, icon: LayoutDashboard },

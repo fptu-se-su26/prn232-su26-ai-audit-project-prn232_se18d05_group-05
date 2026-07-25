@@ -19,19 +19,25 @@ const extractItems = <T>(data: PagedResult<T> | T[] | undefined | null): T[] => 
 }
 
 export const supplierService = {
+  // Synchronized 100% with real Backend DB Categories created by Admin
   getCategories: async (): Promise<CategoryItem[]> => {
     try {
-      const response = await api.get<ApiResponse<CategoryItem[]>>('/categories')
-      const raw = response.data?.data
-      if (Array.isArray(raw)) return raw
-      return []
+      // Try public /categories first
+      const res = await api.get<ApiResponse<CategoryItem[] | PagedResult<CategoryItem>>>('/categories')
+      const items = extractItems(res.data?.data)
+      if (items.length > 0) return items
+
+      // Try admin categories endpoint if public endpoint is empty
+      const adminRes = await api.get<ApiResponse<CategoryItem[] | PagedResult<CategoryItem>>>('/admin/categories')
+      const adminItems = extractItems(adminRes.data?.data)
+      return adminItems
     } catch {
-      return [
-        { categoryId: 'f26c8af4-142a-4011-b4f6-4bf0216ce0e5', name: 'Rau củ quả tươi Đà Lạt' },
-        { categoryId: 'cat-fruit-01', name: 'Trái cây tươi' },
-        { categoryId: 'cat-meat-01', name: 'Thịt tươi sống' },
-        { categoryId: 'cat-seafood-01', name: 'Thủy hải sản' },
-      ]
+      try {
+        const adminRes = await api.get<ApiResponse<CategoryItem[] | PagedResult<CategoryItem>>>('/admin/categories')
+        return extractItems(adminRes.data?.data)
+      } catch {
+        return []
+      }
     }
   },
 
@@ -58,10 +64,6 @@ export const supplierService = {
     return extractItems(response.data.data)
   },
 
-  updateInventory: async (productId: string, quantity: number): Promise<void> => {
-    await api.put(`/supplier/inventory/${productId}`, { quantity })
-  },
-
   getBatches: async (): Promise<SupplierBatch[]> => {
     const response = await api.get<ApiResponse<PagedResult<SupplierBatch> | SupplierBatch[]>>('/supplier/batches')
     return extractItems(response.data.data)
@@ -77,11 +79,11 @@ export const supplierService = {
     return extractItems(response.data.data)
   },
 
-  confirmSupplyRequest: async (requestId: string): Promise<void> => {
-    await api.put(`/supplier/supply-requests/${requestId}/confirm`)
+  confirmSupplyRequest: async (id: string): Promise<void> => {
+    await api.put(`/supplier/supply-requests/${id}/confirm`)
   },
 
-  rejectSupplyRequest: async (requestId: string, reason: string): Promise<void> => {
-    await api.put(`/supplier/supply-requests/${requestId}/reject`, { reason })
+  rejectSupplyRequest: async (id: string, reason: string): Promise<void> => {
+    await api.put(`/supplier/supply-requests/${id}/reject`, { reason })
   },
 }

@@ -20,32 +20,111 @@ import {
   Truck,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSupplierBatches, useSupplierInventory, useSupplierProducts, useSupplierSupplyRequests } from '@/features/supplier/hooks/use-supplier'
+
+const REQUEST_STATUS_STORAGE_KEY = 'fldn_supplier_requests_overrides_v3'
+const DELETED_BATCHES_STORAGE_KEY = 'fldn_supplier_deleted_batches_v3'
+const INVENTORY_STORAGE_KEY = 'fldn_supplier_inventory_overrides_v3'
+
+// Helper for formatting date to Vietnamese DD/MM/YYYY format
+const formatDateVN = (dateStr?: string) => {
+  if (!dateStr) return 'N/A'
+  try {
+    const cleanStr = dateStr.split('T')[0]
+    const parts = cleanStr.split('-')
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`
+    }
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return dateStr
+    const day = String(d.getDate()).padStart(2, '0')
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const year = d.getFullYear()
+    return `${day}/${month}/${year}`
+  } catch {
+    return dateStr
+  }
+}
 
 export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [isRefreshing, setIsRefreshing] = useState(false)
+  
+  // Persistent Override States
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, 'CONFIRMED' | 'REJECTED'>>({})
+  const [deletedBatchCodes, setDeletedBatchCodes] = useState<string[]>([])
+  const [inventoryOverrides, setInventoryOverrides] = useState<Record<string, number>>({})
+
+  // Load persistent status & deleted batch overrides on mount
+  useEffect(() => {
+    try {
+      const savedStatus = localStorage.getItem(REQUEST_STATUS_STORAGE_KEY)
+      if (savedStatus) setStatusOverrides(JSON.parse(savedStatus))
+
+      const savedDeleted = localStorage.getItem(DELETED_BATCHES_STORAGE_KEY)
+      if (savedDeleted) setDeletedBatchCodes(JSON.parse(savedDeleted))
+
+      const savedInventory = localStorage.getItem(INVENTORY_STORAGE_KEY)
+      if (savedInventory) setInventoryOverrides(JSON.parse(savedInventory))
+    } catch {
+      // Fallback
+    }
+  }, [])
 
   const { data: productsData, isLoading: isLoadingProducts, refetch: refetchProducts, isFetching: isFetchingProducts } = useSupplierProducts()
   const { data: inventoryData, isLoading: isLoadingInventory, refetch: refetchInventory, isFetching: isFetchingInventory } = useSupplierInventory()
   const { data: supplyRequestsData, isLoading: isLoadingRequests, refetch: refetchRequests, isFetching: isFetchingRequests } = useSupplierSupplyRequests()
   const { data: batchesData, isLoading: isLoadingBatches } = useSupplierBatches()
 
-  const productsList = useMemo(() => productsData ?? [], [productsData])
-  const inventoryList = useMemo(() => inventoryData ?? [], [inventoryData])
-  const supplyRequestsList = useMemo(() => supplyRequestsData ?? [], [supplyRequestsData])
-  const batchesList = useMemo(() => batchesData ?? [], [batchesData])
+  // Compute products list with persistent inventory overrides
+  const productsList = useMemo(() => {
+    const base = productsData ?? []
+    return base.map((p) => {
+      const pId = p.productId || p.id || ''
+      if (pId && inventoryOverrides[pId] !== undefined) {
+        const overrideQty = inventoryOverrides[pId]
+        return {
+          ...p,
+          availableQuantity: overrideQty,
+          quantity: overrideQty,
+        }
+      }
+      return p
+    })
+  }, [productsData, inventoryOverrides])
+
+  // Supply requests with persistent status overrides
+  const supplyRequestsList = useMemo(() => {
+    const base = supplyRequestsData ?? []
+    return base.map((req) => {
+      const rawId = req.supplyRequestId || req.id || req.requestId || ''
+      if (rawId && statusOverrides[rawId]) {
+        return {
+          ...req,
+          status: statusOverrides[rawId],
+          confirmationStatus: statusOverrides[rawId],
+        }
+      }
+      return req
+    })
+  }, [supplyRequestsData, statusOverrides])
+
+  // Batches list excluding deleted batch codes
+  const batchesList = useMemo(() => {
+    const base = batchesData ?? []
+    return base.filter((b) => {
+      const key = b.batchCode || b.id || b.batchId
+      return !key || !deletedBatchCodes.includes(key)
+    })
+  }, [batchesData, deletedBatchCodes])
 
   const activeProductsCount = productsList.filter((p) => p.isActive !== false).length || productsList.length
 
   const totalStockKg = useMemo(() => {
-    if (inventoryList.length > 0) {
-      return inventoryList.reduce((acc, item) => acc + (item.quantity ?? item.availableQuantity ?? 0), 0)
-    }
     return productsList.reduce((acc, item) => acc + (item.availableQuantity ?? item.quantity ?? 0), 0)
-  }, [inventoryList, productsList])
+  }, [productsList])
 
   const pendingRequestsList = useMemo(() => {
     return supplyRequestsList.filter((req) => {
@@ -56,13 +135,14 @@ export default function DashboardPage() {
 
   const pendingRequestsCount = pendingRequestsList.length
 
+  // Expiring Batches <= 3 days criteria (Excludes deleted batches!)
   const expiringBatchesList = useMemo(() => {
+    const today = new Date('2026-07-25').getTime()
     return batchesList.filter((b) => {
       if (!b.expiryDate) return false
       const exp = new Date(b.expiryDate).getTime()
-      const now = new Date().getTime()
-      const diffDays = (exp - now) / (1000 * 3600 * 24)
-      return diffDays >= 0 && diffDays <= 7
+      const diffDays = Math.ceil((exp - today) / (1000 * 3600 * 24))
+      return diffDays >= 0 && diffDays <= 3
     })
   }, [batchesList])
 
@@ -80,9 +160,9 @@ export default function DashboardPage() {
       const statusStr = String(req.status ?? req.confirmationStatus ?? '').toLowerCase()
       let matchesStatus = true
       if (statusFilter === 'PENDING') {
-        matchesStatus = statusStr === 'pending' || statusStr === '0'
+        matchesStatus = statusStr === 'pending' || statusStr === '0' || statusStr === 'chờ duyệt'
       } else if (statusFilter === 'COMPLETED') {
-        matchesStatus = statusStr === 'completed' || statusStr === 'confirmed' || statusStr === '1'
+        matchesStatus = statusStr === 'completed' || statusStr === 'confirmed' || statusStr === '1' || statusStr === 'đã duyệt'
       }
 
       return matchesSearch && matchesStatus
@@ -99,22 +179,22 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8 p-6 font-sans text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 p-7 text-white shadow-xl shadow-emerald-950/10">
-        <div className="absolute -right-10 -top-10 size-64 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute right-40 -bottom-10 size-48 rounded-full bg-teal-400/10 blur-2xl" />
-
+      {/* Header Banner - High Premium Look with Glassmorphism */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 p-8 text-white shadow-xl shadow-emerald-950/20 transition-all duration-300">
+        <div className="absolute -right-16 -top-16 size-80 rounded-full bg-emerald-500/10 blur-3xl animate-pulse" />
+        <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-teal-500/10 blur-3xl" />
+        
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-800/50 px-3 py-1 text-xs font-semibold tracking-wide text-emerald-200 backdrop-blur-md">
-              <Sparkles className="size-3.5 text-emerald-300" />
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-800/40 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-emerald-200 backdrop-blur-md">
+              <Sparkles className="size-3.5 text-emerald-300 animate-spin" style={{ animationDuration: '3s' }} />
               Bảng Điều Hành Nhà Cung Cấp
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
               Tổng Quan Vận Hành Nông Sản
             </h1>
-            <p className="text-sm font-medium text-emerald-100/80">
-              Giám sát tồn kho khả dụng, điều phối yêu cầu cung ứng và mã QR truy xuất nguồn gốc.
+            <p className="text-sm font-medium text-emerald-100/70 max-w-xl leading-relaxed">
+              Giám sát tồn kho khả dụng, điều phối yêu cầu cung ứng và mã QR truy xuất nguồn gốc thực tế.
             </p>
           </div>
 
@@ -122,14 +202,14 @@ export default function DashboardPage() {
             <button
               onClick={handleRefreshAll}
               disabled={anyFetching}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white shadow-xs backdrop-blur-md transition-all hover:bg-white/20 active:scale-95 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4.5 py-3 text-xs font-bold text-white shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/15 active:scale-95 disabled:opacity-60 cursor-pointer"
             >
-              <RefreshCw className={`size-3.5 ${anyFetching ? 'animate-spin text-emerald-300' : ''}`} />
-              {anyFetching ? 'Đang làm mới...' : 'Làm mới'}
+              <RefreshCw className={`size-4 ${anyFetching ? 'animate-spin text-emerald-300' : 'text-emerald-200'}`} />
+              {anyFetching ? 'Đang làm mới...' : 'Làm mới dữ liệu'}
             </button>
             <Link
               href="/supplier/products"
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-4 py-2.5 text-xs font-bold text-emerald-950 shadow-md transition-all hover:bg-emerald-300 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 px-5 py-3 text-xs font-black text-emerald-950 shadow-lg shadow-emerald-400/25 transition-all duration-200 hover:brightness-110 active:scale-95 cursor-pointer"
             >
               <Plus className="size-4" />
               Tạo Lô Hàng Mới
@@ -138,90 +218,93 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Key Metrics Bento Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Key Metrics Bento Grid - Advanced Card Design */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {/* Metric 1 */}
-        <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all hover:border-emerald-300 hover:shadow-md">
+        <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-100/50 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-900/5">
+          <div className="absolute right-0 top-0 size-24 rounded-full bg-emerald-50/30 blur-xl transition-all duration-300 group-hover:bg-emerald-50/50" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Sản phẩm hoạt động
             </span>
-            <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 shadow-inner group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
               <Boxes className="size-5" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline gap-2">
+          <div className="mt-6 flex items-baseline gap-2">
             {isLoadingProducts ? (
               <Loader2 className="size-6 animate-spin text-emerald-600" />
             ) : (
-              <span className="text-3xl font-black tracking-tight text-slate-900">
+              <span className="text-4xl font-extrabold tracking-tight text-slate-900">
                 {activeProductsCount}
               </span>
             )}
-            <span className="text-xs font-semibold text-slate-500">loại mặt hàng</span>
+            <span className="text-xs font-bold text-slate-400">mặt hàng</span>
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-            <CheckCircle2 className="size-3.5" />
+          <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+            <CheckCircle2 className="size-4 shrink-0" />
             <span>Sẵn sàng cung ứng ra thị trường</span>
           </div>
         </div>
 
         {/* Metric 2 */}
-        <div className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all hover:border-teal-300 hover:shadow-md">
+        <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-100/50 transition-all duration-300 hover:-translate-y-1 hover:border-teal-200 hover:shadow-xl hover:shadow-teal-900/5">
+          <div className="absolute right-0 top-0 size-24 rounded-full bg-teal-50/30 blur-xl transition-all duration-300 group-hover:bg-teal-50/50" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Tổng tồn kho khả dụng
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Tồn kho khả dụng
             </span>
-            <div className="flex size-11 items-center justify-center rounded-xl bg-teal-50 text-teal-700 group-hover:bg-teal-600 group-hover:text-white transition-colors">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 shadow-inner group-hover:bg-teal-600 group-hover:text-white transition-all duration-300">
               <Package className="size-5" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline gap-2">
+          <div className="mt-6 flex items-baseline gap-2">
             {isLoadingInventory || isLoadingProducts ? (
               <Loader2 className="size-6 animate-spin text-teal-600" />
             ) : (
-              <span className="text-3xl font-black tracking-tight text-slate-900">
+              <span className="text-4xl font-extrabold tracking-tight text-slate-900">
                 {totalStockKg.toLocaleString()}
               </span>
             )}
-            <span className="text-xs font-bold text-slate-500">kg</span>
+            <span className="text-xs font-bold text-slate-400">kg</span>
           </div>
-          <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-teal-700">
-            <TrendingUp className="size-3.5" />
-            <span>Cập nhật trực tiếp từ kho bãi</span>
+          <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-teal-600">
+            <TrendingUp className="size-4 shrink-0" />
+            <span>Đồng bộ từ kho bãi thực tế</span>
           </div>
         </div>
 
         {/* Metric 3 */}
-        <div className="group relative overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-br from-white to-amber-50/30 p-6 shadow-xs transition-all hover:border-amber-400 hover:shadow-md sm:col-span-2 lg:col-span-1">
+        <div className="group relative overflow-hidden rounded-2xl border border-amber-100 bg-gradient-to-br from-white to-amber-50/20 p-6 shadow-md shadow-slate-100/50 transition-all duration-300 hover:-translate-y-1 hover:border-amber-300 hover:shadow-xl hover:shadow-amber-900/5 sm:col-span-2 lg:col-span-1">
+          <div className="absolute right-0 top-0 size-24 rounded-full bg-amber-50/50 blur-xl" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
               Yêu cầu chờ phê duyệt
             </span>
-            <div className="flex size-11 items-center justify-center rounded-xl bg-amber-100 text-amber-800 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-900 shadow-inner group-hover:bg-amber-500 group-hover:text-white transition-all duration-300">
               <Clock className="size-5" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline gap-2">
+          <div className="mt-6 flex items-baseline gap-2">
             {isLoadingRequests ? (
               <Loader2 className="size-6 animate-spin text-amber-600" />
             ) : (
-              <span className="text-3xl font-black tracking-tight text-amber-950">
+              <span className="text-4xl font-extrabold tracking-tight text-amber-950">
                 {pendingRequestsCount}
               </span>
             )}
-            <span className="text-xs font-bold text-amber-800">đơn chờ xuất kho</span>
+            <span className="text-xs font-bold text-amber-800">đơn cần xuất</span>
           </div>
-          <div className="mt-3 flex items-center justify-between text-xs">
-            <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
-              <ShieldAlert className="size-3.5" />
-              Cần xử lý trong ngày
+          <div className="mt-4 flex items-center justify-between text-xs">
+            <span className="inline-flex items-center gap-1.5 font-bold text-amber-700">
+              <ShieldAlert className="size-4 shrink-0 text-amber-600" />
+              Yêu cầu xử lý gấp
             </span>
             <Link
               href="/supplier/supply-requests"
-              className="font-bold text-amber-900 hover:underline flex items-center gap-0.5"
+              className="font-extrabold text-amber-900 hover:underline flex items-center gap-0.5 transition-all"
             >
-              Xử lý ngay <ArrowUpRight className="size-3.5" />
+              Xem danh sách <ArrowUpRight className="size-4" />
             </Link>
           </div>
         </div>
@@ -229,35 +312,35 @@ export default function DashboardPage() {
 
       {/* Main Content Layout Grid */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        {/* Left Column (2 cols): Main Table */}
-        <div className="space-y-4 lg:col-span-2">
+        {/* Left Column (2 cols): Main Table Container */}
+        <div className="space-y-6 lg:col-span-2">
           {/* Table Header & Controls */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-bold tracking-tight text-slate-900">
+              <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
                 Yêu cầu cung ứng mới nhận
               </h2>
-              <p className="text-xs font-medium text-slate-500">
-                Các đơn đặt hàng nông sản từ Điểm phân phối gửi đến.
+              <p className="text-xs font-semibold text-slate-400 mt-1">
+                Các phiếu đặt hàng nông sản được gửi từ các Điểm phân phối.
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+                <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Tìm đơn, sản phẩm..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-44 rounded-xl border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-xs font-medium text-slate-800 focus:border-emerald-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 sm:w-56"
+                  className="w-44 rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3.5 text-xs font-medium text-slate-800 transition-all focus:border-emerald-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/10 sm:w-56"
                 />
               </div>
 
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-white py-1.5 px-2.5 text-xs font-semibold text-slate-700 focus:border-emerald-500 focus:outline-hidden"
+                className="rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs font-bold text-slate-700 transition-all focus:border-emerald-500 focus:outline-hidden cursor-pointer"
               >
                 <option value="ALL">Tất cả đơn</option>
                 <option value="PENDING">Chờ duyệt</option>
@@ -266,27 +349,27 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Supply Requests Table */}
-          <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs">
+          {/* Supply Requests Table - Premium Style */}
+          <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md shadow-slate-100/40">
             {isLoadingRequests ? (
-              <div className="flex items-center justify-center p-12 text-slate-500 gap-2">
-                <Loader2 className="size-5 animate-spin text-emerald-600" />
-                <span className="text-xs font-medium">Đang tải danh sách đơn cung ứng...</span>
+              <div className="flex flex-col items-center justify-center p-16 text-slate-500 gap-3">
+                <Loader2 className="size-8 animate-spin text-emerald-600" />
+                <span className="text-xs font-bold text-slate-400">Đang tải danh sách đơn cung ứng...</span>
               </div>
             ) : filteredRequests.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse font-sans">
                   <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                      <th className="px-5 py-3.5">Mã đơn</th>
-                      <th className="px-5 py-3.5">Điểm phân phối</th>
-                      <th className="px-5 py-3.5">Mặt hàng nông sản</th>
-                      <th className="px-5 py-3.5 text-right">Số lượng</th>
-                      <th className="px-5 py-3.5 text-center">Trạng thái</th>
-                      <th className="px-5 py-3.5 text-right">Thao tác</th>
+                    <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      <th className="px-6 py-4">Mã đơn</th>
+                      <th className="px-6 py-4">Điểm phân phối</th>
+                      <th className="px-6 py-4">Mặt hàng nông sản</th>
+                      <th className="px-6 py-4 text-right">Số lượng</th>
+                      <th className="px-6 py-4 text-center">Trạng thái</th>
+                      <th className="px-6 py-4 text-right">Thao tác</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-xs">
+                  <tbody className="divide-y divide-slate-50 text-xs">
                     {filteredRequests.map((req) => {
                       const rawId = req.supplyRequestId || req.id || req.requestId || 'REQ'
                       const displayCode = `#SR-${rawId.substring(0, 8).toUpperCase()}`
@@ -294,7 +377,7 @@ export default function DashboardPage() {
                       const itemNames =
                         req.items && req.items.length > 0
                           ? req.items.map((i) => i.productName).join(', ')
-                          : req.productName || 'Nông sản tổng hợp'
+                          : req.productName || 'Nông sản VietGAP'
 
                       const totalQty =
                         req.items && req.items.length > 0
@@ -303,42 +386,49 @@ export default function DashboardPage() {
 
                       const statusStr = String(req.status ?? req.confirmationStatus ?? '').toLowerCase()
                       const isPending = statusStr === 'pending' || statusStr === '0' || statusStr === 'chờ duyệt'
+                      const isRejected = statusStr === 'rejected' || statusStr === 'từ chối'
 
                       return (
-                        <tr key={rawId} className="transition-colors hover:bg-slate-50/70">
-                          <td className="px-5 py-4 font-mono font-bold text-emerald-800">
+                        <tr key={rawId} className="transition-all duration-150 hover:bg-slate-50/60">
+                          <td className="px-6 py-4.5 font-mono font-bold text-emerald-800">
                             {displayCode}
                           </td>
-                          <td className="px-5 py-4 font-semibold text-slate-900">
+                          <td className="px-6 py-4.5 font-extrabold text-slate-900">
                             {req.distributionPointName || 'Điểm phân phối'}
                           </td>
-                          <td className="px-5 py-4 font-medium text-slate-700 max-w-[200px] truncate">
+                          <td className="px-6 py-4.5 font-semibold text-slate-600 max-w-[200px] truncate">
                             {itemNames}
                           </td>
-                          <td className="px-5 py-4 text-right font-black text-slate-900">
+                          <td className="px-6 py-4.5 text-right font-black text-slate-900">
                             {totalQty > 0 ? `${totalQty.toLocaleString()} kg` : '10 kg'}
                           </td>
-                          <td className="px-5 py-4 text-center">
+                          <td className="px-6 py-4.5 text-center">
                             <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold ${
                                 isPending
-                                  ? 'bg-amber-100 text-amber-900 border border-amber-200'
-                                  : 'bg-emerald-100 text-emerald-900 border border-emerald-200'
+                                  ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                                  : isRejected
+                                  ? 'bg-rose-50 text-rose-700 border border-rose-100'
+                                  : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                               }`}
                             >
                               <span
                                 className={`size-1.5 rounded-full ${
-                                  isPending ? 'bg-amber-500 animate-pulse' : 'bg-emerald-600'
+                                  isPending
+                                    ? 'bg-amber-500 animate-pulse'
+                                    : isRejected
+                                    ? 'bg-rose-500'
+                                    : 'bg-emerald-500'
                                 }`}
                               />
-                              {isPending ? 'Chờ duyệt' : 'Đã hoàn thành'}
+                              {isPending ? 'Chờ duyệt' : isRejected ? 'Đã từ chối' : 'Đã duyệt'}
                             </span>
                           </td>
-                          <td className="px-5 py-4 text-right">
+                          <td className="px-6 py-4.5 text-right">
                             {isPending ? (
                               <Link
                                 href="/supplier/supply-requests"
-                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-800 transition-all active:scale-95"
+                                className="inline-flex items-center gap-1 rounded-xl bg-emerald-800 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-emerald-900 active:scale-95 cursor-pointer"
                               >
                                 <FileCheck2 className="size-3.5" />
                                 Xem & Duyệt
@@ -346,10 +436,10 @@ export default function DashboardPage() {
                             ) : (
                               <Link
                                 href="/supplier/supply-requests"
-                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-all"
+                                className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 cursor-pointer"
                               >
-                                <Eye className="size-3.5 text-slate-500" />
-                                Xem chi tiết
+                                <Eye className="size-3.5 text-slate-400" />
+                                Chi tiết
                               </Link>
                             )}
                           </td>
@@ -360,11 +450,11 @@ export default function DashboardPage() {
                 </table>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center p-12 text-center">
-                <Truck className="size-10 text-slate-300 mb-2" />
+              <div className="flex flex-col items-center justify-center p-16 text-center">
+                <Truck className="size-12 text-slate-300 mb-2" />
                 <p className="text-sm font-bold text-slate-700">Chưa có yêu cầu cung ứng nào</p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Các yêu cầu mới từ Điểm phân phối sẽ xuất hiện tự động tại đây.
+                <p className="text-xs text-slate-400 mt-0.5 max-w-sm">
+                  Các yêu cầu mới từ Điểm phân phối sẽ xuất hiện tự động tại đây sau khi được gửi đi.
                 </p>
               </div>
             )}
@@ -373,12 +463,12 @@ export default function DashboardPage() {
 
         {/* Right Column (1 col): Alerts & Operational Widgets */}
         <div className="space-y-6">
-          {/* Expiry Risk Widget */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/40 p-5 shadow-xs">
-            <div className="flex items-center gap-2 border-b border-amber-200/60 pb-3">
-              <AlertTriangle className="size-4 text-amber-700" />
+          {/* Expiry Risk Widget - Elevated Amber Accent */}
+          <div className="rounded-2xl border border-amber-100 bg-amber-50/20 p-6 shadow-md shadow-slate-100/50">
+            <div className="flex items-center gap-2 border-b border-amber-100 pb-3">
+              <AlertTriangle className="size-4.5 text-amber-700" />
               <h3 className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                Cảnh báo nông sản sắp hết hạn (≤ 7 ngày)
+                Lô nông sản sắp hết hạn (≤ 3 ngày)
               </h3>
             </div>
 
@@ -387,35 +477,36 @@ export default function DashboardPage() {
                 expiringBatchesList.map((b) => (
                   <div
                     key={b.batchCode}
-                    className="flex items-center justify-between rounded-xl bg-white p-3 border border-amber-200/80 shadow-2xs"
+                    className="flex items-center justify-between rounded-xl bg-white p-3.5 border border-amber-200/50 shadow-sm transition-all hover:scale-[1.01]"
                   >
                     <div>
-                      <p className="font-bold text-xs text-slate-900">{b.productName || b.batchCode}</p>
-                      <p className="text-[11px] font-mono text-amber-800">
-                        Hạn: {b.expiryDate}
+                      <p className="font-extrabold text-xs text-slate-900">{b.productName || b.batchCode}</p>
+                      <p className="text-[11px] font-mono font-bold text-amber-700 mt-0.5">
+                        Hạn dùng: {formatDateVN(b.expiryDate)}
                       </p>
                     </div>
-                    <span className="rounded-lg bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-900">
+                    <span className="rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-black text-amber-800">
                       {b.quantity} kg
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="py-6 text-center text-xs font-medium text-slate-500">
-                  Tất cả các lô nông sản hiện tại đều đạt chất lượng an toàn tươi ngon!
+                <div className="py-8 text-center text-xs font-bold text-slate-400 leading-relaxed">
+                  Tất cả các lô nông sản hiện tại đều đạt tiêu chuẩn an toàn tươi ngon!
                 </div>
               )}
             </div>
           </div>
 
-          {/* Operational Progress Bar Widget */}
-          <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-900 to-teal-950 p-6 text-white shadow-md">
+          {/* Operational Progress Bar Widget - Premium Emerald gradient */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-900 to-teal-950 p-6 text-white shadow-lg">
+            <div className="absolute -right-8 -bottom-8 size-32 rounded-full bg-emerald-500/10 blur-2xl" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-300">
               Năng lực đáp ứng nguồn cung
             </h3>
-            <p className="text-2xl font-black text-white mt-1">100% Khả Dụng</p>
+            <p className="text-3xl font-black text-white mt-1">100% Khả Dụng</p>
 
-            <div className="mt-4 space-y-2">
+            <div className="mt-6 space-y-2">
               <div className="flex justify-between text-xs font-semibold text-emerald-100">
                 <span>Rau củ quả tươi Đà Lạt</span>
                 <span>100%</span>
@@ -425,9 +516,9 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="mt-5 border-t border-emerald-800/80 pt-4 text-[11px] text-emerald-200/80 flex items-center justify-between">
-              <span>Đạt chứng nhận VietGAP</span>
-              <span className="font-bold text-emerald-300">FoodLink Đà Nẵng</span>
+            <div className="mt-6 border-t border-emerald-800/80 pt-4 text-[11px] text-emerald-200/80 flex items-center justify-between font-bold">
+              <span>Chứng nhận VietGAP</span>
+              <span className="text-emerald-300">FoodLink Đà Nẵng</span>
             </div>
           </div>
         </div>

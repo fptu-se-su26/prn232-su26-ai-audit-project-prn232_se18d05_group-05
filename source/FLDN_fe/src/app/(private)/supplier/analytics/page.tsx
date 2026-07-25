@@ -2,27 +2,28 @@
 
 import {
   AlertCircle,
-  Award,
-  BarChart3,
   Calendar,
   CheckCircle2,
   Clock,
-  Download,
   FileSpreadsheet,
   Filter,
-  Loader2,
   Package,
-  PieChart,
   RefreshCw,
   ShieldCheck,
   Sparkles,
   Star,
-  TrendingDown,
   TrendingUp,
   Trophy,
   Truck,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+
 import {
   useSupplierBatches,
   useSupplierInventory,
@@ -58,9 +59,9 @@ const parseISOToVN = (isoStr: string) => {
 }
 
 export default function SupplierAnalyticsPage() {
-  const { data: realProducts, isLoading: isLoadingProducts, refetch: refetchProducts } = useSupplierProducts()
-  const { data: realInventory, isLoading: isLoadingInventory, refetch: refetchInventory } = useSupplierInventory()
-  const { data: realRequests, isLoading: isLoadingRequests, refetch: refetchRequests } = useSupplierSupplyRequests()
+  const { data: realProducts, refetch: refetchProducts } = useSupplierProducts()
+  const { data: realInventory, refetch: refetchInventory } = useSupplierInventory()
+  const { data: realRequests, refetch: refetchRequests } = useSupplierSupplyRequests()
   const { data: realBatches, refetch: refetchBatches } = useSupplierBatches()
 
   // VN Date Strings for Input Display (DD/MM/YYYY)
@@ -185,13 +186,10 @@ export default function SupplierAnalyticsPage() {
 
     const qrCount = validBatchesInRange.length
 
-    // REAL TIME COMPUTATIONS FOR LOWER BLOCKS FROM ACTUAL COMPLETED ORDERS
     const avgApprovalHours = hasData ? '1.5 giờ' : 'N/A'
     const avgPrepHours = hasData ? '3.0 giờ' : 'N/A'
     const slaRate = hasData ? '99.5%' : 'N/A'
     const vietGapRate = hasData ? '100%' : 'N/A'
-    
-    // REAL RATING COMPUTATION FROM DP CONFIRMATIONS (UC23)
     const ratingScore = hasData ? '4.9 ★' : 'Chưa có đánh giá'
     const lossRate = hasData ? '< 0.1%' : '0%'
     const disputeCount = 0
@@ -214,7 +212,7 @@ export default function SupplierAnalyticsPage() {
     }
   }, [appliedDateRange, productsList, requestsList, batchesList])
 
-  // ULTRA STUNNING EXCEL FILE EXPORT (Formatted HTML Spreadsheet .xls with columns, colors & clean borders)
+  // EXCELLENT FORMATTED EXCEL EXPORT (Spreadsheet .xls HTML Table)
   const handleExportExcelReport = () => {
     try {
       const todayStr = new Date().toLocaleDateString('vi-VN')
@@ -325,118 +323,116 @@ export default function SupplierAnalyticsPage() {
         </div>
       )}
 
-      {/* Header Banner - High Premium Look with Glassmorphism */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 p-8 text-white shadow-xl shadow-emerald-950/20 transition-all duration-300">
+      {/* Header Banner - High Premium Card with shadcn composition */}
+      <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white shadow-xl shadow-emerald-950/20">
         <div className="absolute -right-16 -top-16 size-80 rounded-full bg-emerald-500/10 blur-3xl animate-pulse" />
         <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-teal-500/10 blur-3xl" />
         
-        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <CardHeader className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between p-8">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-800/40 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-emerald-200 backdrop-blur-md">
               <Sparkles className="size-3.5 text-emerald-300" />
               Đánh giá năng lực nhà cung cấp
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            <CardTitle className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
               Báo cáo KPI & Hiệu suất Cung ứng
-            </h1>
-            <p className="text-sm font-medium text-emerald-100/70 max-w-xl leading-relaxed">
+            </CardTitle>
+            <CardDescription className="text-sm font-medium text-emerald-100/70 max-w-xl leading-relaxed">
               Theo dõi chất lượng nông sản xuất kho, tỷ lệ hoàn thành cam kết SLA và phản hồi dịch vụ.
-            </p>
+            </CardDescription>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
+            <Button
+              variant="outline"
               onClick={handleRefreshAll}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4.5 py-3 text-xs font-bold text-white shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/15 active:scale-95 cursor-pointer"
+              className="border-white/20 bg-white/10 text-white hover:bg-white/20"
             >
               <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin text-emerald-300' : 'text-emerald-200'}`} />
               Làm mới báo cáo
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleExportExcelReport}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 px-5 py-3 text-xs font-black text-emerald-950 shadow-lg shadow-emerald-400/25 transition-all duration-200 hover:brightness-110 active:scale-95 cursor-pointer"
+              className="bg-gradient-to-r from-emerald-400 to-teal-400 text-emerald-950 font-black hover:brightness-110 shadow-lg shadow-emerald-400/25"
             >
               <FileSpreadsheet className="size-4" />
               Xuất Báo Cáo Excel
-            </button>
+            </Button>
           </div>
-        </div>
-      </div>
+        </CardHeader>
+      </Card>
 
-      {/* Date Filter & Control Widget - Compact Premium Design */}
-      <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4.5 shadow-md shadow-slate-100/50">
-        <div className="flex items-center gap-4 flex-wrap">
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Từ ngày</label>
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder="01/07/2026"
-                value={startDateVN}
-                onChange={(e) => setStartDateVN(e.target.value)}
-                className="w-36 rounded-xl border border-slate-200 bg-white py-2 pl-3.5 pr-8 text-xs font-mono font-bold text-slate-800 transition-all focus:border-emerald-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/10"
-              />
-              <input
-                type="date"
-                onChange={(e) => {
-                  if (e.target.value) setStartDateVN(parseISOToVN(e.target.value))
-                }}
-                className="absolute right-2 opacity-0 w-6 h-6 cursor-pointer"
-              />
-              <Calendar className="absolute right-2.5 size-4 text-slate-400 pointer-events-none" />
-            </div>
+      {/* Date Filter & Control Widget using shadcn Field & Input */}
+      <Card className="border-slate-100 bg-white p-4.5 shadow-md shadow-slate-100/50">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <Field>
+              <FieldLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Từ ngày</FieldLabel>
+              <div className="relative flex items-center">
+                <Input
+                  type="text"
+                  placeholder="01/07/2026"
+                  value={startDateVN}
+                  onChange={(e) => setStartDateVN(e.target.value)}
+                  className="w-36 font-mono font-bold text-slate-800"
+                />
+                <input
+                  type="date"
+                  onChange={(e) => {
+                    if (e.target.value) setStartDateVN(parseISOToVN(e.target.value))
+                  }}
+                  className="absolute right-2 opacity-0 w-6 h-6 cursor-pointer"
+                />
+                <Calendar className="absolute right-2.5 size-4 text-slate-400 pointer-events-none" />
+              </div>
+            </Field>
+
+            <Field>
+              <FieldLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đến ngày</FieldLabel>
+              <div className="relative flex items-center">
+                <Input
+                  type="text"
+                  placeholder="31/07/2026"
+                  value={endDateVN}
+                  onChange={(e) => setEndDateVN(e.target.value)}
+                  className="w-36 font-mono font-bold text-slate-800"
+                />
+                <input
+                  type="date"
+                  onChange={(e) => {
+                    if (e.target.value) setEndDateVN(parseISOToVN(e.target.value))
+                  }}
+                  className="absolute right-2 opacity-0 w-6 h-6 cursor-pointer"
+                />
+                <Calendar className="absolute right-2.5 size-4 text-slate-400 pointer-events-none" />
+              </div>
+            </Field>
           </div>
 
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Đến ngày</label>
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                placeholder="31/07/2026"
-                value={endDateVN}
-                onChange={(e) => setEndDateVN(e.target.value)}
-                className="w-36 rounded-xl border border-slate-200 bg-white py-2 pl-3.5 pr-8 text-xs font-mono font-bold text-slate-800 transition-all focus:border-emerald-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/10"
-              />
-              <input
-                type="date"
-                onChange={(e) => {
-                  if (e.target.value) setEndDateVN(parseISOToVN(e.target.value))
-                }}
-                className="absolute right-2 opacity-0 w-6 h-6 cursor-pointer"
-              />
-              <Calendar className="absolute right-2.5 size-4 text-slate-400 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-end self-end h-[38px] lg:mt-0">
-          <button
-            onClick={handleApplyFilter}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-800 px-5 py-2.5 text-xs font-bold text-white hover:bg-emerald-900 transition-all active:scale-95 shadow-sm cursor-pointer"
-          >
+          <Button onClick={handleApplyFilter} className="bg-emerald-800 text-white font-bold hover:bg-emerald-900">
             <Filter className="size-3.5" />
             Lọc báo cáo
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
-      {/* Bento Grid Stats */}
+      {/* Bento Grid Stats using shadcn Card composition */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-100/50 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-900/5">
+        <Card className="border-slate-100 bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200">
           <div className="flex items-start justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Sản phẩm trong kỳ</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-              <TrendingUp className="size-3" />
+            <Badge variant="secondary" className="bg-emerald-50 text-emerald-800 border-emerald-100">
+              <TrendingUp className="size-3 mr-1" />
               {filteredMetrics.prodCount > 0 ? '+12% sản lượng' : '0%'}
-            </span>
+            </Badge>
           </div>
           <p className="mt-4 text-3xl font-extrabold text-slate-900">
             {filteredMetrics.prodCount} <span className="text-sm font-semibold text-slate-400">mặt hàng</span>
           </p>
           <p className="mt-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Từ {startDateVN} đến {endDateVN}</p>
-        </div>
+        </Card>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-100/50 transition-all duration-300 hover:-translate-y-1 hover:border-teal-200 hover:shadow-xl hover:shadow-teal-900/5">
+        <Card className="border-slate-100 bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-teal-200">
           <div className="flex items-start justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Thu hoạch trong kỳ</span>
             <Package className="size-5 text-teal-700" />
@@ -445,9 +441,9 @@ export default function SupplierAnalyticsPage() {
             {filteredMetrics.stockKg.toLocaleString()} <span className="text-sm font-semibold text-slate-400">kg</span>
           </p>
           <p className="mt-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sản lượng đã đóng lô</p>
-        </div>
+        </Card>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-100/50 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-900/5">
+        <Card className="border-slate-100 bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200">
           <div className="flex items-start justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Đơn hoàn thành trong kỳ</span>
             <CheckCircle2 className="size-5 text-emerald-600" />
@@ -456,22 +452,22 @@ export default function SupplierAnalyticsPage() {
             {filteredMetrics.completedCount} <span className="text-sm font-semibold text-slate-400">yêu cầu</span>
           </p>
           <p className="mt-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Đã chuyển giao thành công</p>
-        </div>
+        </Card>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50/20 p-6 shadow-md shadow-emerald-950/5 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400">
+        <Card className="border-emerald-200 bg-emerald-50/20 p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-emerald-400">
           <div className="flex items-start justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-950">Chỉ số Uy tín SLA</span>
             <Trophy className="size-5 text-emerald-700 animate-bounce" />
           </div>
           <p className="mt-4 text-3xl font-extrabold text-emerald-950">{filteredMetrics.slaGrade}</p>
           <p className="mt-1.5 text-[10px] font-black text-emerald-800 uppercase tracking-wider">Chuỗi cung ứng xuất sắc</p>
-        </div>
+        </Card>
       </div>
 
-      {/* KPI Section - Performance Cards */}
+      {/* KPI Section - Performance Cards using shadcn Card */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Quality Card */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-100/50 space-y-4 transition-all hover:shadow-lg">
+        <Card className="border-slate-100 bg-white p-6 shadow-md space-y-4">
           <div className="flex items-center justify-between border-b pb-3.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
               <ShieldCheck className="size-4.5 text-emerald-700" />
@@ -494,10 +490,10 @@ export default function SupplierAnalyticsPage() {
               </span>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Fulfillment Card */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-100/50 space-y-4 transition-all hover:shadow-lg">
+        <Card className="border-slate-100 bg-white p-6 shadow-md space-y-4">
           <div className="flex items-center justify-between border-b pb-3.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
               <Clock className="size-4.5 text-blue-700" />
@@ -518,10 +514,10 @@ export default function SupplierAnalyticsPage() {
               <span className="font-black text-emerald-800 text-sm">{filteredMetrics.slaRate}</span>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Dispatch Card */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-100/50 space-y-4 transition-all hover:shadow-lg">
+        <Card className="border-slate-100 bg-white p-6 shadow-md space-y-4">
           <div className="flex items-center justify-between border-b pb-3.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
               <Truck className="size-4.5 text-teal-700" />
@@ -542,7 +538,7 @@ export default function SupplierAnalyticsPage() {
               <span className="font-black text-emerald-800 text-sm">{filteredMetrics.disputeCount} đơn</span>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   )

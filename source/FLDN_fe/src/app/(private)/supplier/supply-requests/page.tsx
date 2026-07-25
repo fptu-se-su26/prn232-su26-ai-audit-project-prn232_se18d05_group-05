@@ -2,28 +2,44 @@
 
 import {
   AlertCircle,
-  AlertTriangle,
-  ArrowRight,
   Check,
   CheckCircle2,
-  Clock,
   Download,
   Eye,
-  FileCheck,
-  Filter,
   Loader2,
   MapPin,
-  Package,
   RefreshCw,
   Search,
-  ShieldCheck,
   Sparkles,
   Truck,
   UserCheck,
   X,
-  XCircle,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Empty, EmptyDescription, EmptyHeader, EmptyIcon, EmptyTitle } from '@/components/ui/empty'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+
 import {
   useConfirmSupplyRequest,
   useRejectSupplyRequest,
@@ -68,17 +84,14 @@ export default function SupplierSupplyRequestsPage() {
   // Toast notification
   const [notification, setNotification] = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
 
-  // Persistent Status Overrides map (requestId -> 'CONFIRMED' | 'REJECTED') across F5 reloads
+  // Persistent Status Overrides map across F5 reloads
   const [statusOverrides, setStatusOverrides] = useState<Record<string, 'CONFIRMED' | 'REJECTED'>>({})
 
-  // Load persistent status overrides on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(REQUEST_STATUS_STORAGE_KEY)
       if (saved) setStatusOverrides(JSON.parse(saved))
-    } catch {
-      // Storage fallback
-    }
+    } catch {}
   }, [])
 
   // Reject Modal State
@@ -100,7 +113,7 @@ export default function SupplierSupplyRequestsPage() {
     }, 400)
   }
 
-  // ULTRA STUNNING EXCEL FILE EXPORT (Formatted HTML Spreadsheet .xls with columns, colors & clean borders)
+  // EXCELLENT FORMATTED EXCEL EXPORT (Spreadsheet .xls HTML Table)
   const handleExportExcel = () => {
     try {
       const todayStr = new Date().toLocaleDateString('vi-VN')
@@ -376,44 +389,45 @@ export default function SupplierSupplyRequestsPage() {
         </div>
       )}
 
-      {/* Header Banner - High Premium Look with Glassmorphism */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 p-8 text-white shadow-xl shadow-emerald-950/20 transition-all duration-300">
+      {/* Header Banner - High Premium Card with shadcn composition */}
+      <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 text-white shadow-xl shadow-emerald-950/20">
         <div className="absolute -right-16 -top-16 size-80 rounded-full bg-emerald-500/10 blur-3xl animate-pulse" />
         <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-teal-500/10 blur-3xl" />
         
-        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <CardHeader className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between p-8">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-800/40 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-emerald-200 backdrop-blur-md">
               <Sparkles className="size-3.5 text-emerald-300" />
               Điều phối & Theo dõi Tiến độ Giao vận
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+            <CardTitle className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
               Quản lý Yêu cầu Cung ứng & Vận chuyển
-            </h1>
-            <p className="text-sm font-medium text-emerald-100/70 max-w-xl leading-relaxed">
+            </CardTitle>
+            <CardDescription className="text-sm font-medium text-emerald-100/70 max-w-xl leading-relaxed">
               Duyệt xuất kho nông sản và theo dõi trực tiếp hành trình Shipper giao hàng đến Điểm phân phối.
-            </p>
+            </CardDescription>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
+            <Button
+              variant="outline"
               onClick={handleRefreshData}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4.5 py-3 text-xs font-bold text-white shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/15 active:scale-95 disabled:opacity-60 cursor-pointer"
+              className="border-white/20 bg-white/10 text-white hover:bg-white/20"
             >
               <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin text-emerald-300' : 'text-emerald-200'}`} />
               {isRefreshing ? 'Đang làm mới...' : 'Làm mới dữ liệu'}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleExportExcel}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 px-5 py-3 text-xs font-black text-emerald-950 shadow-lg shadow-emerald-400/25 transition-all duration-200 hover:brightness-110 active:scale-95 cursor-pointer"
+              className="bg-gradient-to-r from-emerald-400 to-teal-400 text-emerald-950 font-black hover:brightness-110 shadow-lg shadow-emerald-400/25"
             >
               <Download className="size-4" />
               Xuất Báo Cáo Excel
-            </button>
+            </Button>
           </div>
-        </div>
-      </div>
+        </CardHeader>
+      </Card>
 
       {/* Filter Tabs & Search Bar - Premium Capsule Style */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between border-b border-slate-200/80 pb-4.5">
@@ -482,18 +496,18 @@ export default function SupplierSupplyRequestsPage() {
 
         <div className="relative">
           <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder="Tìm theo mã đơn, đối tác..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-xs font-medium focus:border-emerald-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/10 sm:w-64"
+            className="pl-9 w-full sm:w-64 border-slate-200"
           />
         </div>
       </div>
 
-      {/* Main Table Container */}
-      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md shadow-slate-100/40">
+      {/* Main Table Container using shadcn/ui Table */}
+      <Card className="overflow-hidden border-slate-100 bg-white shadow-md shadow-slate-100/40">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center p-16 text-slate-500 gap-3">
             <Loader2 className="size-8 animate-spin text-emerald-600" />
@@ -501,18 +515,18 @@ export default function SupplierSupplyRequestsPage() {
           </div>
         ) : filteredList.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse font-sans">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  <th className="px-6 py-4">Mã đơn</th>
-                  <th className="px-6 py-4">Điểm phân phối nhận hàng</th>
-                  <th className="px-6 py-4">Nông sản chi tiết</th>
-                  <th className="px-6 py-4 text-right">Số lượng</th>
-                  <th className="px-6 py-4 text-center">Trạng thái Giao vận (Logistics)</th>
-                  <th className="px-6 py-4 text-right">Thao tác & Tiến độ</th>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <TableHead className="px-6 py-4">Mã đơn</TableHead>
+                  <TableHead className="px-6 py-4">Điểm phân phối nhận hàng</TableHead>
+                  <TableHead className="px-6 py-4">Nông sản chi tiết</TableHead>
+                  <TableHead className="px-6 py-4 text-right">Số lượng</TableHead>
+                  <TableHead className="px-6 py-4 text-center">Trạng thái Giao vận (Logistics)</TableHead>
+                  <TableHead className="px-6 py-4 text-right">Thao tác & Tiến độ</TableHead>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 text-xs">
+              </TableHeader>
+              <TableBody className="divide-y divide-slate-50 text-xs">
                 {filteredList.map((req) => {
                   const rawId = req.supplyRequestId || req.id || req.requestId || 'REQ'
                   const displayCode = `#SR-${rawId.substring(0, 8).toUpperCase()}`
@@ -536,126 +550,125 @@ export default function SupplierSupplyRequestsPage() {
                   const isReceived = statusStr === 'received' || statusStr === 'completed' || statusStr === 'đã giao'
 
                   return (
-                    <tr key={rawId} className="transition-all duration-150 hover:bg-slate-50/60">
-                      <td className="px-6 py-4.5">
+                    <TableRow key={rawId} className="transition-all duration-150 hover:bg-slate-50/60">
+                      <TableCell className="px-6 py-4.5">
                         <span className="font-mono font-bold text-emerald-900 text-sm">{displayCode}</span>
                         {req.requestedDeliveryDate && (
                           <p className="text-[10px] text-slate-400 mt-0.5 font-semibold">
                             Hẹn giao: {formatDateVN(req.requestedDeliveryDate)}
                           </p>
                         )}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4.5">
+                      <TableCell className="px-6 py-4.5">
                         <p className="font-extrabold text-slate-900">{req.distributionPointName || 'Kho Phân Phối Thủ Đức'}</p>
                         <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
                           <MapPin className="size-3 text-slate-400" />
                           45 Võ Văn Ngân, TP. Thủ Đức
                         </p>
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4.5 font-semibold text-slate-600 max-w-[260px]">
+                      <TableCell className="px-6 py-4.5 font-semibold text-slate-600 max-w-[260px]">
                         {itemDetails}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4.5 text-right font-black text-slate-900 text-sm">
+                      <TableCell className="px-6 py-4.5 text-right font-black text-slate-900 text-sm">
                         {totalQty.toLocaleString()} <span className="text-xs font-normal text-slate-500">kg</span>
-                      </td>
+                      </TableCell>
 
-                      {/* CLEAR LOGISTICS STATUS BADGES */}
-                      <td className="px-6 py-4.5 text-center">
+                      {/* CLEAR LOGISTICS STATUS BADGES using shadcn Badge */}
+                      <TableCell className="px-6 py-4.5 text-center">
                         {isPending ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-700 border border-amber-100">
-                            <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                            <span className="size-1.5 rounded-full bg-amber-500 animate-pulse mr-1.5" />
                             Chờ phê duyệt
-                          </span>
+                          </Badge>
                         ) : isRejected ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-[11px] font-bold text-rose-700 border border-rose-100">
-                            <span className="size-1.5 rounded-full bg-rose-500" />
+                          <Badge variant="destructive" className="bg-rose-50 text-rose-700 border-rose-200">
                             Đã từ chối
-                          </span>
+                          </Badge>
                         ) : isReceived ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-900 px-3 py-1 text-[11px] font-bold text-white shadow-xs">
-                            <CheckCircle2 className="size-3.5 text-emerald-300" />
+                          <Badge className="bg-emerald-900 text-white shadow-xs">
+                            <CheckCircle2 className="size-3.5 text-emerald-300 mr-1" />
                             ✅ Đã giao thành công
-                          </span>
+                          </Badge>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-[11px] font-bold text-blue-700 border border-blue-200">
-                            <Truck className="size-3.5 text-blue-600 animate-bounce" style={{ animationDuration: '2s' }} />
+                          <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
+                            <Truck className="size-3.5 text-blue-600 animate-bounce mr-1" style={{ animationDuration: '2s' }} />
                             🚚 Shipper đang giao hàng
-                          </span>
+                          </Badge>
                         )}
-                      </td>
+                      </TableCell>
 
-                      <td className="px-6 py-4.5 text-right">
+                      <TableCell className="px-6 py-4.5 text-right">
                         {isPending ? (
                           <div className="flex items-center justify-end gap-2">
-                            <button
+                            <Button
+                              size="sm"
                               onClick={() => handleConfirm(rawId)}
                               disabled={confirmMutation.isPending}
-                              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:from-emerald-800 hover:to-teal-800 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                              className="bg-gradient-to-r from-emerald-700 to-teal-700 text-white font-bold"
                             >
                               <Check className="size-3.5" />
                               Phê duyệt
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
                               onClick={() => handleOpenRejectModal(rawId)}
                               disabled={rejectMutation.isPending}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                              className="border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
                             >
                               <X className="size-3.5" />
                               Từ chối
-                            </button>
+                            </Button>
                           </div>
                         ) : (
-                          <button
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => setTrackingRequest(req)}
-                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                            className="border-slate-200 text-slate-700 hover:bg-slate-50"
                           >
-                            <Eye className="size-3.5 text-emerald-700" />
+                            <Eye className="size-3.5 text-emerald-700 mr-1" />
                             Xem tiến độ giao
-                          </button>
+                          </Button>
                         )}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center p-16 text-center">
-            <Truck className="size-12 text-slate-300 mb-2" />
-            <p className="text-sm font-bold text-slate-700">Không tìm thấy yêu cầu cung ứng nào</p>
-            <p className="text-xs text-slate-400 mt-0.5">Vui lòng kiểm tra lại bộ lọc hoặc tìm kiếm.</p>
-          </div>
+          <Empty className="p-16">
+            <EmptyHeader>
+              <EmptyIcon>
+                <Truck className="size-10 text-slate-400" />
+              </EmptyIcon>
+              <EmptyTitle>Không tìm thấy yêu cầu cung ứng nào</EmptyTitle>
+              <EmptyDescription>Vui lòng kiểm tra lại bộ lọc hoặc tìm kiếm.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
-      </div>
+      </Card>
 
-      {/* TRACKING TIMELINE MODAL (Chi tiết hành trình giao vận từ Shipper đến Điểm phân phối) */}
-      {trackingRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl animate-in zoom-in-95 duration-150 border border-slate-100/80">
-            <div className="flex items-center justify-between border-b px-6 py-4.5 bg-gradient-to-r from-emerald-950 to-teal-950 text-white">
-              <div>
-                <h3 className="text-base font-extrabold flex items-center gap-2">
-                  <Truck className="size-5 text-emerald-300" />
-                  Chi Tiết Hành Trình Vận Chuyển
-                </h3>
-                <p className="text-xs text-emerald-100/70 mt-0.5 font-mono">
-                  Mã đơn: #SR-{(trackingRequest.supplyRequestId || trackingRequest.id || '').substring(0, 8).toUpperCase()}
-                </p>
-              </div>
-              <button
-                onClick={() => setTrackingRequest(null)}
-                className="rounded-lg p-1.5 text-white/70 hover:bg-white/10 hover:text-white cursor-pointer"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
+      {/* TRACKING TIMELINE MODAL using shadcn Dialog */}
+      <Dialog open={Boolean(trackingRequest)} onOpenChange={(open) => !open && setTrackingRequest(null)}>
+        <DialogContent className="max-w-lg p-0 overflow-hidden rounded-3xl border-none">
+          <DialogHeader className="bg-gradient-to-r from-emerald-950 to-teal-950 p-6 text-white">
+            <DialogTitle className="text-base font-extrabold flex items-center gap-2 text-white">
+              <Truck className="size-5 text-emerald-300" />
+              Chi Tiết Hành Trình Vận Chuyển
+            </DialogTitle>
+            <DialogDescription className="text-xs text-emerald-100/70 font-mono mt-0.5">
+              Mã đơn: #SR-{(trackingRequest?.supplyRequestId || trackingRequest?.id || '').substring(0, 8).toUpperCase()}
+            </DialogDescription>
+          </DialogHeader>
 
+          {trackingRequest && (
             <div className="p-6 space-y-6">
-              {/* Delivery info summary */}
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50/30 p-4 space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="font-semibold text-slate-500">Điểm phân phối nhận:</span>
@@ -674,12 +687,10 @@ export default function SupplierSupplyRequestsPage() {
                 </div>
               </div>
 
-              {/* TIMELINE PROGRESS FLOW */}
               <div className="space-y-4">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tiến trình giao vận thực tế</p>
                 
                 <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-emerald-200">
-                  {/* Step 1 */}
                   <div className="relative flex items-start gap-3">
                     <div className="absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full bg-emerald-600 ring-4 ring-white">
                       <Check className="size-2.5 text-white" />
@@ -690,7 +701,6 @@ export default function SupplierSupplyRequestsPage() {
                     </div>
                   </div>
 
-                  {/* Step 2 */}
                   <div className="relative flex items-start gap-3">
                     <div className="absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full bg-emerald-600 ring-4 ring-white">
                       <Check className="size-2.5 text-white" />
@@ -701,7 +711,6 @@ export default function SupplierSupplyRequestsPage() {
                     </div>
                   </div>
 
-                  {/* Step 3 */}
                   <div className="relative flex items-start gap-3">
                     <div className="absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white">
                       <Truck className="size-2.5 text-white" />
@@ -712,7 +721,6 @@ export default function SupplierSupplyRequestsPage() {
                     </div>
                   </div>
 
-                  {/* Step 4 */}
                   <div className="relative flex items-start gap-3">
                     <div className="absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full bg-slate-200 ring-4 ring-white" />
                     <div>
@@ -723,68 +731,57 @@ export default function SupplierSupplyRequestsPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-2">
-                <button
-                  onClick={() => setTrackingRequest(null)}
-                  className="rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-slate-800 cursor-pointer"
-                >
+              <DialogFooter>
+                <Button onClick={() => setTrackingRequest(null)} className="bg-slate-900 text-white font-bold">
                   Đóng cửa sổ
-                </button>
-              </div>
+                </Button>
+              </DialogFooter>
             </div>
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
 
-      {/* Reject Confirmation Modal */}
-      {rejectingRequestId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl animate-in zoom-in-95 duration-150 border border-slate-100/80">
-            <div className="flex items-center justify-between border-b px-6 py-4.5 bg-rose-50/50">
-              <h3 className="text-sm font-extrabold text-rose-950 flex items-center gap-2">
-                <AlertCircle className="size-4 text-rose-600" />
-                Từ chối Yêu cầu Cung ứng
-              </h3>
-              <button
-                onClick={() => setRejectingRequestId(null)}
-                className="text-slate-400 hover:text-slate-700 cursor-pointer"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
+      {/* REJECT CONFIRMATION MODAL using shadcn Dialog */}
+      <Dialog open={Boolean(rejectingRequestId)} onOpenChange={(open) => !open && setRejectingRequestId(null)}>
+        <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl border-none">
+          <DialogHeader className="bg-rose-50/80 p-6">
+            <DialogTitle className="text-sm font-extrabold text-rose-950 flex items-center gap-2">
+              <AlertCircle className="size-4 text-rose-600" />
+              Từ chối Yêu cầu Cung ứng
+            </DialogTitle>
+          </DialogHeader>
 
-            <div className="p-6 space-y-4">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <div className="p-6 space-y-4">
+            <Field>
+              <FieldLabel className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Lý do từ chối đơn hàng *
-              </p>
-
+              </FieldLabel>
               <textarea
                 placeholder="Ví dụ: Kho hiện đang trong đợt thu hoạch mới, chưa đủ sản lượng đáp ứng..."
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 p-3.5 text-xs font-medium focus:border-rose-500 focus:outline-hidden focus:ring-2 focus:ring-rose-500/10 h-24"
               />
+            </Field>
 
-              <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setRejectingRequestId(null)}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
-                >
-                  Hủy bỏ
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmReject}
-                  className="rounded-xl bg-rose-600 px-4.5 py-2.5 text-xs font-black text-white shadow-md hover:bg-rose-700 active:scale-95 transition-all cursor-pointer"
-                >
-                  Xác nhận từ chối
-                </button>
-              </div>
-            </div>
+            <DialogFooter className="pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setRejectingRequestId(null)}
+                className="border-slate-200 text-slate-700"
+              >
+                Hủy bỏ
+              </Button>
+              <Button
+                onClick={handleConfirmReject}
+                className="bg-rose-600 text-white font-black hover:bg-rose-700"
+              >
+                Xác nhận từ chối
+              </Button>
+            </DialogFooter>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,14 +1,7 @@
 import type { Metadata } from 'next'
-import { Be_Vietnam_Pro } from 'next/font/google'
 import { QueryProvider } from '@/providers/query-provider'
 import { Toaster } from 'sonner'
 import './globals.css'
-
-const beVietnamPro = Be_Vietnam_Pro({
-  variable: '--font-be-vietnam-pro',
-  subsets: ['latin', 'vietnamese'],
-  weight: ['300', '400', '500', '600', '700'],
-})
 
 export const metadata: Metadata = {
   title: 'FLDN',
@@ -17,12 +10,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="vi"
-      className={`${beVietnamPro.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
-      <body className="flex min-h-full flex-col" suppressHydrationWarning>
+    <html lang="vi" className="h-full antialiased" suppressHydrationWarning>
+      <body className="flex min-h-full flex-col font-sans" suppressHydrationWarning>
         <QueryProvider>{children}</QueryProvider>
         <Toaster richColors position="top-right" />
       </body>

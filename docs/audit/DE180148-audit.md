@@ -38,6 +38,33 @@
 
 ---
 
+## Lần 8 – Triển khai Trọn bộ Giao diện Supplier (Next.js & Stitch UI Design)
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-24 |
+| Công cụ AI | Gemini (Antigravity CLI) |
+| Mục đích | Dựng hoàn chỉnh trọn bộ 4 màn hình Frontend cho vai trò Supplier dựa trên thiết kế chuẩn Google Stitch |
+| Phần việc | Frontend – Supplier UI Pages & Services |
+| Mức độ sử dụng | Hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Tiếp nhận và phân tích mã thiết kế UI Google Stitch do sinh viên cung cấp cho vai trò Supplier (Nhà cung cấp).
+- Xây dựng 4 màn hình chuẩn Next.js App Router + Shadcn UI + Tailwind v4:
+  1. `src/app/(private)/dashboard/page.tsx`: Dashboard Bento Grid tổng quan vận hành kho.
+  2. `src/app/(private)/supplier/products/page.tsx`: Quản lý Sản phẩm, Lô hàng & Tạo Mã QR Code Truy xuất nguồn gốc.
+  3. `src/app/(private)/supplier/supply-requests/page.tsx`: Phê duyệt / Từ chối đơn Yêu cầu cung ứng từ Bếp ăn/Siêu thị & Modal xuất kho.
+  4. `src/app/(private)/supplier/analytics/page.tsx`: Báo cáo KPI, Phân tích hiệu suất, Bảng xếp hạng NCC & Biểu đồ Velocity Chart.
+- Xây dựng lớp dịch vụ `supplier.service.ts` và tích hợp các loại kiểu dữ liệu DTO trong `supplier.types.ts`.
+- Cập nhật cấu hình điều hướng Sidebar `nav-config.ts` và hệ thống đường dẫn `app-routes.ts`.
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Chạy lệnh `npm run build` xác nhận đóng gói ứng dụng Next.js đạt kết quả **Compiled successfully (0 TypeScript Errors)**.
+
+**Kết quả áp dụng:** Có – Áp dụng thành công vào hệ thống và sẵn sàng đẩy code lên nhánh main.
+
+---
+
 ## Lần 1 – Thiết kế Data Models và Interface cho Supplier Actor
 
 | Nội dung | Thông tin |

@@ -1,7 +1,7 @@
 'use client'
 
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { safeZodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,7 +33,7 @@ interface CreateCategoryDialogProps {
 export function CreateCategoryDialog({ open, onClose, categories }: CreateCategoryDialogProps) {
   const mutation = useCreateCategoryMutation()
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: safeZodResolver(schema),
     defaultValues: { name: '', parentCategoryId: '' },
   })
 

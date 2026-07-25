@@ -54,6 +54,15 @@ export function useResetPasswordMutation() {
   })
 }
 
+export function useVerifyEmailMutation() {
+  return useMutation<ApiResponse<string>, ApiErrorResponse, string>({
+    mutationFn: authService.verifyEmail,
+    onError: (error) => {
+      logAuthError('verify-email', error)
+    },
+  })
+}
+
 export function useLogoutMutation() {
   return useMutation<ApiResponse<unknown>, ApiErrorResponse>({
     mutationFn: authService.logout,

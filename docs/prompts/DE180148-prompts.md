@@ -27,6 +27,23 @@
 | 5 | 2026-07-22 | Gemini | Xóa ShipperController cũ và tối ưu hóa Swagger Schema Generator | Có |
 | 6 | 2026-07-23 | Gemini | Refactor cấu hình style CSS toàn cục và cập nhật Git | Có |
 | 7 | 2026-07-24 | Gemini | Tích hợp logo chính thức dự án FoodLink Đà Nẵng vào Frontend | Có |
+| 8 | 2026-07-24 | Gemini | Triển khai trọn bộ giao diện Supplier trên Next.js dựa trên thiết kế Stitch | Có |
+
+---
+
+## Prompt 8 – Triển khai Trọn bộ Giao diện Supplier trên Next.js
+
+**Mục đích:** Xây dựng toàn bộ giao diện Frontend cho Actor 2 Supplier bám sát thiết kế Google Stitch.
+
+**Prompt (tóm tắt):**
+Dưới đây là mã HTML/CSS từ bản vẽ Google Stitch cho hệ thống Supplier. Hãy chuyển đổi mã này thành bộ màn hình chuẩn Next.js (App Router) với Shadcn UI và Tailwind v4:
+1. Màn hình Dashboard Tổng quan vận hành.
+2. Màn hình Quản lý Sản phẩm, Lô hàng & Tạo Mã QR truy xuất.
+3. Màn hình Phê duyệt/Từ chối Yêu cầu cung ứng.
+4. Màn hình Báo cáo KPI & Bảng xếp hạng.
+Sau đó tích hợp API service, kiểm tra build thành công và đẩy code lên main.
+
+**Kết quả áp dụng:** Có. Đã hoàn thành 4 trang màn hình trong src/app/(private)/supplier và src/app/(private)/dashboard.
 
 ---
 

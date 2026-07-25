@@ -9,6 +9,9 @@ export const APP_ROUTES = {
   },
   dashboard: '/dashboard',
   products: '/products',
+  orders: {
+    create: '/orders/create',
+  },
   unauthorized: '/unauthorized',
   admin: {
     dashboard:  '/admin',

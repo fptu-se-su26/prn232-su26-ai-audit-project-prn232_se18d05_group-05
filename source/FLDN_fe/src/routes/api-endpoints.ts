@@ -36,4 +36,14 @@ export const API_ENDPOINTS = {
     supplierProducts: '/supplier/products',
   },
   categories: '/categories',
+  orders: {
+    create: '/orders',
+    list: '/orders',
+    detail: (id: string) => `/orders/${id}`,
+    cancel: (id: string) => `/orders/${id}/cancel`,
+  },
+  addresses: '/addresses',
+  vouchers: {
+    validate: '/vouchers/validate',
+  },
 } as const

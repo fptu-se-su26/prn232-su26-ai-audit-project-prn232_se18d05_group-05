@@ -21,4 +21,9 @@ export const APP_ROUTES = {
     logistics:  '/admin/logistics',
     zones:      '/admin/zones',
   },
+  supplier: {
+    products: '/supplier/products',
+    supplyRequests: '/supplier/supply-requests',
+    analytics: '/supplier/analytics',
+  },
 } as const

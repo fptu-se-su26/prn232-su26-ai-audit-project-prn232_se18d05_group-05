@@ -33,6 +33,14 @@ public sealed class OrderItemResponse
     public decimal SubTotal => UnitPrice * Quantity;
 }
 
+public sealed class OrderStatusHistoryResponse
+{
+    public Guid Id { get; set; }
+    public SupplyRequestStatus Status { get; set; }
+    public string? Note { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
 public sealed class OrderResponse
 {
     public Guid Id { get; set; }
@@ -48,4 +56,5 @@ public sealed class OrderResponse
     public string? Note { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public List<OrderItemResponse> Items { get; set; } = [];
+    public List<OrderStatusHistoryResponse> StatusHistories { get; set; } = [];
 }

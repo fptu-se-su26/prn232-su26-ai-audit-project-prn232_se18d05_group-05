@@ -170,5 +170,41 @@ public class AppData
             }
             await context.SaveChangesAsync();
         }
+
+        if (!await context.Addresses.AnyAsync())
+        {
+            var userId = await context.Users.Select(u => u.Id).FirstOrDefaultAsync();
+            var districtId = await context.Districts.Select(d => d.Id).FirstOrDefaultAsync();
+
+            var addresses = new List<Address>
+            {
+                new()
+                {
+                    Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    UserId = userId,
+                    ReceiverName = "Điểm Phân Phối Quận 1",
+                    ReceiverPhone = "0901234567",
+                    FullAddress = "123 Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
+                    DistrictId = districtId,
+                    IsDefault = true,
+                    IsActive = true,
+                    IsDeleted = false
+                },
+                new()
+                {
+                    Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    UserId = userId,
+                    ReceiverName = "Kho Phân Phối Thủ Đức",
+                    ReceiverPhone = "0909876543",
+                    FullAddress = "45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh",
+                    DistrictId = districtId,
+                    IsDefault = false,
+                    IsActive = true,
+                    IsDeleted = false
+                }
+            };
+            await context.Addresses.AddRangeAsync(addresses);
+            await context.SaveChangesAsync();
+        }
     }
 }

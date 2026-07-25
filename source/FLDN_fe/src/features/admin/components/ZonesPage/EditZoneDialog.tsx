@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { safeZodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,7 +30,7 @@ export function EditZoneDialog({ zone, onClose }: EditZoneDialogProps) {
   const mutation = useUpdateZoneMutation()
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: safeZodResolver(schema),
     defaultValues: { zoneName: '', description: '', shippingFee: 0, isActive: true },
   })
 

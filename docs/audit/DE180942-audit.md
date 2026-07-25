@@ -11,7 +11,7 @@
 | MSSV | DE180942 |
 | Giảng viên hướng dẫn | Thầy Quang |
 | Ngày bắt đầu | 11/5/2026 |
-| Ngày cập nhật gần nhất | 24/7/2026 |
+| Ngày cập nhật gần nhất | 25/7/2026 |
 | Công cụ AI | Claude (Claude Code CLI), OpenCode (Codex) |
 
 ---
@@ -239,6 +239,37 @@
 - Xác nhận sidebar active fix chạy đúng khi navigate giữa các trang admin
 
 **Kết quả áp dụng:** Có – build 0 lỗi, 3 trang admin mới hoạt động, branch `feat/DE180942-admin-module`
+
+---
+
+## Lần 13 – Implement Auth Module FE: Register, Verify Email, Forgot/Reset Password
+
+| Nội dung | Thông tin |
+|---|---|
+| Ngày | 2026-07-25 |
+| Công cụ AI | Claude |
+| Mục đích | Tạo đầy đủ 4 trang auth còn thiếu theo đúng feature-folder structure, fix verify email URL ở BE |
+| Phần việc | Frontend – Auth |
+| Mức độ sử dụng | AI hỗ trợ nhiều |
+
+**Việc AI hỗ trợ:**
+- Tạo `RegisterPage`: form fullName/email/phone/password, Zod schema sync với BE validator (min 7, hoa/thường/số/ký tự đặc biệt)
+- Tạo `VerifyEmailPage`: nhận `?token=` từ URL, auto-gọi `authService.verifyEmail` khi mount, hiện 4 trạng thái (loading/success/error/missing-token)
+- Tạo `ForgotPasswordPage`: form email, hiện success state inline sau khi gửi
+- Tạo `ResetPasswordPage`: nhận `?token=` từ URL, form newPassword/confirmPassword, xử lý token hết hạn
+- Tạo `RegisterSuccessPage`: trang xác nhận sau đăng ký thành công, hướng dẫn kiểm tra hộp thư
+- Fix `AppConstants.cs` BE: `BaseUrl` từ `https://localhost:7114` → `http://localhost:3000`, `VerifyEmailPath`/`ResetPasswordPath` trỏ về FE route thay vì BE API
+- Tạo `set-server-errors.ts`: map BE validation errors (PascalCase) → RHF `setError` (camelCase)
+- Tạo `safeZodResolver` thay thế `zodResolver` từ `@hookform/resolvers`: dùng `safeParseAsync` tránh ZodError throw trong Turbopack
+- Thêm `useVerifyEmailMutation` vào `use-auth.ts`
+- Thêm `registerSuccess` vào `APP_ROUTES`
+
+**Phần tự kiểm tra / chỉnh sửa:**
+- Xác nhận BE gửi link verify trỏ đúng port FE sau khi fix `AppConstants`
+- Xác nhận ZodError không còn xuất hiện trong Turbopack dev overlay sau khi dùng `safeZodResolver`
+- Xác nhận flow đăng ký → trang success → login hoạt động end-to-end
+
+**Kết quả áp dụng:** Có – branch `feat/DE180942-auth-module`
 
 ---
 

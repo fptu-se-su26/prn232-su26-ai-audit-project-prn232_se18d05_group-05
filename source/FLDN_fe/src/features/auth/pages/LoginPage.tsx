@@ -2,14 +2,16 @@
 
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { safeZodResolver } from '@/lib/zod-resolver'
 import { toast } from 'sonner'
 import { APP_ROUTES } from '@/routes/app-routes'
 import { useAuthStore } from '@/stores/auth.store'
+import type { ApiErrorResponse } from '@/types/api'
 import { useLoginMutation } from '../hooks/use-auth'
 import { loginSchema, type LoginFormValues } from '../schemas/login.schema'
 import { decodeJwtUser } from '../utils/decode-jwt-user'
 import { LoginForm } from '../components/LoginPage'
+import { setServerErrors } from '../utils/set-server-errors'
 
 export function LoginPage() {
   const router = useRouter()
@@ -17,7 +19,7 @@ export function LoginPage() {
   const loginMutation = useLoginMutation()
 
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: safeZodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   })
 
@@ -38,8 +40,8 @@ export function LoginPage() {
         user.role === 'Admin' ? APP_ROUTES.admin.users : APP_ROUTES.dashboard
       router.replace(destination)
     } catch (error) {
-      console.error(error)
-      // useLoginMutation.onError already shows toast
+      const apiError = error as ApiErrorResponse
+      setServerErrors(apiError, form)
     }
   }
 

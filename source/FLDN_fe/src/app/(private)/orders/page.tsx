@@ -260,8 +260,8 @@ export default function OrdersListPage() {
                   key={tab.id}
                   onClick={() => setSelectedStatus(tab.id as FilterStatus)}
                   className={`rounded-2xl px-4 py-2 text-xs font-bold transition-all whitespace-nowrap ${selectedStatus === tab.id
-                      ? 'bg-black text-white shadow-sm'
-                      : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-100'
+                    ? 'bg-black text-white shadow-sm'
+                    : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-100'
                     }`}
                 >
                   {tab.label}
@@ -459,8 +459,8 @@ export default function OrdersListPage() {
                 <div className="grid grid-cols-1 gap-3">
                   <label
                     className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 ${isFullReceived
-                        ? 'border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-600'
-                        : 'border-zinc-200 hover:border-zinc-300'
+                      ? 'border-emerald-600 bg-emerald-50/50 ring-1 ring-emerald-600'
+                      : 'border-zinc-200 hover:border-zinc-300'
                       }`}
                   >
                     <input
@@ -482,8 +482,8 @@ export default function OrdersListPage() {
 
                   <label
                     className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-start gap-3 ${!isFullReceived
-                        ? 'border-amber-600 bg-amber-50/50 ring-1 ring-amber-600'
-                        : 'border-zinc-200 hover:border-zinc-300'
+                      ? 'border-amber-600 bg-amber-50/50 ring-1 ring-amber-600'
+                      : 'border-zinc-200 hover:border-zinc-300'
                       }`}
                   >
                     <input

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { safeZodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import {
   Building2, FileText, MapPin, ShieldCheck,
@@ -54,7 +54,7 @@ export function SupplierDetailSheet({ supplierId, onClose }: SupplierDetailSheet
   const supplier = data?.data
 
   const form = useForm<FeeValues>({
-    resolver: zodResolver(feeSchema),
+    resolver: safeZodResolver(feeSchema),
     defaultValues: { serviceFeeRate: 0, discountRate: 0 },
   })
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { safeZodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import {
@@ -29,7 +29,7 @@ interface RejectSupplierDialogProps {
 export function RejectSupplierDialog({ supplierId, onClose }: RejectSupplierDialogProps) {
   const mutation = useRejectSupplierMutation()
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: safeZodResolver(schema),
     defaultValues: { reason: '' },
   })
 

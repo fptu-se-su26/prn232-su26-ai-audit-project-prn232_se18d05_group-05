@@ -14,6 +14,12 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import type { UseFormReturn } from 'react-hook-form'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
 
 interface LoginFormProps {
   readonly form: UseFormReturn<{ email: string; password: string }>
@@ -78,18 +84,18 @@ export function LoginForm({ form, onSubmit, isLoading }: LoginFormProps) {
             Kết nối trực tiếp nhà sản xuất với mạng lưới phân phối hiện đại thông qua nền tảng vận hành tối ưu và minh bạch.
           </p>
 
-          {/* Glassmorphism Bento Grid Cards */}
+          {/* Glassmorphism Bento Grid Cards using shadcn Card */}
           <div className="grid grid-cols-2 gap-4 pt-4">
-            <div className="rounded-2xl border border-white/40 bg-white/20 p-4.5 shadow-xl backdrop-blur-xl transition-all hover:bg-white/25">
+            <Card className="border border-white/40 bg-white/20 p-4.5 shadow-xl backdrop-blur-xl transition-all hover:bg-white/25 text-white">
               <span className="text-[10px] font-black uppercase tracking-wider text-emerald-100">ĐỐI TÁC</span>
               <p className="mt-1 text-3xl font-black text-white drop-shadow-xs">500+</p>
               <p className="text-[11px] font-bold text-white/90 mt-0.5">Doanh nghiệp phân phối</p>
-            </div>
-            <div className="rounded-2xl border border-white/40 bg-white/20 p-4.5 shadow-xl backdrop-blur-xl transition-all hover:bg-white/25">
+            </Card>
+            <Card className="border border-white/40 bg-white/20 p-4.5 shadow-xl backdrop-blur-xl transition-all hover:bg-white/25 text-white">
               <span className="text-[10px] font-black uppercase tracking-wider text-emerald-100">SẢN LƯỢNG</span>
               <p className="mt-1 text-3xl font-black text-white drop-shadow-xs">120 Tấn/Tháng</p>
               <p className="text-[11px] font-bold text-white/90 mt-0.5">Nông sản sạch VietGAP</p>
-            </div>
+            </Card>
           </div>
         </div>
 
@@ -124,50 +130,42 @@ export function LoginForm({ form, onSubmit, isLoading }: LoginFormProps) {
             </p>
           </div>
 
-          {/* Main Auth Form */}
+          {/* Main Auth Form using shadcn/ui Field & Input */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
             {/* Email Field */}
-            <div className="space-y-1">
-              <label htmlFor="email" className="block text-xs font-bold text-slate-700">
+            <Field data-invalid={Boolean(errors.email)}>
+              <FieldLabel htmlFor="email" className="text-xs font-bold text-slate-700">
                 Địa chỉ Email / Tên người dùng *
-              </label>
+              </FieldLabel>
               <div className="relative flex items-center">
                 <Mail className="absolute left-3.5 size-4 text-slate-400 pointer-events-none" />
-                <input
+                <Input
                   id="email"
                   type="email"
                   autoComplete="email"
+                  aria-invalid={Boolean(errors.email)}
                   placeholder="Ví dụ: supplier@foodlink.vn"
-                  className={`w-full rounded-2xl border bg-white py-3 pl-10 pr-4 text-xs font-semibold transition-all duration-200 focus:outline-hidden ${
-                    errors.email
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/10'
-                      : 'border-slate-200 focus:border-[#006948] focus:ring-3 focus:ring-[#006948]/10'
-                  }`}
+                  className="pl-10 rounded-2xl border-slate-200 focus:border-[#006948]"
                   {...register('email')}
                 />
               </div>
-              {errors.email && (
-                <p className="text-[11px] font-bold text-rose-500 mt-1">{errors.email.message}</p>
-              )}
-            </div>
+              <FieldError>{errors.email?.message}</FieldError>
+            </Field>
 
             {/* Password Field */}
-            <div className="space-y-1">
-              <label htmlFor="password" className="block text-xs font-bold text-slate-700">
+            <Field data-invalid={Boolean(errors.password)}>
+              <FieldLabel htmlFor="password" className="text-xs font-bold text-slate-700">
                 Mật khẩu *
-              </label>
+              </FieldLabel>
               <div className="relative flex items-center">
                 <Lock className="absolute left-3.5 size-4 text-slate-400 pointer-events-none" />
-                <input
+                <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
+                  aria-invalid={Boolean(errors.password)}
                   placeholder="••••••••"
-                  className={`w-full rounded-2xl border bg-white py-3 pl-10 pr-10 text-xs font-semibold transition-all duration-200 focus:outline-hidden ${
-                    errors.password
-                      ? 'border-rose-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/10'
-                      : 'border-slate-200 focus:border-[#006948] focus:ring-3 focus:ring-[#006948]/10'
-                  }`}
+                  className="pl-10 pr-10 rounded-2xl border-slate-200 focus:border-[#006948]"
                   {...register('password')}
                 />
                 <button
@@ -178,18 +176,13 @@ export function LoginForm({ form, onSubmit, isLoading }: LoginFormProps) {
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-[11px] font-bold text-rose-500 mt-1">{errors.password.message}</p>
-              )}
-            </div>
+              <FieldError>{errors.password?.message}</FieldError>
+            </Field>
 
             {/* Checkbox & Forgot Password */}
             <div className="flex items-center justify-between pt-1">
               <label className="flex items-center gap-2 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  className="size-4 rounded-md border-slate-300 text-[#006948] focus:ring-[#006948]/20"
-                />
+                <Checkbox id="remember" className="rounded-md border-slate-300 text-[#006948]" />
                 <span className="text-xs font-bold text-slate-500 group-hover:text-slate-800 transition-colors">
                   Duy trì đăng nhập
                 </span>
@@ -199,28 +192,30 @@ export function LoginForm({ form, onSubmit, isLoading }: LoginFormProps) {
               </a>
             </div>
 
-            {/* Bright & Fresh Gradient Submit Button */}
-            <button
+            {/* Submit Button using shadcn Button */}
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#006948] to-[#00855d] py-3.5 text-xs font-black text-white shadow-lg shadow-[#006948]/25 transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+              className="w-full rounded-2xl bg-gradient-to-r from-[#006948] to-[#00855d] py-3.5 text-xs font-black text-white shadow-lg shadow-[#006948]/25 hover:brightness-110"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="size-4 animate-spin text-white" />
+                  <Loader2 className="size-4 animate-spin text-white mr-2" />
                   <span>Đang xử lý đăng nhập...</span>
                 </>
               ) : (
                 <>
                   <span>Đăng nhập hệ thống</span>
-                  <LogIn className="size-4" />
+                  <LogIn className="size-4 ml-2" />
                 </>
               )}
-            </button>
+            </Button>
           </form>
 
+          <Separator />
+
           {/* Footer Register & Support Links */}
-          <div className="border-t border-slate-100 pt-6 text-center space-y-3">
+          <div className="text-center space-y-3">
             <p className="text-xs font-medium text-slate-500">
               Bạn chưa có tài khoản doanh nghiệp?{' '}
               <Link href="/auth/register" className="font-extrabold text-[#006948] hover:underline ml-1">

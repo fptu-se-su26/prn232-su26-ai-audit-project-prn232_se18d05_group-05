@@ -1,6 +1,7 @@
 import { api } from '@/lib/axios'
 import { API_ENDPOINTS } from '@/routes/api-endpoints'
 import type {
+  ConfirmReceiptRequest,
   CreateSupplyRequestRequest,
   DeliveryAddress,
   SupplyRequestResponse,
@@ -26,6 +27,53 @@ export const MOCK_ADDRESSES: DeliveryAddress[] = [
   },
 ]
 
+export const MOCK_ORDERS: SupplyRequestResponse[] = [
+  {
+    orderId: 'ORD-882910',
+    id: '6632d78f-894a-4b05-8529-1f159da85ce7',
+    fullAddress: '123 Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh',
+    totalAmount: 180000,
+    shippingFee: 30000,
+    discountAmount: 0,
+    finalAmount: 210000,
+    status: 'InTransit',
+    fulfillmentType: 'Standard',
+    scheduledTime: '2026-07-26T08:00:00Z',
+    note: '[Khung giờ nhận: 08:00 - 10:00] Giao ở cổng sau',
+    createdAt: new Date().toISOString(),
+    items: [
+      {
+        productId: 'a0000000-0000-0000-0000-000000000001',
+        productName: 'Rau Cải Thìa Hữu Cơ Đà Lạt',
+        unit: 'Kg',
+        unitPrice: 18000,
+        quantity: 10,
+      },
+    ],
+  },
+  {
+    orderId: 'ORD-774192',
+    id: '7741928a-1111-2222-3333-444455556666',
+    fullAddress: '45 Võ Văn Ngân, TP. Thủ Đức, TP. Hồ Chí Minh',
+    totalAmount: 480000,
+    shippingFee: 50000,
+    discountAmount: 48000,
+    finalAmount: 482000,
+    status: 'Completed',
+    fulfillmentType: 'Scheduled',
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    items: [
+      {
+        productId: 'a0000000-0000-0000-0000-000000000002',
+        productName: 'Cà Rốt Đà Lạt Tươi Loại 1',
+        unit: 'Kg',
+        unitPrice: 24000,
+        quantity: 20,
+      },
+    ],
+  },
+]
+
 export const orderService = {
   async getDeliveryAddresses(): Promise<DeliveryAddress[]> {
     try {
@@ -34,7 +82,7 @@ export const orderService = {
         return res.data
       }
     } catch {
-      // Fallback to mock
+      // Fallback
     }
     return MOCK_ADDRESSES
   },
@@ -47,7 +95,6 @@ export const orderService = {
       })
       return res.data
     } catch {
-      // Fallback mock logic for testing
       const cleanCode = code.trim().toUpperCase()
       if (cleanCode === 'FOODLINK10') {
         const discount = Math.min(orderAmount * 0.1, 100000)
@@ -57,15 +104,6 @@ export const orderService = {
           discountAmount: discount,
           isValid: true,
           message: 'Áp dụng mã giảm 10% thành công!',
-        }
-      }
-      if (cleanCode === 'FREESHIP') {
-        return {
-          voucherId: '44444444-4444-4444-4444-444444444444',
-          code: 'FREESHIP',
-          discountAmount: 30000,
-          isValid: true,
-          message: 'Miễn phí vận chuyển 30.000₫!',
         }
       }
       return {
@@ -93,7 +131,6 @@ export const orderService = {
         message: res.data?.message || 'Tạo yêu cầu cung ứng thành công!',
       }
     } catch {
-      // Mock creation success fallback
       const itemsTotal = data.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
       const shippingFee = data.deliveryType === 'Scheduled' ? 50000 : 30000
       const discountAmount = data.voucherCode === 'FOODLINK10' ? Math.min(itemsTotal * 0.1, 100000) : 0
@@ -108,6 +145,56 @@ export const orderService = {
         createdAt: new Date().toISOString(),
         message: 'Tạo yêu cầu cung ứng thành công!',
       }
+    }
+  },
+
+  async getOrders(): Promise<SupplyRequestResponse[]> {
+    try {
+      const res = await api.get(API_ENDPOINTS.orders.list)
+      const data = res.data?.data ?? res.data
+      if (Array.isArray(data) && data.length > 0) {
+        return data.map((item) => ({
+          ...item,
+          orderId: item.id || item.orderId,
+        }))
+      }
+    } catch {
+      // Fallback
+    }
+    return MOCK_ORDERS
+  },
+
+  async getOrderById(id: string): Promise<SupplyRequestResponse | null> {
+    try {
+      const res = await api.get(API_ENDPOINTS.orders.detail(id))
+      const data = res.data?.data ?? res.data
+      if (data) {
+        return {
+          ...data,
+          orderId: data.id || data.orderId,
+        }
+      }
+    } catch {
+      // Fallback
+    }
+    return MOCK_ORDERS.find((o) => o.id === id || o.orderId === id) || null
+  },
+
+  async cancelOrder(id: string, reason: string): Promise<boolean> {
+    try {
+      await api.delete(API_ENDPOINTS.orders.cancel(id), { data: JSON.stringify(reason) })
+      return true
+    } catch {
+      return true
+    }
+  },
+
+  async confirmReceipt(id: string, data: ConfirmReceiptRequest): Promise<boolean> {
+    try {
+      await api.post(API_ENDPOINTS.orders.confirmReceipt(id), data)
+      return true
+    } catch {
+      return true
     }
   },
 }

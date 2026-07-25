@@ -31,14 +31,27 @@ export interface CreateSupplyRequestRequest {
   }[]
 }
 
+export interface ConfirmReceiptRequest {
+  isFullReceived: boolean
+  note?: string
+}
+
 export interface SupplyRequestResponse {
   orderId: string
   id?: string
+  distributionPointId?: string
+  addressId?: string
+  fullAddress?: string
+  totalAmount?: number
   finalAmount: number
   shippingFee: number
-  discountAmount: number
-  status: 'Pending' | 'Accepted' | 'Delivering' | 'Completed' | 'Cancelled'
+  discountAmount?: number
+  status: 'Pending' | 'Approved' | 'Dispatched' | 'InTransit' | 'Received' | 'Rejected' | 'Cancelled' | 'Completed'
+  fulfillmentType?: 'Standard' | 'Scheduled'
+  scheduledTime?: string
+  note?: string
   createdAt: string
+  items?: SupplyRequestItem[]
   message?: string
 }
 

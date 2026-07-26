@@ -1,4 +1,4 @@
-import { ClipboardList, BarChart3, Boxes, FileText, LayoutDashboard, MapPin, Package, Search, Tag, Truck, Users } from 'lucide-react'
+import { ClipboardList, BarChart3, Boxes, FileCheck, FileText, Forklift, LayoutDashboard, MapPin, Package, Search, Tag, Truck, Users } from 'lucide-react'
 import type { UserRole } from './roles'
 import { APP_ROUTES } from '@/routes/app-routes'
 
@@ -34,6 +34,9 @@ export const NAV_CONFIG: Record<UserRole, NavItem[]> = {
   ],
   LogisticsOperator: [
     { label: 'Tổng quan', href: APP_ROUTES.dashboard, icon: LayoutDashboard },
+    { label: 'Lô hàng chờ vận chuyển', href: APP_ROUTES.logistics.pending, icon: Truck },
+    { label: 'Cập nhật trạng thái vận chuyển', href: APP_ROUTES.logistics.myShipments, icon: Forklift },
+    { label: 'Xác nhận giao hàng POD', href: APP_ROUTES.logistics.pod('ship-88-uuid-0003'), icon: FileCheck },
     { label: 'Tìm kiếm sản phẩm', href: APP_ROUTES.products, icon: Search },
     { label: 'Quản lý yêu cầu', href: APP_ROUTES.orders.list, icon: ClipboardList },
   ],

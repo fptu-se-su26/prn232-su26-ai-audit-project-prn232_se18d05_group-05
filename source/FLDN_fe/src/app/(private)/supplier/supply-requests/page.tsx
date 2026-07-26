@@ -524,7 +524,7 @@ export default function SupplierSupplyRequestsPage() {
                   <TableHead className="px-6 py-4 text-right">Số lượng</TableHead>
                   <TableHead className="px-6 py-4 text-center">Trạng thái Giao vận (Logistics)</TableHead>
                   <TableHead className="px-6 py-4 text-right">Thao tác & Tiến độ</TableHead>
-                </tr>
+                </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-slate-50 text-xs">
                 {filteredList.map((req) => {

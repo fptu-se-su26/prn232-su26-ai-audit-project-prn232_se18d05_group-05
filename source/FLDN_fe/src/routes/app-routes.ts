@@ -27,4 +27,10 @@ export const APP_ROUTES = {
     supplyRequests: '/supplier/supply-requests',
     analytics: '/supplier/analytics',
   },
+  logistics: {
+    pending: '/logistics',
+    myShipments: '/logistics/my-shipments',
+    confirm: (id: string) => `/logistics/${id}/confirm`,
+    pod: (id: string) => `/logistics/${id}/pod`,
+  },
 } as const

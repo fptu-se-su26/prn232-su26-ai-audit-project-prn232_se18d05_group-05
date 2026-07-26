@@ -14,6 +14,7 @@ import {
   Receipt,
   ShieldCheck,
   ShoppingBag,
+  Store,
   Tag,
   Trash2,
   Truck
@@ -30,6 +31,8 @@ import type {
 } from '@/types/order'
 import { APP_ROUTES } from '@/routes/app-routes'
 import { useSupplyRequestDraftStore } from '@/stores/supply-request-draft.store'
+import { distributionPointService } from '@/services/distribution-point.service'
+import type { DistributionPointProfile } from '@/types/distribution-point'
 
 export default function CreateSupplyRequestPage() {
   const router = useRouter()
@@ -47,6 +50,7 @@ export default function CreateSupplyRequestPage() {
   const [newDistrictId, setNewDistrictId] = useState('')
   const [newIsDefault, setNewIsDefault] = useState(false)
   const [isSavingAddress, setIsSavingAddress] = useState(false)
+  const [dpProfile, setDpProfile] = useState<DistributionPointProfile | null>(null)
 
   // Delivery type & schedule
   const [deliveryType, setDeliveryType] = useState<'Standard' | 'Scheduled'>('Standard')
@@ -110,6 +114,12 @@ export default function CreateSupplyRequestPage() {
         if (res.length > 0) setNewDistrictId(res[0].districtId)
       })
       .catch(() => toast.error('Không tải được danh sách quận/huyện.'))
+
+    // Hồ sơ điểm phân phối dùng để điền nhanh địa chỉ. Role khác (Admin) sẽ bị 403 — bỏ qua im lặng.
+    distributionPointService
+      .getMyProfile()
+      .then(setDpProfile)
+      .catch(() => setDpProfile(null))
 
     productService.searchProducts({ pageSize: 50 }).then((res) => {
       const items = res.items.length > 0 ? res.items : MOCK_PRODUCTS
@@ -230,6 +240,26 @@ export default function CreateSupplyRequestPage() {
     }
   }
 
+  // Điền nhanh form địa chỉ từ hồ sơ điểm phân phối
+  const handleFillFromProfile = () => {
+    if (!dpProfile) return
+
+    setNewReceiverName(dpProfile.contactPerson || dpProfile.pointName)
+    if (dpProfile.contactPhone) setNewReceiverPhone(dpProfile.contactPhone)
+    if (dpProfile.address) setNewFullAddress(dpProfile.address)
+    if (dpProfile.districtId) setNewDistrictId(dpProfile.districtId)
+
+    const missing: string[] = []
+    if (!dpProfile.contactPhone) missing.push('số điện thoại')
+    if (!dpProfile.address) missing.push('địa chỉ')
+
+    if (missing.length > 0) {
+      toast.warning(`Hồ sơ chưa có ${missing.join(' và ')}. Vui lòng điền nốt.`)
+    } else {
+      toast.success('Đã điền từ hồ sơ điểm phân phối.')
+    }
+  }
+
   // Đặt địa chỉ có sẵn làm mặc định
   const handleSetDefaultAddress = async (id: string) => {
     try {
@@ -311,7 +341,7 @@ export default function CreateSupplyRequestPage() {
         <div className="border-b border-zinc-200/80 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900 mb-2">
-              UC22 • Yêu cầu cung ứng thực phẩm
+              Yêu cầu cung ứng thực phẩm
             </span>
             <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">
               Lập yêu cầu cung ứng
@@ -471,9 +501,21 @@ export default function CreateSupplyRequestPage() {
               {/* Add New Address Form */}
               {showAddAddress && (
                 <form onSubmit={handleCreateNewAddress} className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900">
-                    Nhập địa chỉ giao mới
-                  </h4>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900">
+                      Nhập địa chỉ giao mới
+                    </h4>
+                    {dpProfile && (
+                      <button
+                        type="button"
+                        onClick={handleFillFromProfile}
+                        className="flex items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 py-1 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100"
+                      >
+                        <Store className="size-3" />
+                        Điền từ hồ sơ điểm phân phối
+                      </button>
+                    )}
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input
                       type="text"

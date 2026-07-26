@@ -15,6 +15,7 @@ public class User : EntityBase<Guid>, ISoftDeletable
     public ICollection<UserRole> UserRoles { get; set; } = [];
     public SupplierProfile? SupplierProfile { get; set; }
     public LogisticsProfile? LogisticsProfile { get; set; }
+    public DistributionPointProfile? DistributionPointProfile { get; set; }
     public ICollection<Address> Addresses { get; set; } = [];
     public ICollection<SupplyRequest> SupplyRequests { get; set; } = [];
     public ICollection<Notification> Notifications { get; set; } = [];

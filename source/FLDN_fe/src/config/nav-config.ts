@@ -1,4 +1,4 @@
-import { ClipboardList, BarChart3, Boxes, FileText, Forklift, LayoutDashboard, MapPin, Package, Search, Tag, Truck, Users } from 'lucide-react'
+import { ClipboardList, BarChart3, Boxes, FileText, Forklift, LayoutDashboard, MapPin, Package, Search, Store, Tag, Truck, Users } from 'lucide-react'
 import type { UserRole } from './roles'
 import { APP_ROUTES } from '@/routes/app-routes'
 
@@ -30,6 +30,7 @@ export const NAV_CONFIG: Record<UserRole, NavItem[]> = {
     { label: 'Tìm kiếm sản phẩm', href: APP_ROUTES.products, icon: Search },
     { label: 'Tạo yêu cầu cung ứng', href: APP_ROUTES.orders.create, icon: FileText },
     { label: 'Quản lý yêu cầu', href: APP_ROUTES.orders.list, icon: ClipboardList },
+    { label: 'Hồ sơ điểm phân phối', href: APP_ROUTES.distributionPoint.profile, icon: Store },
   ],
   // LogisticsOperator: /api/logistics/* (role-locked)
   LogisticsOperator: [

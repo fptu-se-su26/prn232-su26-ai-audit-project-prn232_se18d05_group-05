@@ -33,4 +33,17 @@ public class AppConfiguration(IConfiguration configuration) : IAppConfiguration
 
         return cloudinaryOptions;
     }
+
+    public OrderOptions GetOrderOptions()
+    {
+        var orderOptions = configuration.GetSection("Order").Get<OrderOptions>();
+
+        if (orderOptions == null)
+            throw new InvalidOperationException("Missing 'Order' section in appsettings.json");
+
+        if (orderOptions.StandardShippingFee < 0 || orderOptions.ScheduledShippingFee < 0)
+            throw new InvalidOperationException("Order shipping fees must not be negative.");
+
+        return orderOptions;
+    }
 }

@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useEffect, useState, useTransition } from 'react'
-import { Search, SlidersHorizontal, X, ArrowUpDown, RefreshCw, PackageSearch } from 'lucide-react'
+import Link from 'next/link'
+import { Search, SlidersHorizontal, X, ArrowUpDown, RefreshCw, PackageSearch, ClipboardList } from 'lucide-react'
 import { productService } from '@/services/product.service'
 import type { Category, Product, ProductSearchParams } from '@/types/product'
 import { ProductCard } from '@/app/(private)/products/components/ProductCard'
@@ -9,6 +10,7 @@ import { ProductDetailModal } from '@/app/(private)/products/components/ProductD
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useSupplyRequestDraftStore } from '@/stores/supply-request-draft.store'
 
 export default function ProductsSearchPage() {
   const [categories, setCategories] = useState<Category[]>([])
@@ -27,6 +29,10 @@ export default function ProductsSearchPage() {
   // UI states
   const [showMobileFilter, setShowMobileFilter] = useState<boolean>(false)
   const [selectedProductForModal, setSelectedProductForModal] = useState<Product | null>(null)
+  const draftItems = useSupplyRequestDraftStore((state) => state.items)
+  // Store persist từ localStorage — chỉ render sau mount để tránh lệch SSR/client
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   // Fetch categories on mount
   useEffect(() => {
@@ -366,6 +372,25 @@ export default function ProductsSearchPage() {
         isOpen={!!selectedProductForModal}
         onClose={() => setSelectedProductForModal(null)}
       />
+
+      {/* Thanh nổi: sản phẩm đã chọn cho yêu cầu cung ứng */}
+      {mounted && draftItems.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2">
+          <Link
+            href="/orders/create"
+            className="flex items-center gap-3 rounded-full bg-black px-6 py-3 text-sm font-semibold text-white shadow-xl transition-all hover:bg-zinc-800"
+          >
+            <ClipboardList className="size-4" />
+            <span>
+              Tạo yêu cầu cung ứng ({draftItems.length} sản phẩm ·{' '}
+              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+                draftItems.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0)
+              )}
+              )
+            </span>
+          </Link>
+        </div>
+      )}
     </div>
   )
 }

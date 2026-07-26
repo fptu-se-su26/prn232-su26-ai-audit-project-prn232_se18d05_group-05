@@ -22,8 +22,14 @@ import { toast } from 'sonner'
 import { MOCK_PRODUCTS, productService } from '@/services/product.service'
 import { orderService } from '@/services/order.service'
 import type { Product } from '@/types/product'
-import type { DeliveryAddress, SupplyRequestItem, VoucherValidationResponse } from '@/types/order'
+import type {
+  DeliveryAddress,
+  District,
+  SupplyRequestItem,
+  VoucherValidationResponse,
+} from '@/types/order'
 import { APP_ROUTES } from '@/routes/app-routes'
+import { useSupplyRequestDraftStore } from '@/stores/supply-request-draft.store'
 
 export default function CreateSupplyRequestPage() {
   const router = useRouter()
@@ -33,10 +39,14 @@ export default function CreateSupplyRequestPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string>('')
   
   // Custom new address form
+  const [districts, setDistricts] = useState<District[]>([])
   const [showAddAddress, setShowAddAddress] = useState<boolean>(false)
   const [newReceiverName, setNewReceiverName] = useState('')
   const [newReceiverPhone, setNewReceiverPhone] = useState('')
   const [newFullAddress, setNewFullAddress] = useState('')
+  const [newDistrictId, setNewDistrictId] = useState('')
+  const [newIsDefault, setNewIsDefault] = useState(false)
+  const [isSavingAddress, setIsSavingAddress] = useState(false)
 
   // Delivery type & schedule
   const [deliveryType, setDeliveryType] = useState<'Standard' | 'Scheduled'>('Standard')
@@ -63,15 +73,43 @@ export default function CreateSupplyRequestPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [successOrder, setSuccessOrder] = useState<{ orderId: string; finalAmount: number } | null>(null)
 
+  // Nhận các sản phẩm đã chọn từ trang tìm kiếm (/products) vào yêu cầu
+  useEffect(() => {
+    const draftItems = useSupplyRequestDraftStore.getState().items
+    if (draftItems.length === 0) return
+    setRequestItems((current) => {
+      const merged = [...current]
+      for (const draft of draftItems) {
+        const idx = merged.findIndex((i) => i.productId === draft.productId)
+        if (idx > -1) merged[idx] = { ...merged[idx], quantity: merged[idx].quantity + draft.quantity }
+        else merged.push(draft)
+      }
+      return merged
+    })
+    useSupplyRequestDraftStore.getState().clear()
+    toast.info(`Đã đưa ${draftItems.length} sản phẩm đã chọn vào yêu cầu cung ứng.`)
+  }, [])
+
   // Load initial data
   useEffect(() => {
-    orderService.getDeliveryAddresses().then((res) => {
-      setAddresses(res)
-      if (res.length > 0) {
-        const defaultAddr = res.find((a) => a.isDefault) || res[0]
-        setSelectedAddressId(defaultAddr.addressId)
-      }
-    })
+    orderService
+      .getDeliveryAddresses()
+      .then((res) => {
+        setAddresses(res)
+        if (res.length > 0) {
+          const defaultAddr = res.find((a) => a.isDefault) || res[0]
+          setSelectedAddressId(defaultAddr.addressId)
+        }
+      })
+      .catch(() => toast.error('Không tải được danh sách địa chỉ giao hàng.'))
+
+    orderService
+      .getDistricts()
+      .then((res) => {
+        setDistricts(res)
+        if (res.length > 0) setNewDistrictId(res[0].districtId)
+      })
+      .catch(() => toast.error('Không tải được danh sách quận/huyện.'))
 
     productService.searchProducts({ pageSize: 50 }).then((res) => {
       const items = res.items.length > 0 ? res.items : MOCK_PRODUCTS
@@ -145,28 +183,80 @@ export default function CreateSupplyRequestPage() {
   }
 
   // Add new custom address
-  const handleCreateNewAddress = (e: React.FormEvent) => {
+  const handleCreateNewAddress = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newReceiverName || !newReceiverPhone || !newFullAddress) {
       toast.error('Vui lòng điền đầy đủ thông tin địa chỉ!')
       return
     }
-
-    const newAddr: DeliveryAddress = {
-      addressId: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : '55555555-5555-5555-5555-555555555555',
-      receiverName: newReceiverName,
-      receiverPhone: newReceiverPhone,
-      fullAddress: newFullAddress,
-      isDefault: false,
+    if (!newDistrictId) {
+      toast.error('Vui lòng chọn quận/huyện!')
+      return
     }
 
-    setAddresses([newAddr, ...addresses])
-    setSelectedAddressId(newAddr.addressId)
-    setShowAddAddress(false)
-    setNewReceiverName('')
-    setNewReceiverPhone('')
-    setNewFullAddress('')
-    toast.success('Đã thêm địa chỉ giao hàng mới!')
+    setIsSavingAddress(true)
+    try {
+      const created = await orderService.createAddress({
+        receiverName: newReceiverName,
+        receiverPhone: newReceiverPhone,
+        fullAddress: newFullAddress,
+        districtId: newDistrictId,
+        isDefault: newIsDefault,
+      })
+
+      // Đặt mặc định làm server đổi cờ isDefault của các địa chỉ khác, nên nạp lại danh sách
+      const refreshed = await orderService.getDeliveryAddresses()
+      setAddresses(refreshed)
+      setSelectedAddressId(created.addressId)
+
+      setShowAddAddress(false)
+      setNewReceiverName('')
+      setNewReceiverPhone('')
+      setNewFullAddress('')
+      setNewIsDefault(false)
+      toast.success(
+        created.isDefault
+          ? 'Đã lưu địa chỉ và đặt làm mặc định!'
+          : 'Đã lưu địa chỉ giao hàng mới!'
+      )
+    } catch (error) {
+      const message =
+        typeof error === 'object' && error !== null && 'message' in error
+          ? String((error as { message: unknown }).message)
+          : 'Lưu địa chỉ thất bại. Vui lòng thử lại.'
+      toast.error(message)
+    } finally {
+      setIsSavingAddress(false)
+    }
+  }
+
+  // Đặt địa chỉ có sẵn làm mặc định
+  const handleSetDefaultAddress = async (id: string) => {
+    try {
+      await orderService.setDefaultAddress(id)
+      const refreshed = await orderService.getDeliveryAddresses()
+      setAddresses(refreshed)
+      setSelectedAddressId(id)
+      toast.success('Đã đặt làm địa chỉ mặc định.')
+    } catch {
+      toast.error('Không đặt được địa chỉ mặc định.')
+    }
+  }
+
+  // Xoá địa chỉ
+  const handleDeleteAddress = async (id: string) => {
+    try {
+      await orderService.deleteAddress(id)
+      const refreshed = await orderService.getDeliveryAddresses()
+      setAddresses(refreshed)
+      if (selectedAddressId === id) {
+        const fallback = refreshed.find((a) => a.isDefault) || refreshed[0]
+        setSelectedAddressId(fallback?.addressId ?? '')
+      }
+      toast.success('Đã xoá địa chỉ.')
+    } catch {
+      toast.error('Không xoá được địa chỉ.')
+    }
   }
 
   // Submit Supply Request
@@ -407,6 +497,27 @@ export default function CreateSupplyRequestPage() {
                     onChange={(e) => setNewFullAddress(e.target.value)}
                     className="w-full rounded-xl border border-zinc-200 bg-white p-2.5 text-sm text-zinc-900 focus:outline-none"
                   />
+                  <select
+                    value={newDistrictId}
+                    onChange={(e) => setNewDistrictId(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-200 bg-white p-2.5 text-sm text-zinc-900 focus:outline-none"
+                  >
+                    <option value="">-- Chọn quận/huyện --</option>
+                    {districts.map((d) => (
+                      <option key={d.districtId} value={d.districtId}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+                  <label className="flex items-center gap-2 text-xs font-medium text-zinc-700">
+                    <input
+                      type="checkbox"
+                      checked={newIsDefault}
+                      onChange={(e) => setNewIsDefault(e.target.checked)}
+                      className="accent-black"
+                    />
+                    Đặt làm địa chỉ nhận hàng mặc định
+                  </label>
                   <div className="flex justify-end gap-2 pt-1">
                     <button
                       type="button"
@@ -417,9 +528,10 @@ export default function CreateSupplyRequestPage() {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-1.5 text-xs font-semibold text-white bg-black rounded-lg hover:bg-zinc-800"
+                      disabled={isSavingAddress}
+                      className="px-4 py-1.5 text-xs font-semibold text-white bg-black rounded-lg hover:bg-zinc-800 disabled:opacity-50"
                     >
-                      Lưu địa chỉ
+                      {isSavingAddress ? 'Đang lưu...' : 'Lưu địa chỉ'}
                     </button>
                   </div>
                 </form>
@@ -453,10 +565,45 @@ export default function CreateSupplyRequestPage() {
                           </span>
                         )}
                       </div>
-                      <p className="mt-0.5 text-zinc-600">{addr.fullAddress}</p>
+                      <p className="mt-0.5 text-zinc-600">
+                        {addr.fullAddress}
+                        {addr.districtName ? ` — ${addr.districtName}` : ''}
+                      </p>
+                      <div className="mt-2 flex gap-3 text-[11px] font-semibold">
+                        {!addr.isDefault && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleSetDefaultAddress(addr.addressId)
+                            }}
+                            className="text-emerald-700 hover:underline"
+                          >
+                            Đặt mặc định
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleDeleteAddress(addr.addressId)
+                          }}
+                          className="text-red-600 hover:underline"
+                        >
+                          Xoá
+                        </button>
+                      </div>
                     </div>
                   </label>
                 ))}
+
+                {addresses.length === 0 && (
+                  <div className="rounded-2xl border border-dashed border-zinc-300 p-4 text-center text-sm text-zinc-500">
+                    Chưa có địa chỉ nhận hàng. Nhấn &quot;Thêm địa chỉ mới&quot; để tạo.
+                  </div>
+                )}
               </div>
             </div>
 

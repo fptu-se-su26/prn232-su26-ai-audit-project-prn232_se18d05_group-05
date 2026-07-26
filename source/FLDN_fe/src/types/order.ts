@@ -14,8 +14,23 @@ export interface DeliveryAddress {
   receiverName: string
   receiverPhone: string
   fullAddress: string
+  districtId?: string
   districtName?: string
   isDefault?: boolean
+}
+
+export interface District {
+  districtId: string
+  name: string
+  code: string
+}
+
+export interface AddressPayload {
+  receiverName: string
+  receiverPhone: string
+  fullAddress: string
+  districtId: string
+  isDefault: boolean
 }
 
 export interface CreateSupplyRequestRequest {

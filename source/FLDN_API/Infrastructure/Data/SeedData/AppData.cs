@@ -5,7 +5,11 @@ namespace Infrastructure;
 
 public class AppData
 {
-    public static async Task SeedAsync(ApplicationDbContext context)
+    /// <summary>
+    /// Dữ liệu bắt buộc để hệ thống chạy được ở MỌI môi trường, kể cả Production.
+    /// Thiếu Role thì đăng ký tài khoản sẽ hỏng; thiếu District thì không tạo được địa chỉ giao hàng.
+    /// </summary>
+    public static async Task SeedEssentialAsync(ApplicationDbContext context)
     {
         if (!await context.Roles.AnyAsync())
         {
@@ -24,6 +28,14 @@ public class AppData
             await context.Districts.AddAsync(district);
             await context.SaveChangesAsync();
         }
+    }
+
+    /// <summary>
+    /// Dữ liệu demo (danh mục, sản phẩm, lô hàng, địa chỉ mẫu) — chỉ dùng cho môi trường phát triển.
+    /// </summary>
+    public static async Task SeedAsync(ApplicationDbContext context)
+    {
+        await SeedEssentialAsync(context);
 
         if (!await context.Categories.AnyAsync())
         {

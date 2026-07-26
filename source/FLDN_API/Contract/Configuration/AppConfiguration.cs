@@ -34,6 +34,23 @@ public class AppConfiguration(IConfiguration configuration) : IAppConfiguration
         return cloudinaryOptions;
     }
 
+    public AppOptions GetAppOptions()
+    {
+        var appOptions = configuration.GetSection("App").Get<AppOptions>();
+
+        if (appOptions == null)
+            throw new InvalidOperationException("Missing 'App' section in appsettings.json");
+
+        if (string.IsNullOrWhiteSpace(appOptions.BaseUrl))
+            throw new InvalidOperationException("App:BaseUrl is required — link xác thực email phụ thuộc vào giá trị này.");
+
+        // Bỏ dấu '/' cuối để nối path không sinh ra '//'
+        appOptions.BaseUrl = appOptions.BaseUrl.TrimEnd('/');
+        appOptions.ApiBaseUrl = appOptions.ApiBaseUrl?.TrimEnd('/') ?? string.Empty;
+
+        return appOptions;
+    }
+
     public OrderOptions GetOrderOptions()
     {
         var orderOptions = configuration.GetSection("Order").Get<OrderOptions>();

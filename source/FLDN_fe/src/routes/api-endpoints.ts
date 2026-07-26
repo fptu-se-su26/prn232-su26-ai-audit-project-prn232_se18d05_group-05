@@ -47,4 +47,10 @@ export const API_ENDPOINTS = {
   vouchers: {
     validate: '/vouchers/validate',
   },
+  logistics: {
+    shipments: '/logistics/shipments',
+    accept: (id: string) => `/logistics/shipments/${id}/accept`,
+    updateStatus: (id: string) => `/logistics/shipments/${id}/status`,
+    complete: (id: string) => `/logistics/shipments/${id}/complete`,
+  },
 } as const

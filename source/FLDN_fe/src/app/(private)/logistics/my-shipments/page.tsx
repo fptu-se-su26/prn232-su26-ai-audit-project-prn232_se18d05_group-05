@@ -27,6 +27,8 @@ import {
   UserCheck,
   X,
 } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { APP_ROUTES } from '@/routes/app-routes'
 import { toast } from 'sonner'
 import { logisticsService } from '@/services/logistics.service'
 import type { ConfirmDeliveryRequest, ShipmentItem, ShipmentStatus } from '@/types/logistics'
@@ -45,11 +47,21 @@ const STATUS_STEP_INDEX: Record<ShipmentStatus, number> = {
 }
 
 export default function UpdateShipmentStatusPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const tabParam = searchParams?.get('tab') as TabStatus | null
+
   const [shipments, setShipments] = useState<ShipmentItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [refreshing, setRefreshing] = useState<boolean>(false)
-  const [activeTab, setActiveTab] = useState<TabStatus>('ALL')
+  const [activeTab, setActiveTab] = useState<TabStatus>(tabParam || 'ALL')
   const [searchQuery, setSearchQuery] = useState<string>('')
+
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam)
+    }
+  }, [tabParam])
 
   // State for status update processing
   const [updatingId, setUpdatingId] = useState<string | null>(null)
@@ -211,7 +223,7 @@ export default function UpdateShipmentStatusPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-              <Forklift className="w-3.5 h-3.5" /> Quản lý giao vận (UC29)
+              <Forklift className="w-3.5 h-3.5" /> Quản lý giao vận
             </span>
             <span className="text-xs text-gray-500">FoodLink Đà Nẵng</span>
           </div>
@@ -476,10 +488,10 @@ export default function UpdateShipmentStatusPage() {
                         </button>
                       )}
 
-                      {/* Step 4 -> Step 5: Delivered (UC30 Complete) */}
+                      {/* Step 4 -> Step 5: Delivered (Redirect to POD) */}
                       {shipment.shipmentStatus === 'Arrived' && (
                         <button
-                          onClick={() => openDeliveryModal(shipment)}
+                          onClick={() => router.push(APP_ROUTES.logistics.pod(shipment.shipmentId))}
                           className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
@@ -489,13 +501,19 @@ export default function UpdateShipmentStatusPage() {
 
                       {/* Completed State */}
                       {shipment.shipmentStatus === 'Delivered' && (
-                        <button
-                          disabled
-                          className="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1 cursor-default"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                          Giao hàng hoàn tất
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <span className="px-3.5 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            Giao hàng hoàn tất
+                          </span>
+                          <button
+                            onClick={() => router.push(APP_ROUTES.logistics.pod(shipment.shipmentId))}
+                            className="px-4 py-2 bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
+                          >
+                            <FileText className="w-4 h-4 text-emerald-600" />
+                            <span>Xem lại ảnh &amp; chữ ký POD</span>
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>

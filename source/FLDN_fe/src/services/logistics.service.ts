@@ -139,7 +139,18 @@ export const MOCK_SHIPMENTS: ShipmentItem[] = [
 
 const ACCEPTED_KEY = 'fldn_accepted_shipments'
 
-function getAcceptedShipmentsMap(): Record<string, { status: ShipmentStatus; assignedAt: string }> {
+export interface AcceptedShipmentData {
+  status: ShipmentStatus
+  assignedAt: string
+  deliveredAt?: string
+  receiverName?: string
+  receiverPhone?: string
+  deliveryNote?: string
+  photos?: string[]
+  signature?: string
+}
+
+function getAcceptedShipmentsMap(): Record<string, AcceptedShipmentData> {
   if (typeof window === 'undefined') return {}
   try {
     const raw = localStorage.getItem(ACCEPTED_KEY)
@@ -149,15 +160,67 @@ function getAcceptedShipmentsMap(): Record<string, { status: ShipmentStatus; ass
   }
 }
 
-function saveAcceptedShipment(id: string, status: ShipmentStatus = 'Assigned') {
+function saveAcceptedShipment(
+  id: string,
+  status: ShipmentStatus = 'Assigned',
+  extraData?: Partial<AcceptedShipmentData>
+) {
   if (typeof window === 'undefined') return
   try {
     const map = getAcceptedShipmentsMap()
-    map[id] = { status, assignedAt: new Date().toISOString() }
+    const existing = map[id] || {}
+    const entry: AcceptedShipmentData = {
+      ...existing,
+      ...extraData,
+      status,
+      assignedAt: existing.assignedAt || new Date().toISOString(),
+    }
+    map[id] = entry
+    const cleanKey = id.replace('#', '').toLowerCase()
+    map[cleanKey] = entry
     localStorage.setItem(ACCEPTED_KEY, JSON.stringify(map))
   } catch {
     // ignore
   }
+}
+
+function getAcceptedShipmentData(id: string): AcceptedShipmentData | undefined {
+  const map = getAcceptedShipmentsMap()
+  if (map[id]) return map[id]
+  const cleanKey = id.replace('#', '').toLowerCase()
+  if (map[cleanKey]) return map[cleanKey]
+  for (const key of Object.keys(map)) {
+    if (
+      key.toLowerCase() === cleanKey ||
+      key.toLowerCase().includes(cleanKey) ||
+      cleanKey.includes(key.toLowerCase().replace('#', ''))
+    ) {
+      return map[key]
+    }
+  }
+  return undefined
+}
+
+function getStatusFromMap(id: string): ShipmentStatus | undefined {
+  return getAcceptedShipmentData(id)?.status
+}
+
+function isSamePickupLocation(s1: ShipmentItem, s2: ShipmentItem): boolean {
+  if (
+    s1.retailerName &&
+    s2.retailerName &&
+    s1.retailerName.trim().toLowerCase() === s2.retailerName.trim().toLowerCase()
+  ) {
+    return true
+  }
+  if (s1.pickupAddress && s2.pickupAddress) {
+    const addr1 = s1.pickupAddress.trim().toLowerCase()
+    const addr2 = s2.pickupAddress.trim().toLowerCase()
+    if (addr1 === addr2 || addr1.includes(addr2) || addr2.includes(addr1)) {
+      return true
+    }
+  }
+  return false
 }
 
 export const logisticsService = {
@@ -203,7 +266,9 @@ export const logisticsService = {
     }
 
     const acceptedMap = getAcceptedShipmentsMap()
-    let filtered = MOCK_SHIPMENTS.filter((s) => !acceptedMap[s.shipmentId])
+    let filtered = MOCK_SHIPMENTS.filter(
+      (s) => !acceptedMap[s.shipmentId] && !acceptedMap[s.shipmentCode] && !getStatusFromMap(s.shipmentId) && !getStatusFromMap(s.shipmentCode)
+    )
 
     if (params?.search) {
       const q = params.search.toLowerCase()
@@ -230,8 +295,42 @@ export const logisticsService = {
 
   async acceptShipment(id: string): Promise<AcceptShipmentResponse> {
     const acceptedMap = getAcceptedShipmentsMap()
-    if (acceptedMap[id]) {
+    if (acceptedMap[id] && acceptedMap[id].status !== 'Delivered') {
       throw new Error('Lô hàng này đã được một tài xế khác tiếp nhận trước đó!')
+    }
+
+    // Fetch active shipments of driver
+    const myShipmentsRes = await this.getMyShipments()
+    const activeShipments = myShipmentsRes.items.filter(
+      (s) => s.shipmentStatus !== 'Delivered' && s.shipmentStatus !== 'Failed' && s.shipmentStatus !== 'Returned'
+    )
+
+    // Lookup target shipment
+    let targetShipment: ShipmentItem | undefined = MOCK_SHIPMENTS.find(
+      (s) =>
+        s.shipmentId === id ||
+        s.shipmentCode.toLowerCase() === id.toLowerCase() ||
+        s.shipmentCode.replace('#', '').toLowerCase() === id.replace('#', '').toLowerCase()
+    )
+
+    if (!targetShipment) {
+      const pendingRes = await this.getPendingShipments()
+      targetShipment = pendingRes.items.find(
+        (s) =>
+          s.shipmentId === id ||
+          s.shipmentCode.toLowerCase() === id.toLowerCase() ||
+          s.shipmentCode.replace('#', '').toLowerCase() === id.replace('#', '').toLowerCase()
+      )
+    }
+
+    if (activeShipments.length > 0 && targetShipment) {
+      const isSameLocation = activeShipments.every((active) => isSamePickupLocation(active, targetShipment!))
+      if (!isSameLocation) {
+        const activeLocation = activeShipments[0].retailerName || activeShipments[0].pickupAddress
+        throw new Error(
+          `Tài xế đang có đơn hàng chưa hoàn tất tại điểm lấy: "${activeLocation}". Bạn chỉ được nhận thêm các đơn trùng điểm lấy hàng này, hoặc phải hoàn thành các đơn hiện tại trước khi nhận đơn ở điểm lấy hàng mới!`
+        )
+      }
     }
 
     try {
@@ -254,6 +353,7 @@ export const logisticsService = {
     status: ShipmentStatus,
     note?: string
   ): Promise<boolean> {
+    saveAcceptedShipment(id, status)
     try {
       await api.put(API_ENDPOINTS.logistics.updateStatus(id), {
         shipmentStatus: status,
@@ -265,7 +365,22 @@ export const logisticsService = {
     }
   },
 
-  async confirmDelivery(id: string, data: ConfirmDeliveryRequest): Promise<boolean> {
+  async confirmDelivery(
+    id: string,
+    data: ConfirmDeliveryRequest & { photos?: string[]; signature?: string }
+  ): Promise<boolean> {
+    const podExtra: Partial<AcceptedShipmentData> = {
+      receiverName: data.receiverName,
+      receiverPhone: data.receiverPhone,
+      deliveryNote: data.deliveryNote,
+      photos: data.photos || (data.deliveryImageUrl ? [data.deliveryImageUrl] : []),
+      signature: data.signature,
+      deliveredAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' Hôm nay',
+    }
+    saveAcceptedShipment(id, 'Delivered', podExtra)
+    if (data.shipmentId) {
+      saveAcceptedShipment(data.shipmentId, 'Delivered', podExtra)
+    }
     try {
       await api.put(API_ENDPOINTS.logistics.complete(id), data)
       return true
@@ -274,18 +389,19 @@ export const logisticsService = {
     }
   },
 
-  async getShipmentById(id: string): Promise<ShipmentItem | null> {
+  async getShipmentById(id: string): Promise<(ShipmentItem & { podData?: AcceptedShipmentData }) | null> {
     try {
       const res = await api.get(`${API_ENDPOINTS.logistics.shipments}/${id}`)
       const item = res.data?.data ?? res.data
       if (item && (item.shipmentId || item.id)) {
+        const savedData = getAcceptedShipmentData(id)
         return {
           shipmentId: item.shipmentId || item.id,
           orderId: item.orderId || 'ORD-9001',
           shipmentCode: item.shipmentCode || '#SHIP-90',
           retailerName: item.retailerName || item.supplierName || 'Farm Hòa Vang',
-          receiverName: item.receiverName || 'Siêu thị Co.op Mart',
-          receiverPhone: item.receiverPhone || '0905123456',
+          receiverName: savedData?.receiverName || item.receiverName || 'Siêu thị Co.op Mart',
+          receiverPhone: savedData?.receiverPhone || item.receiverPhone || '0905123456',
           deliveryAddress: item.deliveryAddress || 'Đà Nẵng',
           pickupAddress: item.pickupAddress || 'Hòa Vang, Đà Nẵng',
           productName: item.productName || 'Rau Cải Thìa',
@@ -294,27 +410,43 @@ export const logisticsService = {
           priority: item.priority || 'Urgent',
           tempRequirement: item.tempRequirement || 'Cold',
           estimatedDeliveryDate: item.estimatedDeliveryDate,
-          shipmentStatus: (item.shipmentStatus || item.status || 'Pending') as ShipmentStatus,
+          shipmentStatus: (savedData?.status || item.shipmentStatus || item.status || 'Pending') as ShipmentStatus,
           totalItems: item.totalItems || 200,
           assignedAt: item.assignedAt,
           createdAt: item.createdAt || '08:30 Hôm nay',
           distanceKm: item.distanceKm || 12.5,
           timeWindow: item.timeWindow || '08:30 - 10:30 Hôm nay',
+          podData: savedData,
         }
       }
     } catch {
       // Fallback local lookup
     }
 
-    const found = MOCK_SHIPMENTS.find(
-      (s) =>
-        s.shipmentId === id ||
-        s.shipmentCode.toLowerCase() === id.toLowerCase() ||
-        s.shipmentCode.replace('#', '').toLowerCase() === id.replace('#', '').toLowerCase() ||
-        id === 'SHIP-90' ||
-        id === 'ship-90'
-    )
-    return found || MOCK_SHIPMENTS[0]
+    const cleanId = id.replace('#', '').toLowerCase()
+    const found =
+      MOCK_SHIPMENTS.find(
+        (s) =>
+          s.shipmentId === id ||
+          s.shipmentCode.toLowerCase() === id.toLowerCase() ||
+          s.shipmentCode.replace('#', '').toLowerCase() === cleanId ||
+          s.shipmentId.toLowerCase() === cleanId ||
+          s.shipmentId.toLowerCase().includes(cleanId) ||
+          cleanId.includes(s.shipmentId.toLowerCase())
+      ) || MOCK_SHIPMENTS[0]
+
+    const savedData =
+      getAcceptedShipmentData(id) ||
+      getAcceptedShipmentData(found.shipmentId) ||
+      getAcceptedShipmentData(found.shipmentCode)
+
+    return {
+      ...found,
+      shipmentStatus: savedData?.status || found.shipmentStatus,
+      receiverName: savedData?.receiverName || found.receiverName,
+      receiverPhone: savedData?.receiverPhone || found.receiverPhone,
+      podData: savedData,
+    }
   },
 
   async getMyShipments(params?: ShipmentListRequest): Promise<{
@@ -325,28 +457,31 @@ export const logisticsService = {
       const res = await api.get(API_ENDPOINTS.logistics.shipments, { params })
       const rawData = res.data?.data ?? res.data
       if (rawData && Array.isArray(rawData.items)) {
-        const mappedItems: ShipmentItem[] = rawData.items.map((item: any, idx: number) => ({
-          shipmentId: item.shipmentId || item.id,
-          orderId: item.orderId || `ORD-${2000 + idx}`,
-          shipmentCode: item.shipmentCode || `#SHIP-${95 - idx}`,
-          retailerName: item.retailerName || item.supplierName || 'Farm Hòa Vang',
-          receiverName: item.receiverName || 'Siêu thị Co.op Mart',
-          receiverPhone: item.receiverPhone || '0905123456',
-          deliveryAddress: item.deliveryAddress || '478 Điện Biên Phủ, Đà Nẵng',
-          pickupAddress: item.pickupAddress || 'Hòa Vang, Đà Nẵng',
-          productName: item.productName || 'Rau Cải Thìa',
-          quantity: item.totalItems || 200,
-          unit: item.unit || 'kg',
-          priority: item.priority || 'Urgent',
-          tempRequirement: item.tempRequirement || 'Cold',
-          estimatedDeliveryDate: item.estimatedDeliveryDate,
-          shipmentStatus: (item.shipmentStatus || item.status || 'Assigned') as ShipmentStatus,
-          totalItems: item.totalItems || 200,
-          assignedAt: item.assignedAt || new Date().toISOString(),
-          createdAt: item.createdAt || '08:30 Hôm nay',
-          distanceKm: item.distanceKm || 12.5,
-          timeWindow: item.timeWindow || '08:30 - 10:30 Hôm nay',
-        }))
+        const mappedItems: ShipmentItem[] = rawData.items.map((item: any, idx: number) => {
+          const savedStatus = getStatusFromMap(item.shipmentId || item.id)
+          return {
+            shipmentId: item.shipmentId || item.id,
+            orderId: item.orderId || `ORD-${2000 + idx}`,
+            shipmentCode: item.shipmentCode || `#SHIP-${95 - idx}`,
+            retailerName: item.retailerName || item.supplierName || 'Farm Hòa Vang',
+            receiverName: item.receiverName || 'Siêu thị Co.op Mart',
+            receiverPhone: item.receiverPhone || '0905123456',
+            deliveryAddress: item.deliveryAddress || '478 Điện Biên Phủ, Đà Nẵng',
+            pickupAddress: item.pickupAddress || 'Hòa Vang, Đà Nẵng',
+            productName: item.productName || 'Rau Cải Thìa',
+            quantity: item.totalItems || 200,
+            unit: item.unit || 'kg',
+            priority: item.priority || 'Urgent',
+            tempRequirement: item.tempRequirement || 'Cold',
+            estimatedDeliveryDate: item.estimatedDeliveryDate,
+            shipmentStatus: (savedStatus || item.shipmentStatus || item.status || 'Assigned') as ShipmentStatus,
+            totalItems: item.totalItems || 200,
+            assignedAt: item.assignedAt || new Date().toISOString(),
+            createdAt: item.createdAt || '08:30 Hôm nay',
+            distanceKm: item.distanceKm || 12.5,
+            timeWindow: item.timeWindow || '08:30 - 10:30 Hôm nay',
+          }
+        })
         return {
           items: mappedItems,
           totalCount: rawData.totalCount ?? mappedItems.length,
@@ -422,7 +557,18 @@ export const logisticsService = {
       },
     ]
 
-    let filtered = [...activeMocks]
+    const extraAccepted = MOCK_SHIPMENTS.filter(
+      (s) =>
+        (getStatusFromMap(s.shipmentId) || getStatusFromMap(s.shipmentCode)) &&
+        !activeMocks.some((am) => am.shipmentId === s.shipmentId)
+    )
+
+    const allItems = [...activeMocks, ...extraAccepted].map((item) => {
+      const savedStatus = getStatusFromMap(item.shipmentId) || getStatusFromMap(item.shipmentCode)
+      return savedStatus ? { ...item, shipmentStatus: savedStatus } : item
+    })
+
+    let filtered = [...allItems]
     if (params?.search) {
       const q = params.search.toLowerCase()
       filtered = filtered.filter(
@@ -434,7 +580,7 @@ export const logisticsService = {
       )
     }
 
-    if (params?.status) {
+    if (params?.status && params.status !== ('ALL' as any)) {
       filtered = filtered.filter((s) => s.shipmentStatus === params.status)
     }
 

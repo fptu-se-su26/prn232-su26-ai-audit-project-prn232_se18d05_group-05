@@ -60,8 +60,8 @@ export default function ConfirmShipmentPage() {
       setTimeout(() => {
         router.push(APP_ROUTES.logistics.pending)
       }, 1500)
-    } catch {
-      toast.error('Có lỗi xảy ra khi xác nhận tiếp nhận lô hàng!')
+    } catch (err: any) {
+      toast.error(err?.message || 'Có lỗi xảy ra khi xác nhận tiếp nhận lô hàng!')
       setSubmitting(false)
     }
   }

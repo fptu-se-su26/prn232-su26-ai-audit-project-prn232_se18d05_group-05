@@ -262,7 +262,7 @@ export default function SupplierSupplyRequestsPage() {
     })
   }, [realRequests, statusOverrides])
 
-  // Stat Calculations
+  // Stat Calculations - Exactly matched with individual statuses
   const pendingCount = useMemo(() => {
     return requestList.filter((req) => {
       const s = String(req.status ?? req.confirmationStatus ?? '').toLowerCase()
@@ -273,7 +273,7 @@ export default function SupplierSupplyRequestsPage() {
   const confirmedCount = useMemo(() => {
     return requestList.filter((req) => {
       const s = String(req.status ?? req.confirmationStatus ?? '').toLowerCase()
-      return s === 'confirmed' || s === '1' || s === 'đã duyệt' || s === 'approved' || s === 'accepted'
+      return s === 'confirmed' || s === '1' || s === 'accepted' || s === 'đã duyệt' || s === 'approved'
     }).length
   }, [requestList])
 
@@ -298,7 +298,7 @@ export default function SupplierSupplyRequestsPage() {
     }).length
   }, [requestList])
 
-  // Filtered List
+  // Filtered List - Strictly isolated tabs and badges
   const filteredList = useMemo(() => {
     return requestList.filter((req) => {
       const rawId = req.supplyRequestId || req.id || req.requestId || ''
@@ -318,7 +318,7 @@ export default function SupplierSupplyRequestsPage() {
       const isRejected = statusStr === 'rejected' || statusStr === 'từ chối'
 
       if (activeTab === 'PENDING') return matchesSearch && isPending
-      if (activeTab === 'CONFIRMED') return matchesSearch && (isConfirmed || isDelivering || isReceived)
+      if (activeTab === 'CONFIRMED') return matchesSearch && isConfirmed
       if (activeTab === 'DELIVERING') return matchesSearch && isDelivering
       if (activeTab === 'RECEIVED') return matchesSearch && isReceived
       if (activeTab === 'REJECTED') return matchesSearch && isRejected
@@ -460,7 +460,7 @@ export default function SupplierSupplyRequestsPage() {
                 : 'text-blue-700 hover:bg-blue-50/50'
             }`}
           >
-            🚚 Đang vận chuyển ({deliveringCount > 0 ? deliveringCount : confirmedCount})
+            🚚 Đang vận chuyển ({deliveringCount})
           </button>
           <button
             onClick={() => setActiveTab('RECEIVED')}
@@ -536,6 +536,7 @@ export default function SupplierSupplyRequestsPage() {
                   const statusStr = String(req.status ?? req.confirmationStatus ?? '').toLowerCase()
                   const isPending = statusStr === 'pending' || statusStr === '0' || statusStr === 'chờ duyệt'
                   const isRejected = statusStr === 'rejected' || statusStr === 'từ chối'
+                  const isConfirmed = statusStr === 'confirmed' || statusStr === '1' || statusStr === 'accepted' || statusStr === 'đã duyệt' || statusStr === 'approved'
                   const isDelivering = statusStr === 'intransit' || statusStr === 'dispatched' || statusStr === 'shipping' || statusStr === 'đang vận chuyển'
                   const isReceived = statusStr === 'received' || statusStr === 'completed' || statusStr === 'đã giao'
 
@@ -582,10 +583,15 @@ export default function SupplierSupplyRequestsPage() {
                             <CheckCircle2 className="size-3.5 text-emerald-300 mr-1" />
                             ✅ Đã giao thành công
                           </Badge>
-                        ) : (
+                        ) : isDelivering ? (
                           <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
                             <Truck className="size-3.5 text-blue-600 animate-bounce mr-1" style={{ animationDuration: '2s' }} />
                             🚚 Shipper đang giao hàng
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-emerald-700 text-white border-emerald-800">
+                            <span className="size-1.5 rounded-full bg-emerald-300 mr-1.5" />
+                            📦 Đã duyệt xuất kho
                           </Badge>
                         )}
                       </TableCell>

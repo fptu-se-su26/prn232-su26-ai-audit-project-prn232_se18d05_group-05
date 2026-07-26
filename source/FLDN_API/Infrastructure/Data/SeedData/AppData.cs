@@ -167,7 +167,43 @@ public class AppData
                     Status = BatchStatus.Active
                 };
                 await context.Batches.AddAsync(batch);
+
+                await context.Inventories.AddAsync(new Inventory
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = p.Id,
+                    Quantity = batch.RemainingQty,
+                    ReservedQty = 0
+                });
             }
+            await context.SaveChangesAsync();
+        }
+
+        // Backfill: sản phẩm cũ chưa có bản ghi Inventory thì tạo theo tổng số lượng còn lại của các lô còn hạn
+        var productIdsWithoutInventory = await context.Products
+            .Where(p => !p.IsDeleted && !context.Inventories.Any(i => i.ProductId == p.Id))
+            .Select(p => p.Id)
+            .ToListAsync();
+
+        if (productIdsWithoutInventory.Count > 0)
+        {
+            var remainingByProduct = await context.Batches
+                .Where(b => productIdsWithoutInventory.Contains(b.ProductId) && b.Status != BatchStatus.Expired)
+                .GroupBy(b => b.ProductId)
+                .Select(g => new { ProductId = g.Key, Quantity = g.Sum(b => b.RemainingQty) })
+                .ToListAsync();
+
+            foreach (var productId in productIdsWithoutInventory)
+            {
+                await context.Inventories.AddAsync(new Inventory
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = productId,
+                    Quantity = remainingByProduct.FirstOrDefault(r => r.ProductId == productId)?.Quantity ?? 0,
+                    ReservedQty = 0
+                });
+            }
+
             await context.SaveChangesAsync();
         }
 

@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { X, Store, PackageCheck, ShieldCheck, MapPin, Star, QrCode, ShoppingCart } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { X, Store, PackageCheck, ShieldCheck, MapPin, Star, QrCode, ClipboardList } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Product } from '@/types/product'
+import { useSupplyRequestDraftStore } from '@/stores/supply-request-draft.store'
 
 interface ProductDetailModalProps {
   product: Product | null
@@ -13,7 +15,9 @@ interface ProductDetailModalProps {
 }
 
 export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailModalProps) {
+  const router = useRouter()
   const [selectedQty, setSelectedQty] = useState(1)
+  const addItem = useSupplyRequestDraftStore((state) => state.addItem)
 
   if (!isOpen || !product) return null
 
@@ -21,8 +25,28 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
   }
 
-  const handleAddToCart = () => {
-    toast.success(`Đã thêm ${selectedQty} ${product.unit} "${product.name}" vào giỏ hàng!`)
+  // B2B: DP đặt theo giá sỉ, retailPrice chỉ để tham khảo
+  const orderPrice = product.wholesalePrice ?? product.retailPrice
+  const outOfStock = (product.quantity ?? 0) <= 0
+
+  const handleAddToRequest = () => {
+    if (outOfStock) return
+    addItem({
+      productId: product.productId,
+      productName: product.name,
+      unit: product.unit,
+      unitPrice: orderPrice,
+      quantity: selectedQty,
+      supplierId: product.supplierId,
+      supplierName: product.supplierName,
+      mainImage: product.mainImage,
+    })
+    toast.success(`Đã thêm ${selectedQty} ${product.unit} "${product.name}" vào yêu cầu cung ứng!`, {
+      action: {
+        label: 'Tạo yêu cầu',
+        onClick: () => router.push('/orders/create'),
+      },
+    })
     onClose()
   }
 
@@ -182,11 +206,16 @@ export function ProductDetailModal({ product, isOpen, onClose }: ProductDetailMo
 
               <div className="flex gap-3">
                 <button
-                  onClick={handleAddToCart}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-full bg-black py-3 px-6 text-sm font-semibold text-white transition-all hover:bg-zinc-800 active:scale-95 shadow-md"
+                  onClick={handleAddToRequest}
+                  disabled={outOfStock}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-full bg-black py-3 px-6 text-sm font-semibold text-white transition-all hover:bg-zinc-800 active:scale-95 shadow-md disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
                 >
-                  <ShoppingCart className="size-4" />
-                  <span>Thêm vào giỏ hàng ({formatPrice(product.retailPrice * selectedQty)})</span>
+                  <ClipboardList className="size-4" />
+                  <span>
+                    {outOfStock
+                      ? 'Hết hàng — không thể đặt'
+                      : `Thêm vào yêu cầu cung ứng (${formatPrice(orderPrice * selectedQty)})`}
+                  </span>
                 </button>
               </div>
             </div>

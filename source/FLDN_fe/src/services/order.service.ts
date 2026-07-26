@@ -1,31 +1,14 @@
 import { api } from '@/lib/axios'
 import { API_ENDPOINTS } from '@/routes/api-endpoints'
 import type {
+  AddressPayload,
   ConfirmReceiptRequest,
   CreateSupplyRequestRequest,
   DeliveryAddress,
+  District,
   SupplyRequestResponse,
   VoucherValidationResponse,
 } from '@/types/order'
-
-export const MOCK_ADDRESSES: DeliveryAddress[] = [
-  {
-    addressId: '11111111-1111-1111-1111-111111111111',
-    receiverName: 'Điểm Phân Phối Quận 1',
-    receiverPhone: '0901234567',
-    fullAddress: '123 Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh',
-    districtName: 'Quận 1',
-    isDefault: true,
-  },
-  {
-    addressId: '22222222-2222-2222-2222-222222222222',
-    receiverName: 'Kho Phân Phối Thủ Đức',
-    receiverPhone: '0909876543',
-    fullAddress: '45 Võ Văn Ngân, Phường Linh Chiểu, TP. Thủ Đức, TP. Hồ Chí Minh',
-    districtName: 'TP. Thủ Đức',
-    isDefault: false,
-  },
-]
 
 export const MOCK_ORDERS: SupplyRequestResponse[] = [
   {
@@ -76,15 +59,32 @@ export const MOCK_ORDERS: SupplyRequestResponse[] = [
 
 export const orderService = {
   async getDeliveryAddresses(): Promise<DeliveryAddress[]> {
-    try {
-      const res = await api.get<DeliveryAddress[]>(API_ENDPOINTS.addresses)
-      if (Array.isArray(res.data) && res.data.length > 0) {
-        return res.data
-      }
-    } catch {
-      // Fallback
-    }
-    return MOCK_ADDRESSES
+    const res = await api.get<DeliveryAddress[]>(API_ENDPOINTS.addresses.list)
+    return Array.isArray(res.data) ? res.data : []
+  },
+
+  async getDistricts(): Promise<District[]> {
+    const res = await api.get<District[]>(API_ENDPOINTS.districts)
+    return Array.isArray(res.data) ? res.data : []
+  },
+
+  async createAddress(payload: AddressPayload): Promise<DeliveryAddress> {
+    const res = await api.post<DeliveryAddress>(API_ENDPOINTS.addresses.create, payload)
+    return res.data
+  },
+
+  async updateAddress(id: string, payload: AddressPayload): Promise<DeliveryAddress> {
+    const res = await api.put<DeliveryAddress>(API_ENDPOINTS.addresses.detail(id), payload)
+    return res.data
+  },
+
+  async setDefaultAddress(id: string): Promise<DeliveryAddress> {
+    const res = await api.put<DeliveryAddress>(API_ENDPOINTS.addresses.setDefault(id))
+    return res.data
+  },
+
+  async deleteAddress(id: string): Promise<void> {
+    await api.delete(API_ENDPOINTS.addresses.detail(id))
   },
 
   async validateVoucher(code: string, orderAmount: number): Promise<VoucherValidationResponse> {

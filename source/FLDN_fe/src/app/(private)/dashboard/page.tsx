@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Search,
   ShieldAlert,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
   Truck,
@@ -512,27 +513,47 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Operational Progress Bar Widget - Premium Emerald gradient */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-900 to-teal-950 p-6 text-white shadow-lg">
-            <div className="absolute -right-8 -bottom-8 size-32 rounded-full bg-emerald-500/10 blur-2xl" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-300">
-              Năng lực đáp ứng nguồn cung
-            </h3>
-            <p className="text-3xl font-black text-white mt-1">100% Khả Dụng</p>
-
-            <div className="mt-6 space-y-2">
-              <div className="flex justify-between text-xs font-semibold text-emerald-100">
-                <span>Rau củ quả tươi Đà Lạt</span>
-                <span>100%</span>
+          {/* Operational Health Index Widget - Premium B2B Emerald Glassmorphism */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 p-6 text-white shadow-xl border border-emerald-800/50">
+            <div className="absolute -right-10 -bottom-10 size-40 rounded-full bg-emerald-400/10 blur-3xl animate-pulse" />
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="flex size-2 rounded-full bg-emerald-400 animate-ping" />
+                <h3 className="text-xs font-black uppercase tracking-wider text-emerald-300">
+                  Chỉ số Vận hành Chuỗi Cung ứng
+                </h3>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-emerald-950/60">
-                <div className="h-full w-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-300" />
+              <span className="rounded-full bg-emerald-400/20 border border-emerald-400/30 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-200 backdrop-blur-md">
+                Hạng A+ B2B
+              </span>
+            </div>
+
+            <div className="mt-4 flex items-baseline justify-between">
+              <div>
+                <p className="text-3xl font-black text-white tracking-tight drop-shadow-xs">99.8%</p>
+                <p className="text-[11px] font-bold text-emerald-200/80 mt-0.5">Tỷ lệ sẵn sàng nguồn hàng</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-mono font-black text-amber-300">&lt; 2.0 Giờ</p>
+                <p className="text-[10px] font-semibold text-emerald-200/70">Thời gian duyệt xuất kho</p>
               </div>
             </div>
 
-            <div className="mt-6 border-t border-emerald-800/80 pt-4 text-[11px] text-emerald-200/80 flex items-center justify-between font-bold">
-              <span>Chứng nhận VietGAP</span>
-              <span className="text-emerald-300">FoodLink Đà Nẵng</span>
+            {/* Glowing Progress Bar */}
+            <div className="mt-5 space-y-1.5">
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-emerald-950/80 p-0.5 border border-emerald-800/40">
+                <div className="h-full w-[99.8%] rounded-full bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200 shadow-sm shadow-emerald-400/50" />
+              </div>
+            </div>
+
+            {/* Bottom Certification Badges */}
+            <div className="mt-5 border-t border-emerald-800/60 pt-3.5 flex items-center justify-between text-[11px] font-bold text-emerald-200/90">
+              <span className="flex items-center gap-1 text-emerald-300">
+                <ShieldCheck className="size-3.5 text-emerald-400" />
+                Chứng nhận VietGAP 4.0
+              </span>
+              <span className="text-slate-300 font-mono text-[10px]">FoodLink Đà Nẵng</span>
             </div>
           </div>
         </div>

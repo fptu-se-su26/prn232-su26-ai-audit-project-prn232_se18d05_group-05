@@ -37,7 +37,11 @@ export function LoginPage() {
       setAuth(user, accessToken)
 
       const destination =
-        user.role === 'Admin' ? APP_ROUTES.admin.users : APP_ROUTES.dashboard
+        user.role === 'Admin'
+          ? APP_ROUTES.admin.users
+          : user.role === 'LogisticsOperator'
+          ? APP_ROUTES.logistics.pending
+          : APP_ROUTES.dashboard
       router.replace(destination)
     } catch (error) {
       const apiError = error as ApiErrorResponse

@@ -17,7 +17,6 @@ import {
   Map,
   MapPin,
   Package,
-  PriorityHigh,
   RefreshCw,
   Search,
   SlidersHorizontal,
@@ -44,6 +43,27 @@ export default function PendingShipmentsPage() {
   // State for accepted shipment IDs in session
   const [acceptedIds, setAcceptedIds] = useState<Record<string, boolean>>({})
   const [processingId, setProcessingId] = useState<string | null>(null)
+  const [activeLocationInfo, setActiveLocationInfo] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function checkActiveLocation() {
+      try {
+        const myRes = await logisticsService.getMyShipments()
+        const active = myRes.items.filter(
+          (s) => s.shipmentStatus !== 'Delivered' && s.shipmentStatus !== 'Failed' && s.shipmentStatus !== 'Returned'
+        )
+        if (active.length > 0) {
+          const loc = active[0].retailerName || active[0].pickupAddress
+          setActiveLocationInfo(loc)
+        } else {
+          setActiveLocationInfo(null)
+        }
+      } catch {
+        // ignore
+      }
+    }
+    checkActiveLocation()
+  }, [acceptedIds])
 
   // Modal State
   const [selectedShipment, setSelectedShipment] = useState<ShipmentItem | null>(null)
@@ -80,6 +100,10 @@ export default function PendingShipmentsPage() {
   // Filtered shipments
   const filteredShipments = useMemo(() => {
     return shipments.filter((item) => {
+      if (acceptedIds[item.shipmentId] || acceptedIds[item.shipmentCode]) {
+        return false
+      }
+
       const matchesSearch =
         searchQuery === '' ||
         item.shipmentCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -97,7 +121,7 @@ export default function PendingShipmentsPage() {
 
       return matchesSearch && matchesFarm && matchesHub && matchesPriority
     })
-  }, [shipments, searchQuery, selectedFarm, selectedHub, selectedPriority])
+  }, [shipments, acceptedIds, searchQuery, selectedFarm, selectedHub, selectedPriority])
 
   // Pagination calculation
   const totalPages = Math.max(1, Math.ceil(filteredShipments.length / pageSize))
@@ -107,8 +131,8 @@ export default function PendingShipmentsPage() {
   }, [filteredShipments, currentPage, pageSize])
 
   // Stats calculation
-  const totalPending = filteredShipments.filter((s) => !acceptedIds[s.shipmentId]).length
-  const urgentCount = filteredShipments.filter((s) => s.priority === 'Urgent' && !acceptedIds[s.shipmentId]).length
+  const totalPending = filteredShipments.length
+  const urgentCount = filteredShipments.filter((s) => s.priority === 'Urgent').length
 
   // Action: Accept Shipment
   const handleAcceptShipment = async (shipment: ShipmentItem) => {
@@ -117,9 +141,11 @@ export default function PendingShipmentsPage() {
 
     try {
       await logisticsService.acceptShipment(shipment.shipmentId)
-      setAcceptedIds((prev) => ({ ...prev, [shipment.shipmentId]: true }))
+      setAcceptedIds((prev) => ({ ...prev, [shipment.shipmentId]: true, [shipment.shipmentCode]: true }))
+      setShipments((prev) => prev.filter((s) => s.shipmentId !== shipment.shipmentId && s.shipmentCode !== shipment.shipmentCode))
+
       toast.success(`Đã nhận lô hàng ${shipment.shipmentCode} thành công!`, {
-        description: 'Vui lòng kiểm tra tab "My Logistics" để cập nhật tiến độ giao hàng.',
+        description: 'Vui lòng kiểm tra tab "Cập nhật trạng thái vận chuyển" để cập nhật tiến độ giao hàng.',
       })
       if (selectedShipment?.shipmentId === shipment.shipmentId) {
         setIsModalOpen(false)
@@ -159,23 +185,23 @@ export default function PendingShipmentsPage() {
   const hubOptions = Array.from(new Set(shipments.map((s) => s.receiverName)))
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-10">
-      {/* Header & Page Title */}
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      {/* Header & Title Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-              <Truck className="w-3.5 h-3.5" /> Logistics Operator
+              <Truck className="w-3.5 h-3.5" /> Quản lý giao vận
             </span>
             <span className="text-xs text-gray-500">FoodLink Đà Nẵng</span>
           </div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">Lô hàng chờ vận chuyển</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Quản lý và điều phối các chuyến hàng nông sản đang chờ lấy tại các trang trại Đà Nẵng.
+            Danh sách các lô hàng nông sản chưa có tài xế tiếp nhận. Hãy xem thông tin và chọn đơn phù hợp.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 self-start md:self-auto">
           <button
             onClick={handleExportReport}
             className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-semibold flex items-center gap-2 transition-all shadow-sm active:scale-95"
@@ -193,6 +219,16 @@ export default function PendingShipmentsPage() {
           </button>
         </div>
       </div>
+
+      {/* Active Location Info Banner */}
+      {activeLocationInfo && (
+        <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center gap-3 text-amber-900 text-sm font-medium shadow-xs">
+          <Info className="w-5 h-5 text-amber-600 shrink-0" />
+          <div>
+            <span className="font-bold text-amber-800">Quy tắc tiếp nhận đơn:</span> Bạn đang thực hiện đơn hàng tại điểm lấy <span className="font-bold underline text-amber-950">"{activeLocationInfo}"</span>. Bạn có thể tiếp nhận thêm 2 hoặc nhiều đơn trùng điểm lấy hàng này. Đơn ở điểm lấy hàng khác sẽ bị khóa cho đến khi bạn giao hàng hoàn tất.
+          </div>
+        </div>
+      )}
 
       {/* Bento Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

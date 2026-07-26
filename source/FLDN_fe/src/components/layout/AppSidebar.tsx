@@ -28,8 +28,13 @@ export function AppSidebar() {
   const pathname = usePathname()
   const navItems = user?.role ? (NAV_CONFIG[user.role] ?? []) : []
 
-  const isActive = (href: string) =>
-    pathname === href || (href !== '/dashboard' && href !== '/admin' && pathname.startsWith(href))
+  const isActive = (href: string) => {
+    if (pathname === href) return true
+    if (href === '/dashboard' || href === '/admin') return false
+    if (!pathname.startsWith(href)) return false
+    // Prevent /orders matching when /orders/create is the active item
+    return !navItems.some(item => item.href !== href && item.href.startsWith(href) && pathname.startsWith(item.href))
+  }
 
   const userInitial = user?.fullName ? user.fullName.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || 'N'
 

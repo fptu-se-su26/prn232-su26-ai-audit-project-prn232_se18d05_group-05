@@ -12,7 +12,6 @@ import {
   Search,
   Sparkles,
   Truck,
-  UserCheck,
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -274,7 +273,7 @@ export default function SupplierSupplyRequestsPage() {
   const confirmedCount = useMemo(() => {
     return requestList.filter((req) => {
       const s = String(req.status ?? req.confirmationStatus ?? '').toLowerCase()
-      return s === 'confirmed' || s === '1' || s === 'đã duyệt' || s === 'approved'
+      return s === 'confirmed' || s === '1' || s === 'đã duyệt' || s === 'approved' || s === 'accepted'
     }).length
   }, [requestList])
 
@@ -313,7 +312,7 @@ export default function SupplierSupplyRequestsPage() {
 
       const statusStr = String(req.status ?? req.confirmationStatus ?? '').toLowerCase()
       const isPending = statusStr === 'pending' || statusStr === '0' || statusStr === 'chờ duyệt'
-      const isConfirmed = statusStr === 'confirmed' || statusStr === '1' || statusStr === 'đã duyệt' || statusStr === 'approved'
+      const isConfirmed = statusStr === 'confirmed' || statusStr === '1' || statusStr === 'accepted' || statusStr === 'đã duyệt' || statusStr === 'approved'
       const isDelivering = statusStr === 'intransit' || statusStr === 'dispatched' || statusStr === 'shipping' || statusStr === 'đang vận chuyển'
       const isReceived = statusStr === 'received' || statusStr === 'completed' || statusStr === 'đã giao'
       const isRejected = statusStr === 'rejected' || statusStr === 'từ chối'
@@ -327,17 +326,14 @@ export default function SupplierSupplyRequestsPage() {
     })
   }, [requestList, searchTerm, activeTab])
 
-  // Confirm Request with Guaranteed F5 Persistence
   const handleConfirm = async (reqId: string) => {
-    const updated = { ...statusOverrides, [reqId]: 'CONFIRMED' as const }
-    setStatusOverrides(updated)
     try {
-      localStorage.setItem(REQUEST_STATUS_STORAGE_KEY, JSON.stringify(updated))
       await confirmMutation.mutateAsync(reqId)
-    } catch {}
-
-    showNotification('Đã phê duyệt xuất kho! Đơn hàng được bàn giao cho đơn vị Vận chuyển (Shipper)', 'success')
-    refetch()
+      showNotification('Đã phê duyệt xuất kho! Đơn hàng được bàn giao cho đơn vị Vận chuyển (Shipper)', 'success')
+      refetch()
+    } catch {
+      showNotification('Không thể phê duyệt đơn hàng. Vui lòng thử lại.', 'error')
+    }
   }
 
   const handleOpenRejectModal = (reqId: string) => {
@@ -350,23 +346,17 @@ export default function SupplierSupplyRequestsPage() {
     if (!rejectingRequestId) return
     const targetId = rejectingRequestId
 
-    const updated = { ...statusOverrides, [targetId]: 'REJECTED' as const }
-    setStatusOverrides(updated)
-    try {
-      localStorage.setItem(REQUEST_STATUS_STORAGE_KEY, JSON.stringify(updated))
-    } catch {}
-
     setRejectingRequestId(null)
-
     try {
       await rejectMutation.mutateAsync({
         requestId: targetId,
         reason: rejectReason || 'Không đủ sản lượng kho',
       })
-    } catch {}
-
-    showNotification('Đã từ chối đơn yêu cầu cung ứng và phản hồi tới Điểm phân phối!', 'error')
-    refetch()
+      showNotification('Đã từ chối đơn yêu cầu cung ứng và phản hồi tới Điểm phân phối!', 'error')
+      refetch()
+    } catch {
+      showNotification('Không thể từ chối đơn hàng. Vui lòng thử lại.', 'error')
+    }
   }
 
   return (
@@ -667,65 +657,82 @@ export default function SupplierSupplyRequestsPage() {
             </DialogDescription>
           </DialogHeader>
 
-          {trackingRequest && (
+          {trackingRequest && (() => {
+            const st = String(trackingRequest.status ?? trackingRequest.confirmationStatus ?? '').toLowerCase()
+            const step2Done = ['accepted', 'approved', 'confirmed', 'dispatched', 'intransit', 'received', 'completed'].includes(st)
+            const step3Done = ['dispatched', 'intransit', 'received', 'completed'].includes(st)
+            const step3Active = ['dispatched', 'intransit'].includes(st)
+            const step4Done = ['received', 'completed'].includes(st)
+
+            const histories: Array<{ status: string; changedAt?: string; note?: string }> = (trackingRequest as any).statusHistories ?? []
+            const getTime = (s: string) => histories.find(h => h.status?.toLowerCase() === s)?.changedAt
+
+            const itemSummary = trackingRequest.items && trackingRequest.items.length > 0
+              ? trackingRequest.items.map((i: any) => `${i.productName} (${i.quantity} kg)`).join(', ')
+              : trackingRequest.productName || 'N/A'
+
+            return (
             <div className="p-6 space-y-6">
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50/30 p-4 space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="font-semibold text-slate-500">Điểm phân phối nhận:</span>
-                  <span className="font-extrabold text-slate-900">{trackingRequest.distributionPointName || 'Kho Phân Phối Thủ Đức'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-slate-500">Tài xế vận chuyển (Shipper):</span>
-                  <span className="font-extrabold text-emerald-900 flex items-center gap-1">
-                    <UserCheck className="size-3.5 text-emerald-600" />
-                    Trần Văn Nam (Biển số: 43C-128.90)
-                  </span>
+                  <span className="font-extrabold text-slate-900">{trackingRequest.distributionPointName || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-semibold text-slate-500">Nông sản xuất kho:</span>
-                  <span className="font-extrabold text-slate-900">{trackingRequest.productName || 'Ngô tươi dẻo Đà Lạt'} (10 kg)</span>
+                  <span className="font-extrabold text-slate-900">{itemSummary}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-slate-500">Trạng thái hiện tại:</span>
+                  <span className="font-extrabold text-emerald-900">{trackingRequest.status ?? trackingRequest.confirmationStatus}</span>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tiến trình giao vận thực tế</p>
-                
+
                 <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-emerald-200">
+                  {/* Step 1: always done */}
                   <div className="relative flex items-start gap-3">
                     <div className="absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full bg-emerald-600 ring-4 ring-white">
                       <Check className="size-2.5 text-white" />
                     </div>
                     <div>
                       <p className="text-xs font-extrabold text-slate-900">1. Đã đặt hàng yêu cầu cung ứng</p>
-                      <p className="text-[11px] text-slate-400">08:00 - 24/07/2026 • Từ Điểm phân phối gửi đến Kho</p>
+                      <p className="text-[11px] text-slate-400">{getTime('pending') ? formatDateVN(getTime('pending')) : 'Điểm phân phối gửi đến Kho'}</p>
                     </div>
                   </div>
 
+                  {/* Step 2: supplier approved */}
                   <div className="relative flex items-start gap-3">
-                    <div className="absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full bg-emerald-600 ring-4 ring-white">
-                      <Check className="size-2.5 text-white" />
+                    <div className={`absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full ring-4 ring-white ${step2Done ? 'bg-emerald-600' : 'bg-slate-200'}`}>
+                      {step2Done && <Check className="size-2.5 text-white" />}
                     </div>
                     <div>
-                      <p className="text-xs font-extrabold text-slate-900">2. Nhà cung cấp duyệt xuất kho</p>
-                      <p className="text-[11px] text-slate-400">09:15 - 24/07/2026 • Đã đóng gói nhãn tem QR thành công</p>
+                      <p className={`text-xs font-extrabold ${step2Done ? 'text-slate-900' : 'text-slate-400'}`}>2. Nhà cung cấp duyệt xuất kho</p>
+                      <p className="text-[11px] text-slate-400">{getTime('accepted') || getTime('approved') ? formatDateVN(getTime('accepted') ?? getTime('approved')) : step2Done ? 'Đã duyệt' : 'Chờ duyệt'}</p>
                     </div>
                   </div>
 
+                  {/* Step 3: in transit */}
                   <div className="relative flex items-start gap-3">
-                    <div className="absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full bg-blue-600 ring-4 ring-white">
-                      <Truck className="size-2.5 text-white" />
+                    <div className={`absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full ring-4 ring-white ${step3Done ? 'bg-emerald-600' : step3Active ? 'bg-blue-600' : 'bg-slate-200'}`}>
+                      {step3Done ? <Check className="size-2.5 text-white" /> : step3Active ? <Truck className="size-2.5 text-white" /> : null}
                     </div>
                     <div>
-                      <p className="text-xs font-extrabold text-blue-900">3. Shipper đã nhận hàng & Đang trên đường giao</p>
-                      <p className="text-[11px] font-semibold text-blue-700">10:30 - 24/07/2026 • Đang di chuyển trên tuyến QL1A Đà Nẵng</p>
+                      <p className={`text-xs font-extrabold ${step3Done || step3Active ? (step3Active ? 'text-blue-900' : 'text-slate-900') : 'text-slate-400'}`}>3. Shipper đã nhận hàng & Đang trên đường giao</p>
+                      <p className={`text-[11px] ${step3Active ? 'font-semibold text-blue-700' : 'text-slate-400'}`}>{getTime('intransit') || getTime('dispatched') ? formatDateVN(getTime('intransit') ?? getTime('dispatched')) : step3Done ? 'Đã giao xong' : step3Active ? 'Đang vận chuyển' : 'Chưa đến bước này'}</p>
                     </div>
                   </div>
 
+                  {/* Step 4: received */}
                   <div className="relative flex items-start gap-3">
-                    <div className="absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full bg-slate-200 ring-4 ring-white" />
+                    <div className={`absolute -left-6 top-0 flex size-4 items-center justify-center rounded-full ring-4 ring-white ${step4Done ? 'bg-emerald-600' : 'bg-slate-200'}`}>
+                      {step4Done && <Check className="size-2.5 text-white" />}
+                    </div>
                     <div>
-                      <p className="text-xs font-bold text-slate-400">4. Điểm phân phối xác nhận ký nhận (UC23)</p>
-                      <p className="text-[11px] text-slate-400">Dự kiến hoàn tất trong ngày</p>
+                      <p className={`text-xs font-bold ${step4Done ? 'text-slate-900' : 'text-slate-400'}`}>4. Điểm phân phối xác nhận ký nhận (UC23)</p>
+                      <p className="text-[11px] text-slate-400">{getTime('received') || getTime('completed') ? formatDateVN(getTime('received') ?? getTime('completed')) : step4Done ? 'Hoàn tất' : 'Dự kiến hoàn tất trong ngày'}</p>
                     </div>
                   </div>
                 </div>
@@ -737,7 +744,8 @@ export default function SupplierSupplyRequestsPage() {
                 </Button>
               </DialogFooter>
             </div>
-          )}
+            )
+          })()}
         </DialogContent>
       </Dialog>
 

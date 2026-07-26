@@ -21,6 +21,9 @@ import { toast } from 'sonner'
 import { APP_ROUTES } from '@/routes/app-routes'
 import { orderService } from '@/services/order.service'
 import type { SupplyRequestResponse } from '@/types/order'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
 type FilterStatus = 'ALL' | 'Pending' | 'Approved' | 'InTransit' | 'Completed' | 'Cancelled'
 
@@ -212,13 +215,14 @@ export default function OrdersListPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
+            <Button
               onClick={fetchOrders}
+              variant="outline"
               className="inline-flex items-center gap-2 rounded-2xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 shadow-sm hover:bg-zinc-50 transition-all"
             >
               <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
               Làm mới
-            </button>
+            </Button>
             <Link
               href={APP_ROUTES.orders.create}
               className="inline-flex items-center gap-2 rounded-2xl bg-black px-5 py-2.5 text-sm font-bold text-white shadow-md hover:bg-zinc-800 transition-all hover:scale-[1.02]"
@@ -236,7 +240,7 @@ export default function OrdersListPage() {
             {/* Search input */}
             <div className="relative w-full sm:w-80">
               <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
-              <input
+              <Input
                 type="text"
                 placeholder="Tìm mã đơn, địa chỉ, sản phẩm..."
                 value={searchQuery}
@@ -257,7 +261,7 @@ export default function OrdersListPage() {
                   { id: 'Cancelled', label: 'Đã hủy' },
                 ] as const
               ).map((tab) => (
-                <button
+                <Button
                   key={tab.id}
                   onClick={() => setSelectedStatus(tab.id as FilterStatus)}
                   className={`rounded-2xl px-4 py-2 text-xs font-bold transition-all whitespace-nowrap ${selectedStatus === tab.id
@@ -266,7 +270,7 @@ export default function OrdersListPage() {
                     }`}
                 >
                   {tab.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -392,18 +396,19 @@ export default function OrdersListPage() {
 
                   {/* Footer Actions */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-zinc-100 pt-4">
-                    <button
+                    <Button
+                      variant="ghost"
                       onClick={() => setDetailOrder(order)}
                       className="text-xs font-bold text-zinc-600 hover:text-black transition-colors flex items-center gap-1"
                     >
                       Xem chi tiết tiến độ
                       <ArrowRight className="size-3.5" />
-                    </button>
+                    </Button>
 
                     <div className="flex items-center gap-2">
                       {/* UC23 Action Button */}
                       {isEligibleForConfirm && (
-                        <button
+                        <Button
                           onClick={() => {
                             setConfirmOrder(order)
                             setIsFullReceived(true)
@@ -413,7 +418,7 @@ export default function OrdersListPage() {
                         >
                           <CheckCircle2 className="size-4" />
                           Xác nhận đơn hàng
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -442,12 +447,13 @@ export default function OrdersListPage() {
                   </p>
                 </div>
               </div>
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setConfirmOrder(null)}
                 className="size-8 rounded-full bg-zinc-100 text-zinc-500 hover:bg-zinc-200 flex items-center justify-center text-sm font-bold"
               >
                 ✕
-              </button>
+              </Button>
             </div>
 
             <form onSubmit={handleConfirmReceiptSubmit} className="space-y-5">
@@ -512,7 +518,7 @@ export default function OrdersListPage() {
                 <label className="text-xs font-bold text-zinc-700 block mb-1.5">
                   Ghi chú hoặc phản hồi khi nhận hàng:
                 </label>
-                <textarea
+                <Textarea
                   rows={3}
                   value={confirmNote}
                   onChange={(e) => setConfirmNote(e.target.value)}
@@ -526,14 +532,15 @@ export default function OrdersListPage() {
               </div>
 
               <div className="flex items-center justify-end gap-3 border-t border-zinc-100 pt-4">
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setConfirmOrder(null)}
                   className="rounded-2xl border border-zinc-300 bg-white px-5 py-2.5 text-xs font-bold text-zinc-700 hover:bg-zinc-50 transition-all"
                 >
                   Hủy bỏ
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   disabled={isConfirming}
                   className="inline-flex items-center gap-2 rounded-2xl bg-black px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-zinc-800 transition-all hover:scale-[1.02] disabled:opacity-50"
@@ -546,7 +553,7 @@ export default function OrdersListPage() {
                   ) : (
                     'Hoàn tất xác nhận (UC23)'
                   )}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -566,12 +573,13 @@ export default function OrdersListPage() {
                   Khởi tạo ngày: {formatDate(detailOrder.createdAt)}
                 </p>
               </div>
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setDetailOrder(null)}
                 className="size-8 rounded-full bg-zinc-100 text-zinc-500 hover:bg-zinc-200 flex items-center justify-center text-sm font-bold"
               >
                 ✕
-              </button>
+              </Button>
             </div>
 
             <div className="space-y-4">
@@ -665,12 +673,12 @@ export default function OrdersListPage() {
             </div>
 
             <div className="flex justify-end border-t border-zinc-100 pt-4">
-              <button
+              <Button
                 onClick={() => setDetailOrder(null)}
                 className="rounded-2xl bg-black px-6 py-2.5 text-xs font-bold text-white shadow-md hover:bg-zinc-800 transition-all"
               >
                 Đóng
-              </button>
+              </Button>
             </div>
           </div>
         </div>

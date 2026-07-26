@@ -41,7 +41,9 @@ export function LoginPage() {
           ? APP_ROUTES.admin.users
           : user.role === 'LogisticsOperator'
           ? APP_ROUTES.logistics.pending
-          : APP_ROUTES.dashboard
+          : user.role === 'Supplier'
+          ? APP_ROUTES.dashboard
+          : APP_ROUTES.products
       router.replace(destination)
     } catch (error) {
       const apiError = error as ApiErrorResponse

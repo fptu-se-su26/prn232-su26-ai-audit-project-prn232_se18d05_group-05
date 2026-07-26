@@ -21,7 +21,13 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/stores/auth.store'
 import { useSupplierBatches, useSupplierInventory, useSupplierProducts, useSupplierSupplyRequests } from '@/features/supplier/hooks/use-supplier'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const REQUEST_STATUS_STORAGE_KEY = 'fldn_supplier_requests_overrides_v3'
 const DELETED_BATCHES_STORAGE_KEY = 'fldn_supplier_deleted_batches_v3'
@@ -48,10 +54,17 @@ const formatDateVN = (dateStr?: string) => {
 }
 
 export default function DashboardPage() {
+  const router = useRouter()
+  const user = useAuthStore((state) => state.user)
+
+  useEffect(() => {
+    if (user && user.role !== 'Supplier') router.replace('/unauthorized')
+  }, [user, router])
+
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [isRefreshing, setIsRefreshing] = useState(false)
-  
+
   // Persistent Override States
   const [statusOverrides, setStatusOverrides] = useState<Record<string, 'CONFIRMED' | 'REJECTED'>>({})
   const [deletedBatchCodes, setDeletedBatchCodes] = useState<string[]>([])
@@ -183,7 +196,7 @@ export default function DashboardPage() {
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 p-8 text-white shadow-xl shadow-emerald-950/20 transition-all duration-300">
         <div className="absolute -right-16 -top-16 size-80 rounded-full bg-emerald-500/10 blur-3xl animate-pulse" />
         <div className="absolute -left-20 -bottom-20 size-80 rounded-full bg-teal-500/10 blur-3xl" />
-        
+
         <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-800/40 px-3.5 py-1.5 text-xs font-semibold tracking-wide text-emerald-200 backdrop-blur-md">
@@ -199,14 +212,14 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <button
+            <Button
               onClick={handleRefreshAll}
               disabled={anyFetching}
               className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4.5 py-3 text-xs font-bold text-white shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/15 active:scale-95 disabled:opacity-60 cursor-pointer"
             >
               <RefreshCw className={`size-4 ${anyFetching ? 'animate-spin text-emerald-300' : 'text-emerald-200'}`} />
               {anyFetching ? 'Đang làm mới...' : 'Làm mới dữ liệu'}
-            </button>
+            </Button>
             <Link
               href="/supplier/products"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 px-5 py-3 text-xs font-black text-emerald-950 shadow-lg shadow-emerald-400/25 transition-all duration-200 hover:brightness-110 active:scale-95 cursor-pointer"
@@ -328,7 +341,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <input
+                <Input
                   type="text"
                   placeholder="Tìm đơn, sản phẩm..."
                   value={searchTerm}
@@ -337,15 +350,16 @@ export default function DashboardPage() {
                 />
               </div>
 
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs font-bold text-slate-700 transition-all focus:border-emerald-500 focus:outline-hidden cursor-pointer"
-              >
-                <option value="ALL">Tất cả đơn</option>
-                <option value="PENDING">Chờ duyệt</option>
-                <option value="COMPLETED">Đã hoàn thành</option>
-              </select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs font-bold text-slate-700 transition-all focus:border-emerald-500 focus:outline-hidden cursor-pointer">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">Tất cả đơn</SelectItem>
+                  <SelectItem value="PENDING">Chờ duyệt</SelectItem>
+                  <SelectItem value="COMPLETED">Đã hoàn thành</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -358,18 +372,18 @@ export default function DashboardPage() {
               </div>
             ) : filteredRequests.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse font-sans">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      <th className="px-6 py-4">Mã đơn</th>
-                      <th className="px-6 py-4">Điểm phân phối</th>
-                      <th className="px-6 py-4">Mặt hàng nông sản</th>
-                      <th className="px-6 py-4 text-right">Số lượng</th>
-                      <th className="px-6 py-4 text-center">Trạng thái</th>
-                      <th className="px-6 py-4 text-right">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50 text-xs">
+                <Table className="w-full text-left border-collapse font-sans">
+                  <TableHeader>
+                    <TableRow className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      <TableHead className="px-6 py-4">Mã đơn</TableHead>
+                      <TableHead className="px-6 py-4">Điểm phân phối</TableHead>
+                      <TableHead className="px-6 py-4">Mặt hàng nông sản</TableHead>
+                      <TableHead className="px-6 py-4 text-right">Số lượng</TableHead>
+                      <TableHead className="px-6 py-4 text-center">Trạng thái</TableHead>
+                      <TableHead className="px-6 py-4 text-right">Thao tác</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="divide-y divide-slate-50 text-xs">
                     {filteredRequests.map((req) => {
                       const rawId = req.supplyRequestId || req.id || req.requestId || 'REQ'
                       const displayCode = `#SR-${rawId.substring(0, 8).toUpperCase()}`
@@ -389,20 +403,20 @@ export default function DashboardPage() {
                       const isRejected = statusStr === 'rejected' || statusStr === 'từ chối'
 
                       return (
-                        <tr key={rawId} className="transition-all duration-150 hover:bg-slate-50/60">
-                          <td className="px-6 py-4.5 font-mono font-bold text-emerald-800">
+                        <TableRow key={rawId} className="transition-all duration-150 hover:bg-slate-50/60">
+                          <TableCell className="px-6 py-4.5 font-mono font-bold text-emerald-800">
                             {displayCode}
-                          </td>
-                          <td className="px-6 py-4.5 font-extrabold text-slate-900">
+                          </TableCell>
+                          <TableCell className="px-6 py-4.5 font-extrabold text-slate-900">
                             {req.distributionPointName || 'Điểm phân phối'}
-                          </td>
-                          <td className="px-6 py-4.5 font-semibold text-slate-600 max-w-[200px] truncate">
+                          </TableCell>
+                          <TableCell className="px-6 py-4.5 font-semibold text-slate-600 max-w-[200px] truncate">
                             {itemNames}
-                          </td>
-                          <td className="px-6 py-4.5 text-right font-black text-slate-900">
+                          </TableCell>
+                          <TableCell className="px-6 py-4.5 text-right font-black text-slate-900">
                             {totalQty > 0 ? `${totalQty.toLocaleString()} kg` : '10 kg'}
-                          </td>
-                          <td className="px-6 py-4.5 text-center">
+                          </TableCell>
+                          <TableCell className="px-6 py-4.5 text-center">
                             <span
                               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold ${
                                 isPending
@@ -423,8 +437,8 @@ export default function DashboardPage() {
                               />
                               {isPending ? 'Chờ duyệt' : isRejected ? 'Đã từ chối' : 'Đã duyệt'}
                             </span>
-                          </td>
-                          <td className="px-6 py-4.5 text-right">
+                          </TableCell>
+                          <TableCell className="px-6 py-4.5 text-right">
                             {isPending ? (
                               <Link
                                 href="/supplier/supply-requests"
@@ -442,12 +456,12 @@ export default function DashboardPage() {
                                 Chi tiết
                               </Link>
                             )}
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       )
                     })}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center p-16 text-center">

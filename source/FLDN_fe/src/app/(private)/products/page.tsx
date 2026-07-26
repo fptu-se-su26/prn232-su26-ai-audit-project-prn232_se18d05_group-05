@@ -6,6 +6,9 @@ import { productService } from '@/services/product.service'
 import type { Category, Product, ProductSearchParams } from '@/types/product'
 import { ProductCard } from '@/app/(private)/products/components/ProductCard'
 import { ProductDetailModal } from '@/app/(private)/products/components/ProductDetailModal'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function ProductsSearchPage() {
   const [categories, setCategories] = useState<Category[]>([])
@@ -94,7 +97,7 @@ export default function ProductsSearchPage() {
           <div className="relative w-full sm:w-80 lg:w-96">
             <div className="relative flex items-center">
               <Search className="absolute left-3.5 size-4 text-zinc-400" />
-              <input
+              <Input
                 type="text"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
@@ -102,13 +105,13 @@ export default function ProductsSearchPage() {
                 className="w-full rounded-full border border-zinc-300 bg-white py-2.5 pl-10 pr-10 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black transition-all"
               />
               {keyword && (
-                <button
+                <Button
                   onClick={() => setKeyword('')}
                   aria-label="Xóa từ khóa"
-                  className="absolute right-3 rounded-full p-1 text-zinc-400 hover:text-zinc-600"
+                  className="absolute right-3 rounded-full p-1 text-zinc-400 hover:text-zinc-600 bg-transparent shadow-none hover:bg-transparent"
                 >
                   <X className="size-4" />
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -124,12 +127,12 @@ export default function ProductsSearchPage() {
                 Bộ lọc tìm kiếm
               </h3>
               {(selectedCategory !== 'all' || keyword || minPrice || maxPrice) && (
-                <button
+                <Button
                   onClick={handleClearFilters}
-                  className="text-xs font-semibold text-emerald-700 hover:underline"
+                  className="text-xs font-semibold text-emerald-700 hover:underline bg-transparent shadow-none hover:bg-transparent p-0 h-auto"
                 >
                   Xóa lọc
-                </button>
+                </Button>
               )}
             </div>
 
@@ -139,26 +142,26 @@ export default function ProductsSearchPage() {
                 Danh mục thực phẩm
               </label>
               <div className="space-y-1">
-                <button
+                <Button
                   onClick={() => setSelectedCategory('all')}
-                  className={`w-full text-left px-3 py-2 text-sm rounded-xl font-medium transition-colors ${selectedCategory === 'all'
-                      ? 'bg-black text-white'
-                      : 'text-zinc-700 hover:bg-zinc-100'
+                  className={`w-full text-left px-3 py-2 text-sm rounded-xl font-medium transition-colors justify-start h-auto ${selectedCategory === 'all'
+                      ? 'bg-black text-white hover:bg-black'
+                      : 'text-zinc-700 hover:bg-zinc-100 bg-transparent shadow-none hover:text-zinc-700'
                     }`}
                 >
                   Tất cả danh mục
-                </button>
+                </Button>
                 {categories.map((cat) => (
-                  <button
+                  <Button
                     key={cat.categoryId}
                     onClick={() => setSelectedCategory(cat.categoryId)}
-                    className={`w-full text-left px-3 py-2 text-sm rounded-xl font-medium transition-colors flex items-center justify-between ${selectedCategory === cat.categoryId
-                        ? 'bg-black text-white'
-                        : 'text-zinc-700 hover:bg-zinc-100'
+                    className={`w-full text-left px-3 py-2 text-sm rounded-xl font-medium transition-colors flex items-center justify-between h-auto ${selectedCategory === cat.categoryId
+                        ? 'bg-black text-white hover:bg-black'
+                        : 'text-zinc-700 hover:bg-zinc-100 bg-transparent shadow-none hover:text-zinc-700'
                       }`}
                   >
                     <span>{cat.name}</span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -169,14 +172,14 @@ export default function ProductsSearchPage() {
                 Khoảng giá (VND)
               </label>
               <div className="grid grid-cols-2 gap-2">
-                <input
+                <Input
                   type="number"
                   placeholder="Từ (₫)"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
                   className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 focus:border-black focus:bg-white focus:outline-none"
                 />
-                <input
+                <Input
                   type="number"
                   placeholder="Đến (₫)"
                   value={maxPrice}
@@ -189,26 +192,27 @@ export default function ProductsSearchPage() {
 
           {/* Mobile Filter Toggle Button */}
           <div className="flex items-center justify-between lg:hidden">
-            <button
+            <Button
               onClick={() => setShowMobileFilter(true)}
-              className="flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-800 shadow-sm"
+              className="flex items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-800 shadow-sm hover:bg-white"
             >
               <SlidersHorizontal className="size-4" />
               <span>Bộ lọc sản phẩm</span>
-            </button>
+            </Button>
 
             <div className="flex items-center gap-2">
               <ArrowUpDown className="size-4 text-zinc-400" />
-              <select
-                value={sortOption}
-                onChange={(e) => setSortOption(e.target.value as any)}
-                className="rounded-full border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 focus:outline-none"
-              >
-                <option value="newest">Mới nhất</option>
-                <option value="price_asc">Giá: Thấp đến Cao</option>
-                <option value="price_desc">Giá: Cao đến Thấp</option>
-                <option value="name_asc">Tên: A - Z</option>
-              </select>
+              <Select value={sortOption} onValueChange={(v) => setSortOption(v as typeof sortOption)}>
+                <SelectTrigger className="rounded-full border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-800 focus:outline-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Mới nhất</SelectItem>
+                  <SelectItem value="price_asc">Giá: Thấp đến Cao</SelectItem>
+                  <SelectItem value="price_desc">Giá: Cao đến Thấp</SelectItem>
+                  <SelectItem value="name_asc">Tên: A - Z</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -224,16 +228,17 @@ export default function ProductsSearchPage() {
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="size-4 text-zinc-400" />
                 <span className="text-xs text-zinc-500 font-medium">Sắp xếp:</span>
-                <select
-                  value={sortOption}
-                  onChange={(e) => setSortOption(e.target.value as any)}
-                  className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm font-semibold text-zinc-800 focus:border-black focus:outline-none cursor-pointer"
-                >
-                  <option value="newest">Mới nhất</option>
-                  <option value="price_asc">Giá: Thấp đến Cao</option>
-                  <option value="price_desc">Giá: Cao đến Thấp</option>
-                  <option value="name_asc">Tên: A - Z</option>
-                </select>
+                <Select value={sortOption} onValueChange={(v) => setSortOption(v as typeof sortOption)}>
+                  <SelectTrigger className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-sm font-semibold text-zinc-800 focus:border-black focus:outline-none cursor-pointer">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Mới nhất</SelectItem>
+                    <SelectItem value="price_asc">Giá: Thấp đến Cao</SelectItem>
+                    <SelectItem value="price_desc">Giá: Cao đến Thấp</SelectItem>
+                    <SelectItem value="name_asc">Tên: A - Z</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -259,12 +264,12 @@ export default function ProductsSearchPage() {
                     <X className="size-3 cursor-pointer" onClick={() => { setMinPrice(''); setMaxPrice(''); }} />
                   </span>
                 )}
-                <button
+                <Button
                   onClick={handleClearFilters}
-                  className="ml-auto font-bold text-emerald-800 hover:underline"
+                  className="ml-auto font-bold text-emerald-800 hover:underline bg-transparent shadow-none hover:bg-transparent p-0 h-auto text-xs"
                 >
                   Xóa tất cả
-                </button>
+                </Button>
               </div>
             )}
 
@@ -295,13 +300,13 @@ export default function ProductsSearchPage() {
                 <p className="mt-1 text-sm text-zinc-500 max-w-md">
                   Rất tiếc, không có sản phẩm nào phù hợp với bộ lọc hoặc từ khóa của bạn. Bạn hãy thử tìm kiếm từ khóa khác hoặc xóa bớt bộ lọc.
                 </p>
-                <button
+                <Button
                   onClick={handleClearFilters}
                   className="mt-6 flex items-center gap-2 rounded-full bg-black px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-zinc-800 transition-all"
                 >
                   <RefreshCw className="size-4" />
                   <span>Đặt lại bộ lọc</span>
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -315,41 +320,41 @@ export default function ProductsSearchPage() {
           <div className="relative ml-auto flex h-full w-4/5 max-w-xs flex-col bg-white p-6 shadow-xl">
             <div className="flex items-center justify-between border-b pb-4">
               <h3 className="text-lg font-bold text-zinc-900">Bộ lọc tìm kiếm</h3>
-              <button onClick={() => setShowMobileFilter(false)} className="rounded-full p-1 text-zinc-500">
+              <Button onClick={() => setShowMobileFilter(false)} className="rounded-full p-1 text-zinc-500 bg-transparent shadow-none hover:bg-transparent">
                 <X className="size-5" />
-              </button>
+              </Button>
             </div>
 
             <div className="mt-6 space-y-6 overflow-y-auto flex-1">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Danh mục</label>
                 <div className="space-y-1">
-                  <button
+                  <Button
                     onClick={() => { setSelectedCategory('all'); setShowMobileFilter(false); }}
-                    className={`w-full text-left px-3 py-2 text-sm rounded-xl font-medium ${selectedCategory === 'all' ? 'bg-black text-white' : 'text-zinc-700'}`}
+                    className={`w-full text-left px-3 py-2 text-sm rounded-xl font-medium justify-start h-auto ${selectedCategory === 'all' ? 'bg-black text-white hover:bg-black' : 'text-zinc-700 bg-transparent shadow-none hover:bg-transparent hover:text-zinc-700'}`}
                   >
                     Tất cả danh mục
-                  </button>
+                  </Button>
                   {categories.map((cat) => (
-                    <button
+                    <Button
                       key={cat.categoryId}
                       onClick={() => { setSelectedCategory(cat.categoryId); setShowMobileFilter(false); }}
-                      className={`w-full text-left px-3 py-2 text-sm rounded-xl font-medium ${selectedCategory === cat.categoryId ? 'bg-black text-white' : 'text-zinc-700'}`}
+                      className={`w-full text-left px-3 py-2 text-sm rounded-xl font-medium justify-start h-auto ${selectedCategory === cat.categoryId ? 'bg-black text-white hover:bg-black' : 'text-zinc-700 bg-transparent shadow-none hover:bg-transparent hover:text-zinc-700'}`}
                     >
                       {cat.name}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
             </div>
 
             <div className="pt-4 border-t">
-              <button
+              <Button
                 onClick={() => setShowMobileFilter(false)}
-                className="w-full rounded-full bg-black py-3 text-center text-sm font-semibold text-white"
+                className="w-full rounded-full bg-black py-3 text-center text-sm font-semibold text-white hover:bg-zinc-800"
               >
                 Áp dụng bộ lọc
-              </button>
+              </Button>
             </div>
           </div>
         </div>

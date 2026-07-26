@@ -122,52 +122,22 @@ export const supplierService = {
   },
 
   getSupplyRequests: async (): Promise<SupplierSupplyRequest[]> => {
-    try {
-      const response = await api.get<ApiResponse<PagedResult<SupplierSupplyRequest> | SupplierSupplyRequest[]>>('/supplier/supply-requests')
-      const items = extractItems(response.data?.data)
-      if (items.length > 0) return items
-    } catch {
-      // Fallback
-    }
-
-    try {
-      const orderRes = await api.get('/orders')
-      const rawData = orderRes.data?.data ?? orderRes.data
-      const orderItems = extractItems(rawData)
-      if (orderItems.length > 0) {
-        return orderItems.map((o: any) => ({
-          supplyRequestId: o.id || o.orderId,
-          id: o.id || o.orderId,
-          distributionPointName: o.fullAddress || 'Điểm phân phối Quận 1',
-          productName: o.items?.[0]?.productName || 'Nông sản cung ứng',
-          quantity: o.items?.[0]?.quantity || 10,
-          totalAmount: o.finalAmount || o.totalAmount || 0,
-          status: o.status || 'Pending',
-          confirmationStatus: o.status || 'Pending',
-          createdAt: o.createdAt || new Date().toISOString(),
-          items: o.items || [],
-        }))
-      }
-    } catch {
-      // API Fallback
-    }
-    return []
+    const response = await api.get<ApiResponse<any[]>>('/supplier/supply-requests')
+    const items = extractItems(response.data?.data)
+    return items.map((o: any) => ({
+      ...o,
+      supplyRequestId: o.supplyRequestId || o.id,
+      distributionPointName: o.distributionPointName || o.fullAddress || 'Điểm phân phối',
+      confirmationStatus: o.confirmationStatus ?? o.status,
+      totalAmount: o.totalAmount ?? o.finalAmount ?? 0,
+    }))
   },
 
   confirmSupplyRequest: async (id: string): Promise<void> => {
-    try {
-      await api.put(`/supplier/supply-requests/${id}/confirm`)
-    } catch {
-      // Fallback to confirm-receipt or orders confirm
-      await api.post(`/orders/${id}/confirm-receipt`, { isFullReceived: true, note: 'Nhà cung cấp phê duyệt đơn' })
-    }
+    await api.put(`/supplier/supply-requests/${id}/confirm`)
   },
 
   rejectSupplyRequest: async (id: string, reason: string): Promise<void> => {
-    try {
-      await api.put(`/supplier/supply-requests/${id}/reject`, { reason })
-    } catch {
-      await api.delete(`/orders/${id}/cancel`, { data: JSON.stringify(reason) })
-    }
+    await api.put(`/supplier/supply-requests/${id}/reject`, { reason })
   },
 }

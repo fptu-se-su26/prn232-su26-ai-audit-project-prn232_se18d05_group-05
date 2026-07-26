@@ -15,9 +15,6 @@ public sealed class ProductController(
     [HttpGet("api/products/search")]
     public async Task<IActionResult> GetProducts([FromQuery] string? keyword, [FromQuery] Guid? categoryId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50, CancellationToken ct = default)
     {
-        // Auto-seed if database has no products yet
-        await AppData.SeedAsync(dbContext);
-
         var query = dbContext.Products
             .AsNoTracking()
             .Include(p => p.Category)
@@ -55,7 +52,7 @@ public sealed class ProductController(
                 supplierId = p.SupplierId,
                 supplierName = p.Supplier != null ? p.Supplier.BusinessName : "Nhà cung cấp",
                 mainImage = p.ProductImages.Select(i => i.ImageUrl).FirstOrDefault() ?? "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&q=80&w=800",
-                quantity = 100
+                quantity = p.Inventory != null ? p.Inventory.Quantity - p.Inventory.ReservedQty : 0
             })
             .ToListAsync(ct);
 
@@ -77,6 +74,7 @@ public sealed class ProductController(
             .Include(p => p.Category)
             .Include(p => p.Supplier)
             .Include(p => p.ProductImages)
+            .Include(p => p.Inventory)
             .FirstOrDefaultAsync(p => p.Id == id && !p.IsDeleted, ct);
 
         if (product == null)
@@ -96,15 +94,13 @@ public sealed class ProductController(
             supplierId = product.SupplierId,
             supplierName = product.Supplier?.BusinessName ?? "Nhà cung cấp",
             mainImage = product.ProductImages.Select(i => i.ImageUrl).FirstOrDefault() ?? "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&q=80&w=800",
-            quantity = 100
+            quantity = product.Inventory != null ? product.Inventory.Quantity - product.Inventory.ReservedQty : 0
         }));
     }
 
     [HttpGet("api/categories")]
     public async Task<IActionResult> GetCategories(CancellationToken ct = default)
     {
-        await AppData.SeedAsync(dbContext);
-
         var categories = await dbContext.Categories
             .AsNoTracking()
             .Select(c => new

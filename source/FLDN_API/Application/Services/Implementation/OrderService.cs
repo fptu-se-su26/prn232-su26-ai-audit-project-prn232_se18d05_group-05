@@ -2,102 +2,73 @@ namespace Application;
 
 [RegisterService(typeof(IOrderService))]
 public sealed class OrderService(
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IAppConfiguration appConfiguration
 ) : IOrderService
 {
     public async Task<OrderResponse> CreateOrderAsync(Guid userId, CreateOrderRequest request, CancellationToken ct = default)
     {
-        // 1. Resolve DistributionPoint User ID
         if (userId == Guid.Empty)
-        {
-            userId = await unitOfWork.Users.GetQueryable()
-                .Select(u => u.Id)
-                .FirstOrDefaultAsync(ct);
-        }
-
-        // 2. Resolve Address
-        var address = await unitOfWork.Repository<Address>()
-            .GetQueryable()
-            .FirstOrDefaultAsync(a => a.Id == request.AddressId && !a.IsDeleted, ct);
-
-        if (address == null)
-        {
-            address = await unitOfWork.Repository<Address>()
-                .GetQueryable()
-                .FirstOrDefaultAsync(a => !a.IsDeleted, ct);
-
-            if (address == null)
-            {
-                var district = await unitOfWork.Repository<District>().GetQueryable().FirstOrDefaultAsync(ct);
-                if (district == null)
-                {
-                    district = new District
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Quận 1",
-                        Code = "Q1"
-                    };
-                    await unitOfWork.Repository<District>().AddAsync(district);
-                }
-
-                address = new Address
-                {
-                    Id = request.AddressId != Guid.Empty ? request.AddressId : Guid.NewGuid(),
-                    UserId = userId,
-                    ReceiverName = "Điểm Phân Phối Mặc Định",
-                    ReceiverPhone = "0901234567",
-                    FullAddress = "123 Lê Lợi, Bến Nghé, Quận 1, TP. Hồ Chí Minh",
-                    DistrictId = district.Id,
-                    IsDefault = true,
-                    IsActive = true,
-                    IsDeleted = false
-                };
-                await unitOfWork.Repository<Address>().AddAsync(address);
-            }
-        }
+            throw new UnauthorizedException("Invalid or missing user ID in token.");
 
         if (request.Items == null || request.Items.Count == 0)
             throw new BadRequestException("Supply request must contain at least one item.");
 
+        // 1. Địa chỉ giao hàng phải có thật và thuộc về người đặt
+        var address = await unitOfWork.Repository<Address>()
+            .GetQueryable()
+            .FirstOrDefaultAsync(a => a.Id == request.AddressId && !a.IsDeleted, ct)
+            ?? throw new NotFoundException("Không tìm thấy địa chỉ giao hàng.");
+
+        if (address.UserId != userId)
+            throw new ForbiddenException("Bạn không có quyền sử dụng địa chỉ giao hàng này.");
+
+        // 2. Gộp các dòng trùng sản phẩm để kiểm tra tồn kho một lần cho mỗi sản phẩm
+        var requestedItems = request.Items
+            .GroupBy(i => i.ProductId)
+            .Select(g => new { ProductId = g.Key, Quantity = g.Sum(i => i.Quantity) })
+            .ToList();
+
+        if (requestedItems.Any(i => i.Quantity <= 0))
+            throw new BadRequestException("Số lượng phải lớn hơn 0.");
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
         decimal totalAmount = 0;
         var supplyRequestItems = new List<SupplyRequestItem>();
+        var reservedInventories = new List<Inventory>();
 
-        foreach (var item in request.Items)
+        foreach (var item in requestedItems)
         {
             var product = await unitOfWork.Repository<Product>()
                 .GetQueryable()
+                .Include(p => p.Inventory)
                 .Include(p => p.Batches)
-                .FirstOrDefaultAsync(p => p.Id == item.ProductId && !p.IsDeleted, ct);
+                .FirstOrDefaultAsync(p => p.Id == item.ProductId && !p.IsDeleted && p.IsActive, ct)
+                ?? throw new NotFoundException($"Không tìm thấy sản phẩm {item.ProductId} hoặc sản phẩm đã ngừng kinh doanh.");
 
-            if (product == null)
-            {
-                product = await unitOfWork.Repository<Product>()
-                    .GetQueryable()
-                    .Include(p => p.Batches)
-                    .FirstOrDefaultAsync(p => !p.IsDeleted, ct)
-                    ?? throw new NotFoundException("Không tìm thấy sản phẩm trong hệ thống.");
-            }
+            var inventory = product.Inventory
+                ?? throw new BadRequestException($"Sản phẩm \"{product.Name}\" chưa có tồn kho.");
 
-            var batch = product.Batches.FirstOrDefault(b => b.Status == BatchStatus.Active)
-                ?? product.Batches.FirstOrDefault();
+            var availableQty = inventory.Quantity - inventory.ReservedQty;
+            if (availableQty < item.Quantity)
+                throw new BadRequestException($"Sản phẩm \"{product.Name}\" chỉ còn {availableQty} {product.Unit}.");
 
-            if (batch == null)
-            {
-                batch = new Batch
-                {
-                    Id = Guid.NewGuid(),
-                    ProductId = product.Id,
-                    BatchCode = $"BATCH-{DateTime.UtcNow:yyyyMMddHHmmss}",
-                    Quantity = 1000,
-                    RemainingQty = 1000,
-                    ExpiryDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
-                    Status = BatchStatus.Active,
-                };
-                await unitOfWork.Repository<Batch>().AddAsync(batch);
-            }
+            // FEFO: chọn lô còn hạn, hết hạn sớm nhất và còn đủ số lượng
+            var batch = product.Batches
+                .Where(b => b.Status != BatchStatus.Expired
+                            && b.ExpiryDate > today
+                            && b.RemainingQty >= item.Quantity)
+                .OrderBy(b => b.ExpiryDate)
+                .FirstOrDefault()
+                ?? throw new BadRequestException($"Không có lô hàng nào của \"{product.Name}\" còn đủ {item.Quantity} {product.Unit}.");
 
-            decimal itemPrice = item.UnitPrice > 0 ? item.UnitPrice : product.WholesalePrice;
-            totalAmount += itemPrice * item.Quantity;
+            // Giá luôn lấy từ DB, không tin giá client gửi lên
+            var unitPrice = product.WholesalePrice;
+            totalAmount += unitPrice * item.Quantity;
+
+            // Giữ chỗ tồn kho, trả lại khi đơn bị huỷ
+            inventory.ReservedQty += item.Quantity;
+            reservedInventories.Add(inventory);
 
             supplyRequestItems.Add(new SupplyRequestItem
             {
@@ -106,18 +77,21 @@ public sealed class OrderService(
                 SupplierId = product.SupplierId,
                 BatchId = batch.Id,
                 Quantity = item.Quantity,
-                UnitPrice = itemPrice,
-                SubTotal = itemPrice * item.Quantity,
+                UnitPrice = unitPrice,
+                SubTotal = unitPrice * item.Quantity,
             });
         }
 
-        decimal shippingFee = request.FulfillmentType == FulfillmentType.Scheduled ? 50000 : 30000;
-        decimal discountAmount = 0;
+        foreach (var inventory in reservedInventories)
+            unitOfWork.Repository<Inventory>().Update(inventory);
 
-        if (!string.IsNullOrWhiteSpace(request.VoucherCode) && request.VoucherCode.Trim().Equals("FOODLINK10", StringComparison.OrdinalIgnoreCase))
-        {
-            discountAmount = Math.Min(totalAmount * 0.1m, 100000m);
-        }
+        var orderOptions = appConfiguration.GetOrderOptions();
+
+        decimal shippingFee = request.FulfillmentType == FulfillmentType.Scheduled
+            ? orderOptions.ScheduledShippingFee
+            : orderOptions.StandardShippingFee;
+
+        decimal discountAmount = ResolveDiscount(orderOptions, request.VoucherCode, totalAmount);
 
         decimal finalAmount = Math.Max(0, totalAmount + shippingFee - discountAmount);
 
@@ -186,6 +160,7 @@ public sealed class OrderService(
     {
         var request = await unitOfWork.Repository<SupplyRequest>()
             .GetQueryable()
+            .Include(r => r.Items)
             .FirstOrDefaultAsync(r => r.Id == id, ct)
             ?? throw new NotFoundException("Supply request not found.");
 
@@ -197,6 +172,9 @@ public sealed class OrderService(
 
         request.Status = SupplyRequestStatus.Cancelled;
         request.CancelReason = cancelReason;
+
+        // Trả lại phần tồn kho đã giữ chỗ lúc tạo đơn
+        await ReleaseReservedStockAsync(request.Items, ct);
 
         unitOfWork.Repository<SupplyRequest>().Update(request);
         await unitOfWork.EnsureSaveAsync(ct);
@@ -230,6 +208,37 @@ public sealed class OrderService(
         unitOfWork.Repository<SupplyRequest>().Update(supplyRequest);
         await unitOfWork.Repository<SupplyRequestStatusHistory>().AddAsync(statusHistory);
         await unitOfWork.EnsureSaveAsync(ct);
+    }
+
+    private static decimal ResolveDiscount(OrderOptions options, string? voucherCode, decimal totalAmount)
+    {
+        if (string.IsNullOrWhiteSpace(voucherCode))
+            return 0;
+
+        var voucher = options.Vouchers.FirstOrDefault(v =>
+            v.IsActive && string.Equals(v.Code, voucherCode.Trim(), StringComparison.OrdinalIgnoreCase))
+            ?? throw new BadRequestException("Mã ưu đãi không hợp lệ hoặc đã hết hạn.");
+
+        var discount = totalAmount * voucher.DiscountPercent / 100m;
+
+        return voucher.MaxDiscountAmount > 0
+            ? Math.Min(discount, voucher.MaxDiscountAmount)
+            : discount;
+    }
+
+    private async Task ReleaseReservedStockAsync(IEnumerable<SupplyRequestItem> items, CancellationToken ct)
+    {
+        foreach (var item in items)
+        {
+            var inventory = await unitOfWork.Repository<Inventory>()
+                .FindAsync(i => i.ProductId == item.ProductId, ct);
+
+            if (inventory is null)
+                continue;
+
+            inventory.ReservedQty = Math.Max(0, inventory.ReservedQty - item.Quantity);
+            unitOfWork.Repository<Inventory>().Update(inventory);
+        }
     }
 
     private static OrderResponse MapOrderResponse(SupplyRequest request) => new()

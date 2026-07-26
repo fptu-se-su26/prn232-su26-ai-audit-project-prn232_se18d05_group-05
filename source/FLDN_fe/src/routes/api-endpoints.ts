@@ -43,7 +43,13 @@ export const API_ENDPOINTS = {
     cancel: (id: string) => `/orders/${id}/cancel`,
     confirmReceipt: (id: string) => `/orders/${id}/confirm-receipt`,
   },
-  addresses: '/addresses',
+  addresses: {
+    list: '/addresses',
+    create: '/addresses',
+    detail: (id: string) => `/addresses/${id}`,
+    setDefault: (id: string) => `/addresses/${id}/default`,
+  },
+  districts: '/districts',
   vouchers: {
     validate: '/vouchers/validate',
   },

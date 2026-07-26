@@ -30,7 +30,7 @@ public sealed class AdminLogisticsService(IUnitOfWork unitOfWork) : IAdminLogist
                 VehicleType    = l.VehicleType,
                 LicensePlate   = l.LicensePlate,
                 Status         = l.Status,
-                TotalShipments = l.TotalShipments,
+                TotalShipments = l.Shipments.Count(s => s.Status == ShipmentStatus.Delivered),
                 CreatedAt      = l.CreatedAt,
             })
             .ToListAsync(ct);
@@ -46,6 +46,7 @@ public sealed class AdminLogisticsService(IUnitOfWork unitOfWork) : IAdminLogist
         var op = await unitOfWork.Repository<LogisticsProfile>().GetQueryable()
             .Include(l => l.User)
             .Include(l => l.ApprovedByUser)
+            .Include(l => l.Shipments)
             .FirstOrDefaultAsync(l => l.Id == id, ct)
             ?? throw new NotFoundException("Logistics operator not found.");
 
@@ -59,7 +60,7 @@ public sealed class AdminLogisticsService(IUnitOfWork unitOfWork) : IAdminLogist
             VehicleType    = op.VehicleType,
             LicensePlate   = op.LicensePlate,
             Status         = op.Status,
-            TotalShipments = op.TotalShipments,
+            TotalShipments = op.Shipments.Count(s => s.Status == ShipmentStatus.Delivered),
             ApprovedByName = op.ApprovedByUser?.FullName,
             ApprovedAt     = op.ApprovedAt,
             CreatedAt      = op.CreatedAt,

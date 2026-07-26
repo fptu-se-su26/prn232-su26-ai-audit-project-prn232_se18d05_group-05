@@ -737,7 +737,7 @@ export default function SupplierSupplyRequestsPage() {
                       {step4Done && <Check className="size-2.5 text-white" />}
                     </div>
                     <div>
-                      <p className={`text-xs font-bold ${step4Done ? 'text-slate-900' : 'text-slate-400'}`}>4. Điểm phân phối xác nhận ký nhận (UC23)</p>
+                      <p className={`text-xs font-bold ${step4Done ? 'text-slate-900' : 'text-slate-400'}`}>4. Điểm phân phối xác nhận ký nhận</p>
                       <p className="text-[11px] text-slate-400">{getTime('received') || getTime('completed') ? formatDateVN(getTime('received') ?? getTime('completed')) : step4Done ? 'Hoàn tất' : 'Dự kiến hoàn tất trong ngày'}</p>
                     </div>
                   </div>

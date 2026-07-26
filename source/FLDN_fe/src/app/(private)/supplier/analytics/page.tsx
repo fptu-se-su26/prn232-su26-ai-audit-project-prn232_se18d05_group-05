@@ -110,10 +110,16 @@ export default function SupplierAnalyticsPage() {
     }, 500)
   }
 
-  // Apply Filter by parsing DD/MM/YYYY
+  // Apply Filter by parsing DD/MM/YYYY with strict date range validation
   const handleApplyFilter = () => {
     const startIso = parseVNToISO(startDateVN)
     const endIso = parseVNToISO(endDateVN)
+
+    if (new Date(endIso) < new Date(startIso)) {
+      showNotification('Không thể lọc! Ngày kết thúc (Đến ngày) phải diễn ra SAU hoặc BẰNG Ngày bắt đầu (Từ ngày).', 'error')
+      return
+    }
+
     setAppliedDateRange({ start: startIso, end: endIso })
     showNotification(`Đã lọc lại toàn bộ thông số báo cáo thực tế từ ${startDateVN} đến ${endDateVN}!`, 'success')
   }
@@ -220,7 +226,7 @@ export default function SupplierAnalyticsPage() {
       const rows = [
         { index: 1, name: 'Tỷ lệ nông sản đạt chuẩn an toàn VietGAP & ATTP', val: filteredMetrics.vietGapRate, rank: 'Xuất Sắc (100%)', note: 'Kiểm định lô hàng nghiêm ngặt trước khi đóng gói' },
         { index: 2, name: 'Chỉ số Uy tín & Cam kết SLA', val: filteredMetrics.slaGrade, rank: 'Hạng A+', note: 'Đạt cam kết giao vận đúng tiến độ cho Điểm phân phối' },
-        { index: 3, name: 'Điểm đánh giá từ các Điểm phân phối (UC23)', val: filteredMetrics.ratingScore, rank: 'Hài Lòng Tuyệt Đối', note: 'Dựa trên 100% phiếu xác nhận nhận hàng không bị thiếu hỏng' },
+        { index: 3, name: 'Điểm đánh giá từ các Điểm phân phối', val: filteredMetrics.ratingScore, rank: 'Hài Lòng Tuyệt Đối', note: 'Dựa trên 100% phiếu xác nhận nhận hàng không bị thiếu hỏng' },
         { index: 4, name: 'Số lượng mã QR truy xuất đã phát hành', val: `${filteredMetrics.qrCount} mã QR`, rank: 'Hoàn Tất', note: 'Gắn mã QR minh bạch thông tin nguồn gốc thu hoạch' },
         { index: 5, name: 'Thời gian duyệt yêu cầu cung ứng trung bình', val: filteredMetrics.avgApprovalHours, rank: 'Tốc Độ Cao', note: 'Xử lý đơn sỉ trong vòng 2 giờ kể từ khi nhận' },
         { index: 6, name: 'Thời gian chuẩn bị đóng gói xuất kho', val: filteredMetrics.avgPrepHours, rank: 'Đạt Chuẩn', note: 'Sẵn sàng bàn giao cho xe tải Shipper trong ngày' },
@@ -362,57 +368,62 @@ export default function SupplierAnalyticsPage() {
         </CardHeader>
       </Card>
 
-      {/* Date Filter & Control Widget using shadcn Field & Input */}
-      <Card className="border-slate-100 bg-white p-4.5 shadow-md shadow-slate-100/50">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4 flex-wrap">
-            <Field>
-              <FieldLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Từ ngày</FieldLabel>
+      {/* Date Filter & Control Widget - Compact 1-line toolbar layout */}
+      <Card className="border-slate-200/80 bg-white p-3.5 shadow-sm rounded-2xl">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-600">Từ ngày:</span>
               <div className="relative flex items-center">
-                <Input
+                <input
                   type="text"
+                  readOnly
                   placeholder="01/07/2026"
                   value={startDateVN}
-                  onChange={(e) => setStartDateVN(e.target.value)}
-                  className="w-36 font-mono font-bold text-slate-800"
+                  className="w-36 rounded-xl border border-slate-200 bg-white py-2 pl-3 pr-8 text-xs font-bold text-slate-800 cursor-pointer shadow-2xs focus:border-emerald-500 focus:outline-hidden"
                 />
+                <Calendar className="absolute right-2.5 size-4 text-emerald-600 pointer-events-none" />
                 <input
                   type="date"
                   onChange={(e) => {
                     if (e.target.value) setStartDateVN(parseISOToVN(e.target.value))
                   }}
-                  className="absolute right-2 opacity-0 w-6 h-6 cursor-pointer"
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                 />
-                <Calendar className="absolute right-2.5 size-4 text-slate-400 pointer-events-none" />
               </div>
-            </Field>
+            </div>
 
-            <Field>
-              <FieldLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Đến ngày</FieldLabel>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-600">Đến ngày:</span>
               <div className="relative flex items-center">
-                <Input
+                <input
                   type="text"
+                  readOnly
                   placeholder="31/07/2026"
                   value={endDateVN}
-                  onChange={(e) => setEndDateVN(e.target.value)}
-                  className="w-36 font-mono font-bold text-slate-800"
+                  className="w-36 rounded-xl border border-slate-200 bg-white py-2 pl-3 pr-8 text-xs font-bold text-slate-800 cursor-pointer shadow-2xs focus:border-emerald-500 focus:outline-hidden"
                 />
+                <Calendar className="absolute right-2.5 size-4 text-emerald-600 pointer-events-none" />
                 <input
                   type="date"
                   onChange={(e) => {
                     if (e.target.value) setEndDateVN(parseISOToVN(e.target.value))
                   }}
-                  className="absolute right-2 opacity-0 w-6 h-6 cursor-pointer"
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
                 />
-                <Calendar className="absolute right-2.5 size-4 text-slate-400 pointer-events-none" />
               </div>
-            </Field>
+            </div>
           </div>
 
-          <Button onClick={handleApplyFilter} className="bg-emerald-800 text-white font-bold hover:bg-emerald-900">
-            <Filter className="size-3.5" />
-            Lọc báo cáo
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleApplyFilter}
+              className="rounded-xl bg-emerald-800 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-900 active:scale-95 transition-all"
+            >
+              <Filter className="size-3.5 mr-1" />
+              Lọc báo cáo
+            </Button>
+          </div>
         </div>
       </Card>
 

@@ -23,6 +23,7 @@ export interface SupplierProduct {
   unitCost?: number
   unit?: string
   packagingStandard?: string
+  imageUrl?: string
   isActive?: boolean
   availableQuantity?: number
   quantity?: number

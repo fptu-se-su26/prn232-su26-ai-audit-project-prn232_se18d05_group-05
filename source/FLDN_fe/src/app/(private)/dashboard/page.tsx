@@ -70,8 +70,9 @@ export default function DashboardPage() {
   const [statusOverrides, setStatusOverrides] = useState<Record<string, 'CONFIRMED' | 'REJECTED'>>({})
   const [deletedBatchCodes, setDeletedBatchCodes] = useState<string[]>([])
   const [inventoryOverrides, setInventoryOverrides] = useState<Record<string, number>>({})
+  const [localBatches, setLocalBatches] = useState<any[]>([])
 
-  // Load persistent status & deleted batch overrides on mount
+  // Load persistent status & local batches on mount
   useEffect(() => {
     try {
       const savedStatus = localStorage.getItem(REQUEST_STATUS_STORAGE_KEY)
@@ -82,6 +83,9 @@ export default function DashboardPage() {
 
       const savedInventory = localStorage.getItem(INVENTORY_STORAGE_KEY)
       if (savedInventory) setInventoryOverrides(JSON.parse(savedInventory))
+
+      const savedBatches = localStorage.getItem('fldn_supplier_batches_v3')
+      if (savedBatches) setLocalBatches(JSON.parse(savedBatches))
     } catch {
       // Fallback
     }
@@ -125,14 +129,27 @@ export default function DashboardPage() {
     })
   }, [supplyRequestsData, statusOverrides])
 
-  // Batches list excluding deleted batch codes
+  // MERGE server batches AND local created batches, excluding deleted batch codes
   const batchesList = useMemo(() => {
     const base = batchesData ?? []
-    return base.filter((b) => {
-      const key = b.batchCode || b.id || b.batchId
-      return !key || !deletedBatchCodes.includes(key)
+    const mergedMap = new Map<string, any>()
+
+    base.forEach((b) => {
+      const key = b.batchId || b.id || b.batchCode
+      if (key && !deletedBatchCodes.includes(key) && !deletedBatchCodes.includes(b.batchCode)) {
+        mergedMap.set(key, b)
+      }
     })
-  }, [batchesData, deletedBatchCodes])
+
+    localBatches.forEach((b) => {
+      const key = b.batchId || b.id || b.batchCode
+      if (key && !deletedBatchCodes.includes(key) && !deletedBatchCodes.includes(b.batchCode)) {
+        mergedMap.set(key, b)
+      }
+    })
+
+    return Array.from(mergedMap.values())
+  }, [batchesData, localBatches, deletedBatchCodes])
 
   const activeProductsCount = productsList.filter((p) => p.isActive !== false).length || productsList.length
 
@@ -149,7 +166,7 @@ export default function DashboardPage() {
 
   const pendingRequestsCount = pendingRequestsList.length
 
-  // Expiring Batches <= 3 days criteria (Excludes deleted batches!)
+  // ACCURATE Expiring Batches <= 3 days criteria (Strictly matches UI title)
   const expiringBatchesList = useMemo(() => {
     const today = new Date('2026-07-25').getTime()
     return batchesList.filter((b) => {

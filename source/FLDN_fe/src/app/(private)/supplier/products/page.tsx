@@ -81,9 +81,11 @@ export default function SupplierProductsPage() {
 
   // Persistent States
   const [inventoryOverrides, setInventoryOverrides] = useState<Record<string, number>>({})
+  const [productOverrides, setProductOverrides] = useState<Record<string, Partial<SupplierProduct>>>({})
   const [localBatches, setLocalBatches] = useState<SupplierBatch[]>([])
   const [deletedBatchCodes, setDeletedBatchCodes] = useState<string[]>([])
   const [localCreatedProducts, setLocalCreatedProducts] = useState<SupplierProduct[]>([])
+  const [deletedProductIds, setDeletedProductIds] = useState<string[]>([])
 
   // Custom Delete Confirm Modal State
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<{
@@ -99,6 +101,9 @@ export default function SupplierProductsPage() {
       const savedInventory = localStorage.getItem(INVENTORY_STORAGE_KEY)
       if (savedInventory) setInventoryOverrides(JSON.parse(savedInventory))
 
+      const savedProdOverrides = localStorage.getItem('fldn_supplier_product_overrides_v3')
+      if (savedProdOverrides) setProductOverrides(JSON.parse(savedProdOverrides))
+
       const savedBatches = localStorage.getItem(BATCHES_STORAGE_KEY)
       if (savedBatches) setLocalBatches(JSON.parse(savedBatches))
 
@@ -107,6 +112,14 @@ export default function SupplierProductsPage() {
 
       const savedAdded = localStorage.getItem(ADDED_PRODUCTS_STORAGE_KEY)
       if (savedAdded) setLocalCreatedProducts(JSON.parse(savedAdded))
+
+      const savedDeletedProds = localStorage.getItem('fldn_supplier_deleted_products_v3')
+      if (savedDeletedProds) {
+        // Only keep local product IDs in deletedProductIds (never delete base server products)
+        const parsed = JSON.parse(savedDeletedProds) as string[]
+        const cleanLocalOnly = parsed.filter((id) => id.startsWith('prod-'))
+        setDeletedProductIds(cleanLocalOnly)
+      }
     } catch {
       // Storage fallback
     }
@@ -138,53 +151,70 @@ export default function SupplierProductsPage() {
   const [prodUnit, setProdUnit] = useState('Kg')
   const [prodPkg, setProdPkg] = useState('Túi 1kg')
   const [prodDesc, setProdDesc] = useState('')
+  const [prodImage, setProdImage] = useState('')
 
   const categoriesList = useMemo(() => categoriesData ?? [], [categoriesData])
 
-  // MERGE server products AND local created products with persistent inventory overrides
+  // MERGE server products AND local created products properly (Server products first)
   const productsList = useMemo(() => {
     const baseServer = realProducts ?? []
     const mergedMap = new Map<string, SupplierProduct>()
+    const processedNames = new Set<string>()
 
+    // 1. Add products from Server DB
     baseServer.forEach((p) => {
       const pId = p.productId || p.id || ''
-      if (pId) mergedMap.set(pId, p)
+      const cleanName = (p.name || '').toLowerCase().trim()
+      if (pId && cleanName && !deletedProductIds.includes(pId)) {
+        mergedMap.set(pId, p)
+        processedNames.add(cleanName)
+      }
     })
 
+    // 2. Add local created products (if not already present on server)
     localCreatedProducts.forEach((p) => {
       const pId = p.productId || p.id || ''
-      if (pId) mergedMap.set(pId, p)
+      const cleanName = (p.name || '').toLowerCase().trim()
+      if (pId && cleanName && !deletedProductIds.includes(pId) && !processedNames.has(cleanName)) {
+        mergedMap.set(pId, p)
+        processedNames.add(cleanName)
+      }
     })
 
     return Array.from(mergedMap.values()).map((p) => {
       const pId = p.productId || p.id || ''
+      let item = { ...p }
+
+      if (pId && productOverrides[pId]) {
+        item = { ...item, ...productOverrides[pId] }
+      }
+
       if (pId && inventoryOverrides[pId] !== undefined) {
         const overrideQty = inventoryOverrides[pId]
-        return {
-          ...p,
-          availableQuantity: overrideQty,
-          quantity: overrideQty,
-        }
+        item.availableQuantity = overrideQty
+        item.quantity = overrideQty
       }
-      return p
+      return item
     })
-  }, [realProducts, localCreatedProducts, inventoryOverrides])
+  }, [realProducts, localCreatedProducts, inventoryOverrides, productOverrides, deletedProductIds])
 
-  // MERGE server batches AND local created batches, filter out deleted ones!
+  // MERGE server batches AND local batches cleanly (Local created batches first)
   const batchesList = useMemo(() => {
-    const serverList = realBatches ?? []
+    const base = realBatches ?? []
     const mergedMap = new Map<string, SupplierBatch>()
 
-    serverList.forEach((b) => {
-      const key = b.batchCode || b.id || b.batchId
-      if (key && !deletedBatchCodes.includes(key)) {
+    // Local created batches (added first so new batches display at top)
+    localBatches.forEach((b) => {
+      const key = b.batchId || b.id || b.batchCode
+      if (key && !deletedBatchCodes.includes(key) && !deletedBatchCodes.includes(b.batchCode)) {
         mergedMap.set(key, b)
       }
     })
 
-    localBatches.forEach((b) => {
-      const key = b.batchCode || b.id || b.batchId
-      if (key && !deletedBatchCodes.includes(key)) {
+    // Server batches
+    base.forEach((b) => {
+      const key = b.batchId || b.id || b.batchCode
+      if (key && !deletedBatchCodes.includes(key) && !deletedBatchCodes.includes(b.batchCode) && !mergedMap.has(key)) {
         mergedMap.set(key, b)
       }
     })
@@ -225,18 +255,23 @@ export default function SupplierProductsPage() {
     setProdUnit('Kg')
     setProdPkg('Túi 1kg')
     setProdDesc('')
+    setProdImage('')
     setIsProductModalOpen(true)
   }
 
   const handleOpenEditModal = (product: SupplierProduct) => {
     setEditingProduct(product)
+    const prodId = product.productId || product.id || ''
+    const overrideObj = productOverrides[prodId] || {}
     const firstCatId = categoriesList[0]?.categoryId || categoriesList[0]?.id || ''
-    setProdCategory(product.categoryId || firstCatId)
-    setProdName(product.name || '')
-    setProdCost(String(product.unitCost || 25000))
-    setProdUnit(product.unit || 'Kg')
-    setProdPkg(product.packagingStandard || 'Túi 1kg')
-    setProdDesc(product.description || '')
+
+    setProdCategory(overrideObj.categoryId || product.categoryId || firstCatId)
+    setProdName(overrideObj.name || product.name || '')
+    setProdCost(String(overrideObj.unitCost ?? product.unitCost ?? 25000))
+    setProdUnit(overrideObj.unit || product.unit || 'Kg')
+    setProdPkg(overrideObj.packagingStandard || product.packagingStandard || 'Túi 1kg')
+    setProdDesc(overrideObj.description || product.description || '')
+    setProdImage(overrideObj.imageUrl || product.imageUrl || '')
     setIsProductModalOpen(true)
   }
 
@@ -254,6 +289,24 @@ export default function SupplierProductsPage() {
     if (editingProduct) {
       const prodId = editingProduct.productId || editingProduct.id || ''
 
+      const updatedOverrides = {
+        ...productOverrides,
+        [prodId]: {
+          name: prodName,
+          categoryId: targetCatId,
+          categoryName: targetCatName,
+          unitCost: Number(prodCost) || 0,
+          unit: prodUnit,
+          packagingStandard: prodPkg,
+          description: prodDesc,
+          imageUrl: prodImage,
+        },
+      }
+      setProductOverrides(updatedOverrides)
+      try {
+        localStorage.setItem('fldn_supplier_product_overrides_v3', JSON.stringify(updatedOverrides))
+      } catch {}
+
       setLocalCreatedProducts((prev) =>
         prev.map((p) => {
           if ((p.productId || p.id) === prodId) {
@@ -266,6 +319,7 @@ export default function SupplierProductsPage() {
               unit: prodUnit,
               packagingStandard: prodPkg,
               description: prodDesc,
+              imageUrl: prodImage,
             }
           }
           return p
@@ -300,10 +354,22 @@ export default function SupplierProductsPage() {
         unit: prodUnit,
         packagingStandard: prodPkg,
         description: prodDesc,
-        availableQuantity: 100,
-        quantity: 100,
+        imageUrl: prodImage,
+        availableQuantity: 0,
+        quantity: 0,
         isActive: true,
       }
+
+      const updatedOverrides = {
+        ...productOverrides,
+        [newId]: {
+          imageUrl: prodImage,
+        },
+      }
+      setProductOverrides(updatedOverrides)
+      try {
+        localStorage.setItem('fldn_supplier_product_overrides_v3', JSON.stringify(updatedOverrides))
+      } catch {}
 
       setLocalCreatedProducts((prev) => {
         const updated = [newProd, ...prev]
@@ -380,6 +446,14 @@ export default function SupplierProductsPage() {
     } else if (deleteConfirmTarget.type === 'PRODUCT') {
       const prodId = deleteConfirmTarget.id
 
+      setDeletedProductIds((prev) => {
+        const updated = Array.from(new Set([...prev, prodId]))
+        try {
+          localStorage.setItem('fldn_supplier_deleted_products_v3', JSON.stringify(updated))
+        } catch {}
+        return updated
+      })
+
       setLocalCreatedProducts((prev) => {
         const updated = prev.filter((p) => (p.productId || p.id) !== prodId)
         try {
@@ -392,7 +466,7 @@ export default function SupplierProductsPage() {
         await deleteProductMutation.mutateAsync(prodId)
       } catch {}
 
-      showNotification('Đã ngưng kinh doanh sản phẩm!', 'success')
+      showNotification('Đã ngưng kinh doanh & xóa sản phẩm thành công!', 'success')
       refetchProducts()
     }
 
@@ -433,6 +507,7 @@ export default function SupplierProductsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setCertFile(e.target.files[0])
+      setModalBatchError(null)
     }
   }
 
@@ -541,7 +616,55 @@ export default function SupplierProductsPage() {
     printWindow.document.close()
   }
 
+  // Modal inline error state
+  const [modalBatchError, setModalBatchError] = useState<string | null>(null)
+
+  // Smart unique batch code generator that avoids all existing batch codes
+  const generateUniqueBatchCode = () => {
+    let uniqueCode = ''
+    let attempts = 0
+    const existingSet = new Set(batchesList.map((b) => (b.batchCode || '').toUpperCase().trim()))
+    do {
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+      const randomNum = String(Math.floor(Math.random() * 8900 + 1000))
+      uniqueCode = `BTC-${dateStr}-${randomNum}`
+      attempts++
+    } while (attempts < 50 && existingSet.has(uniqueCode))
+    return uniqueCode
+  }
+
   const handleGenerateQR = async () => {
+    setModalBatchError(null)
+
+    const trimmedCode = (batchCode || '').trim().toUpperCase()
+    if (!trimmedCode) {
+      setModalBatchError('Vui lòng nhập hoặc sinh Mã Lô hàng!')
+      return
+    }
+
+    // STRICT VALIDATION: Prevent duplicate batch codes
+    const isDuplicateBatchCode = batchesList.some(
+      (b) => (b.batchCode || b.id || b.batchId || '').trim().toUpperCase() === trimmedCode
+    )
+
+    if (isDuplicateBatchCode) {
+      setModalBatchError(
+        `Mã Lô hàng "${trimmedCode}" đã tồn tại trên hệ thống! Vui lòng bấm nút "🔄 Sinh mã mới" hoặc nhập mã lô khác!`
+      )
+      return
+    }
+
+    if (!certFile) {
+      setModalBatchError('Vui lòng đính kèm Giấy chứng nhận VietGAP / ATTP (file PDF, JPG, PNG) để đủ điều kiện tạo lô hàng!')
+      return
+    }
+
+    // STRICT VALIDATION: Expiry date MUST be after harvest date
+    if (harvestDate && expiryDate && new Date(expiryDate) <= new Date(harvestDate)) {
+      setModalBatchError('Không thể tạo Lô hàng! Hạn sử dụng phải diễn ra SAU Ngày thu hoạch. Vui lòng điều chỉnh lại ngày hợp lệ!')
+      return
+    }
+
     const targetProdId = selectedProductId || productsList[0]?.productId || productsList[0]?.id || ''
     const targetProd = productsList.find((p) => (p.productId || p.id) === targetProdId)
     const pName = targetProd?.name || 'Nông sản VietGAP'
@@ -550,9 +673,8 @@ export default function SupplierProductsPage() {
     const currentStock = targetProd?.availableQuantity ?? targetProd?.quantity ?? 0
 
     if (currentStock < requestedBatchQty) {
-      showNotification(
-        `Không thể tạo Lô hàng! Tồn kho của "${pName}" hiện có ${currentStock} kg (Không đủ ${requestedBatchQty} kg). Vui lòng "Cập nhật kho" trước!`,
-        'error'
+      setModalBatchError(
+        `Không thể tạo Lô hàng! Tồn kho của "${pName}" hiện có ${currentStock.toLocaleString()} kg (Không đủ ${requestedBatchQty.toLocaleString()} kg). Vui lòng điều chỉnh số lượng hoặc "Cập nhật kho" trước!`
       )
       return
     }
@@ -585,21 +707,23 @@ export default function SupplierProductsPage() {
     })
 
     try {
-      await createBatchMutation.mutateAsync({
+      createBatchMutation.mutate({
         productId: targetProdId,
         batchCode,
         quantity: requestedBatchQty,
         harvestDate,
         expiryDate,
       })
-      await updateInventoryMutation.mutateAsync({
+      updateInventoryMutation.mutate({
         productId: targetProdId,
         quantity: remainingStock,
       })
     } catch {}
 
-    showNotification(`Tạo thành công Lô hàng ${batchCode} (${requestedBatchQty}kg) cho "${pName}". Tồn kho còn lại: ${remainingStock}kg!`, 'success')
+    showNotification(`Tạo thành công Lô hàng ${batchCode} (${requestedBatchQty}kg) cho "${pName}". Tồn kho còn lại: ${remainingStock.toLocaleString()}kg!`, 'success')
     setIsBatchModalOpen(false)
+    setCertFile(null)
+    setModalBatchError(null)
     setActiveTab('BATCHES')
     refetchBatches()
     refetchProducts()
@@ -610,7 +734,7 @@ export default function SupplierProductsPage() {
       {/* Toast Notification */}
       {notification && (
         <div
-          className={`fixed top-5 right-5 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 text-xs font-bold text-white shadow-2xl transition-all duration-300 animate-in slide-in-from-top-4 ${
+          className={`fixed top-5 right-5 z-[100] flex items-center gap-3 rounded-2xl px-5 py-3.5 text-xs font-bold text-white shadow-2xl transition-all duration-300 animate-in slide-in-from-top-4 ${
             notification.type === 'error'
               ? 'bg-gradient-to-r from-rose-900 to-red-800 border border-rose-700/80 shadow-rose-950/30'
               : 'bg-gradient-to-r from-emerald-900 to-teal-800 border border-emerald-700/80 shadow-emerald-950/30'
@@ -654,8 +778,7 @@ export default function SupplierProductsPage() {
             </button>
             <button
               onClick={() => {
-                const count = batchesList.length + 1
-                setBatchCode(`BTC-20260725-00${count}`)
+                setBatchCode(generateUniqueBatchCode())
                 setIsBatchModalOpen(true)
               }}
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 px-5 py-3 text-xs font-black text-emerald-950 shadow-lg shadow-emerald-400/25 transition-all duration-200 hover:brightness-110 active:scale-95 cursor-pointer"
@@ -791,9 +914,17 @@ export default function SupplierProductsPage() {
                       <tr key={itemId} className="transition-all duration-150 hover:bg-slate-50/60">
                         <td className="px-6 py-4.5">
                           <div className="flex items-center gap-3.5">
-                            <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-100 text-sm font-black text-emerald-800 shadow-sm">
-                              {item.name.charAt(0)}
-                            </div>
+                            {item.imageUrl ? (
+                              <img
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="size-11 rounded-2xl object-cover border border-emerald-100 shadow-xs shrink-0 bg-slate-50"
+                              />
+                            ) : (
+                              <div className="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-100 text-sm font-black text-emerald-800 shadow-sm shrink-0">
+                                {item.name.charAt(0)}
+                              </div>
+                            )}
                             <div>
                               <p className="font-extrabold text-slate-900 text-sm">{item.name}</p>
                               <p className="text-[10px] text-slate-400 font-mono mt-0.5">{itemId.substring(0, 8).toUpperCase()}</p>
@@ -839,7 +970,6 @@ export default function SupplierProductsPage() {
                             {item.isActive !== false ? 'Đang kinh doanh' : 'Ngưng bán'}
                           </span>
                         </td>
-
                         <td className="px-6 py-4.5 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
@@ -854,6 +984,9 @@ export default function SupplierProductsPage() {
                             <button
                               onClick={() => {
                                 setSelectedProductId(itemId)
+                                setBatchCode(generateUniqueBatchCode())
+                                setCertFile(null)
+                                setModalBatchError(null)
                                 setIsBatchModalOpen(true)
                               }}
                               className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-800 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-900 transition-all active:scale-95 cursor-pointer"
@@ -1145,12 +1278,32 @@ export default function SupplierProductsPage() {
               </div>
 
               <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">URL Hình ảnh sản phẩm (Tùy chọn)</label>
+                <div className="flex items-center gap-3">
+                  {prodImage ? (
+                    <img src={prodImage} alt="Preview" className="size-11 rounded-2xl object-cover border border-emerald-200 shadow-xs shrink-0 bg-slate-50" />
+                  ) : (
+                    <div className="size-11 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 shrink-0 text-[10px] font-bold">
+                      Trống
+                    </div>
+                  )}
+                  <input
+                    type="text"
+                    placeholder="Dán link ảnh (https://...) hoặc để trống..."
+                    value={prodImage}
+                    onChange={(e) => setProdImage(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 p-2.5 text-xs font-medium focus:border-emerald-500 focus:outline-hidden"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Mô tả sản phẩm</label>
                 <textarea
                   placeholder="Nhập thông tin xuất xứ, quy trình trồng trọt VietGAP..."
                   value={prodDesc}
                   onChange={(e) => setProdDesc(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 p-3 text-xs font-medium h-20 focus:border-emerald-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/10"
+                  className="w-full rounded-xl border border-slate-200 p-3 text-xs font-medium h-16 focus:border-emerald-500 focus:outline-hidden focus:ring-2 focus:ring-emerald-500/10"
                 />
               </div>
 
@@ -1268,45 +1421,63 @@ export default function SupplierProductsPage() {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Mã Lô hàng</label>
-                    <input
-                      type="text"
-                      value={batchCode}
-                      onChange={(e) => setBatchCode(e.target.value)}
-                      className="w-full rounded-xl border bg-slate-100 p-2.5 font-mono text-xs font-bold text-slate-800 focus:bg-white focus:outline-emerald-600 focus:ring-2 focus:ring-emerald-500/10"
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Mã Lô hàng</label>
+                      <input
+                        type="text"
+                        readOnly
+                        value={batchCode}
+                        className="w-full rounded-xl border border-slate-200 bg-slate-100 p-2.5 font-mono text-xs font-bold text-slate-800 cursor-not-allowed select-none focus:outline-hidden"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Số lượng (kg)</label>
+                      <input
+                        type="number"
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
+                        className="w-full rounded-xl border p-2.5 text-xs font-bold focus:outline-emerald-600 focus:ring-2 focus:ring-emerald-500/10"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Số lượng (kg)</label>
-                    <input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(e.target.value)}
-                      className="w-full rounded-xl border p-2.5 text-xs font-bold focus:outline-emerald-600 focus:ring-2 focus:ring-emerald-500/10"
-                    />
-                  </div>
-                </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Ngày thu hoạch</label>
-                    <input
-                      type="date"
-                      value={harvestDate}
-                      onChange={(e) => setHarvestDate(e.target.value)}
-                      className="w-full rounded-xl border p-2.5 text-xs font-bold focus:outline-emerald-600 cursor-pointer focus:ring-2 focus:ring-emerald-500/10"
-                    />
+                    <div className="relative flex items-center">
+                      <input
+                        type="text"
+                        readOnly
+                        value={formatDateVN(harvestDate)}
+                        className="w-full rounded-xl border border-slate-200 bg-white p-2.5 pr-9 text-xs font-bold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 cursor-pointer"
+                      />
+                      <Calendar className="absolute right-3 size-4 text-emerald-600 pointer-events-none" />
+                      <input
+                        type="date"
+                        value={harvestDate}
+                        onChange={(e) => setHarvestDate(e.target.value)}
+                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">Hạn sử dụng</label>
-                    <input
-                      type="date"
-                      value={expiryDate}
-                      onChange={(e) => setExpiryDate(e.target.value)}
-                      className="w-full rounded-xl border p-2.5 text-xs font-bold focus:outline-emerald-600 cursor-pointer focus:ring-2 focus:ring-emerald-500/10"
-                    />
+                    <div className="relative flex items-center">
+                      <input
+                        type="text"
+                        readOnly
+                        value={formatDateVN(expiryDate)}
+                        className="w-full rounded-xl border border-slate-200 bg-white p-2.5 pr-9 text-xs font-bold text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 cursor-pointer"
+                      />
+                      <Calendar className="absolute right-3 size-4 text-emerald-600 pointer-events-none" />
+                      <input
+                        type="date"
+                        value={expiryDate}
+                        onChange={(e) => setExpiryDate(e.target.value)}
+                        className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -1365,6 +1536,13 @@ export default function SupplierProductsPage() {
                 </div>
 
                 <div className="w-full space-y-2">
+                  {modalBatchError && (
+                    <div className="w-full rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-center text-xs font-bold text-rose-700 shadow-sm animate-in fade-in duration-200 flex items-center justify-center gap-1.5">
+                      <AlertCircle className="size-4 shrink-0 text-rose-600" />
+                      <span>{modalBatchError}</span>
+                    </div>
+                  )}
+
                   <button
                     onClick={handleGenerateQR}
                     disabled={createBatchMutation.isPending}

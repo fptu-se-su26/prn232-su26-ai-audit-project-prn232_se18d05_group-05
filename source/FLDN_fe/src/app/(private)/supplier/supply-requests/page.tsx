@@ -504,16 +504,16 @@ export default function SupplierSupplyRequestsPage() {
             <span className="text-xs font-bold text-slate-400">Đang tải danh sách yêu cầu cung ứng...</span>
           </div>
         ) : filteredList.length > 0 ? (
-          <div className="overflow-x-auto">
-            <Table>
+          <div className="w-full overflow-hidden">
+            <Table className="w-full table-fixed text-left border-collapse font-sans">
               <TableHeader>
                 <TableRow className="bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  <TableHead className="px-6 py-4">Mã đơn</TableHead>
-                  <TableHead className="px-6 py-4">Điểm phân phối nhận hàng</TableHead>
-                  <TableHead className="px-6 py-4">Nông sản chi tiết</TableHead>
-                  <TableHead className="px-6 py-4 text-right">Số lượng</TableHead>
-                  <TableHead className="px-6 py-4 text-center">Trạng thái Giao vận (Logistics)</TableHead>
-                  <TableHead className="px-6 py-4 text-right">Thao tác & Tiến độ</TableHead>
+                  <TableHead className="px-3 py-3.5 w-[15%]">Mã đơn</TableHead>
+                  <TableHead className="px-3 py-3.5 w-[22%]">Điểm phân phối nhận hàng</TableHead>
+                  <TableHead className="px-3 py-3.5 w-[22%]">Nông sản chi tiết</TableHead>
+                  <TableHead className="px-3 py-3.5 text-right w-[10%]">Số lượng</TableHead>
+                  <TableHead className="px-3 py-3.5 text-center w-[17%]">Trạng thái Giao vận (Logistics)</TableHead>
+                  <TableHead className="px-3 py-3.5 text-right w-[14%]">Thao tác & Tiến độ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="divide-y divide-slate-50 text-xs">
@@ -542,8 +542,8 @@ export default function SupplierSupplyRequestsPage() {
 
                   return (
                     <TableRow key={rawId} className="transition-all duration-150 hover:bg-slate-50/60">
-                      <TableCell className="px-6 py-4.5">
-                        <span className="font-mono font-bold text-emerald-900 text-sm">{displayCode}</span>
+                      <TableCell className="px-4 py-3.5 font-mono font-bold text-emerald-900 text-xs whitespace-nowrap">
+                        {displayCode}
                         {req.requestedDeliveryDate && (
                           <p className="text-[10px] text-slate-400 mt-0.5 font-semibold">
                             Hẹn giao: {formatDateVN(req.requestedDeliveryDate)}
@@ -551,61 +551,61 @@ export default function SupplierSupplyRequestsPage() {
                         )}
                       </TableCell>
 
-                      <TableCell className="px-6 py-4.5">
-                        <p className="font-extrabold text-slate-900">{req.distributionPointName || 'Kho Phân Phối Thủ Đức'}</p>
-                        <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                          <MapPin className="size-3 text-slate-400" />
+                      <TableCell className="px-4 py-3.5 max-w-[180px]">
+                        <p className="font-extrabold text-slate-900 truncate">{req.distributionPointName || 'Kho Phân Phối Thủ Đức'}</p>
+                        <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5 truncate">
+                          <MapPin className="size-3 text-slate-400 shrink-0" />
                           45 Võ Văn Ngân, TP. Thủ Đức
                         </p>
                       </TableCell>
 
-                      <TableCell className="px-6 py-4.5 font-semibold text-slate-600 max-w-[260px]">
+                      <TableCell className="px-4 py-3.5 font-semibold text-slate-600 max-w-[180px] truncate">
                         {itemDetails}
                       </TableCell>
 
-                      <TableCell className="px-6 py-4.5 text-right font-black text-slate-900 text-sm">
-                        {totalQty.toLocaleString()} <span className="text-xs font-normal text-slate-500">kg</span>
+                      <TableCell className="px-4 py-3.5 text-right font-black text-slate-900 text-xs whitespace-nowrap">
+                        {totalQty.toLocaleString()} <span className="text-[10px] font-normal text-slate-500">kg</span>
                       </TableCell>
 
                       {/* CLEAR LOGISTICS STATUS BADGES using shadcn Badge */}
-                      <TableCell className="px-6 py-4.5 text-center">
+                      <TableCell className="px-4 py-3.5 text-center whitespace-nowrap">
                         {isPending ? (
-                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                            <span className="size-1.5 rounded-full bg-amber-500 animate-pulse mr-1.5" />
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 px-2 py-0.5 text-[11px]">
+                            <span className="size-1.5 rounded-full bg-amber-500 animate-pulse mr-1" />
                             Chờ phê duyệt
                           </Badge>
                         ) : isRejected ? (
-                          <Badge variant="destructive" className="bg-rose-50 text-rose-700 border-rose-200">
+                          <Badge variant="destructive" className="bg-rose-50 text-rose-700 border-rose-200 px-2 py-0.5 text-[11px]">
                             Đã từ chối
                           </Badge>
                         ) : isReceived ? (
-                          <Badge className="bg-emerald-900 text-white shadow-xs">
-                            <CheckCircle2 className="size-3.5 text-emerald-300 mr-1" />
+                          <Badge className="bg-emerald-900 text-white shadow-xs px-2 py-0.5 text-[11px]">
+                            <CheckCircle2 className="size-3 text-emerald-300 mr-1" />
                             ✅ Đã giao thành công
                           </Badge>
                         ) : isDelivering ? (
-                          <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
-                            <Truck className="size-3.5 text-blue-600 animate-bounce mr-1" style={{ animationDuration: '2s' }} />
+                          <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200 px-2 py-0.5 text-[11px]">
+                            <Truck className="size-3 text-blue-600 animate-bounce mr-1" style={{ animationDuration: '2s' }} />
                             🚚 Shipper đang giao hàng
                           </Badge>
                         ) : (
-                          <Badge className="bg-emerald-700 text-white border-emerald-800">
-                            <span className="size-1.5 rounded-full bg-emerald-300 mr-1.5" />
+                          <Badge className="bg-emerald-700 text-white border-emerald-800 px-2 py-0.5 text-[11px]">
+                            <span className="size-1.5 rounded-full bg-emerald-300 mr-1" />
                             📦 Đã duyệt xuất kho
                           </Badge>
                         )}
                       </TableCell>
 
-                      <TableCell className="px-6 py-4.5 text-right">
+                      <TableCell className="px-4 py-3.5 text-right whitespace-nowrap">
                         {isPending ? (
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5">
                             <Button
                               size="sm"
                               onClick={() => handleConfirm(rawId)}
                               disabled={confirmMutation.isPending}
-                              className="bg-gradient-to-r from-emerald-700 to-teal-700 text-white font-bold"
+                              className="bg-gradient-to-r from-emerald-700 to-teal-700 text-white font-bold px-2.5 py-1 text-[11px]"
                             >
-                              <Check className="size-3.5" />
+                              <Check className="size-3 mr-1" />
                               Phê duyệt
                             </Button>
                             <Button
@@ -613,9 +613,9 @@ export default function SupplierSupplyRequestsPage() {
                               variant="outline"
                               onClick={() => handleOpenRejectModal(rawId)}
                               disabled={rejectMutation.isPending}
-                              className="border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+                              className="border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 px-2.5 py-1 text-[11px]"
                             >
-                              <X className="size-3.5" />
+                              <X className="size-3 mr-1" />
                               Từ chối
                             </Button>
                           </div>
@@ -624,9 +624,9 @@ export default function SupplierSupplyRequestsPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => setTrackingRequest(req)}
-                            className="border-slate-200 text-slate-700 hover:bg-slate-50"
+                            className="border-slate-200 text-slate-700 hover:bg-slate-50 px-2.5 py-1 text-[11px]"
                           >
-                            <Eye className="size-3.5 text-emerald-700 mr-1" />
+                            <Eye className="size-3 text-emerald-700 mr-1" />
                             Xem tiến độ giao
                           </Button>
                         )}

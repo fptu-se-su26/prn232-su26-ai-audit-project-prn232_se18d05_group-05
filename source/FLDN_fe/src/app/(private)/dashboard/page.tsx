@@ -364,24 +364,24 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Supply Requests Table - Premium Style */}
-          <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md shadow-slate-100/40">
+          {/* Supply Requests Table - Strict Compact Table-Fixed Style */}
+          <div className="w-full overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md shadow-slate-100/40">
             {isLoadingRequests ? (
               <div className="flex flex-col items-center justify-center p-16 text-slate-500 gap-3">
                 <Loader2 className="size-8 animate-spin text-emerald-600" />
                 <span className="text-xs font-bold text-slate-400">Đang tải danh sách đơn cung ứng...</span>
               </div>
             ) : filteredRequests.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table className="w-full text-left border-collapse font-sans">
+              <div className="w-full overflow-hidden">
+                <Table className="w-full table-fixed text-left border-collapse font-sans">
                   <TableHeader>
                     <TableRow className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      <TableHead className="px-6 py-4">Mã đơn</TableHead>
-                      <TableHead className="px-6 py-4">Điểm phân phối</TableHead>
-                      <TableHead className="px-6 py-4">Mặt hàng nông sản</TableHead>
-                      <TableHead className="px-6 py-4 text-right">Số lượng</TableHead>
-                      <TableHead className="px-6 py-4 text-center">Trạng thái</TableHead>
-                      <TableHead className="px-6 py-4 text-right">Thao tác</TableHead>
+                      <TableHead className="px-3 py-3 w-[15%]">Mã đơn</TableHead>
+                      <TableHead className="px-3 py-3 w-[22%]">Điểm phân phối</TableHead>
+                      <TableHead className="px-3 py-3 w-[24%]">Mặt hàng nông sản</TableHead>
+                      <TableHead className="px-3 py-3 text-right w-[11%]">Số lượng</TableHead>
+                      <TableHead className="px-3 py-3 text-center w-[14%]">Trạng thái</TableHead>
+                      <TableHead className="px-3 py-3 text-right w-[14%]">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="divide-y divide-slate-50 text-xs">
@@ -405,21 +405,21 @@ export default function DashboardPage() {
 
                       return (
                         <TableRow key={rawId} className="transition-all duration-150 hover:bg-slate-50/60">
-                          <TableCell className="px-6 py-4.5 font-mono font-bold text-emerald-800">
+                          <TableCell className="px-3 py-3 font-mono font-bold text-emerald-800 text-xs truncate">
                             {displayCode}
                           </TableCell>
-                          <TableCell className="px-6 py-4.5 font-extrabold text-slate-900">
+                          <TableCell className="px-3 py-3 font-extrabold text-slate-900 truncate">
                             {req.distributionPointName || 'Điểm phân phối'}
                           </TableCell>
-                          <TableCell className="px-6 py-4.5 font-semibold text-slate-600 max-w-[200px] truncate">
+                          <TableCell className="px-3 py-3 font-semibold text-slate-600 truncate">
                             {itemNames}
                           </TableCell>
-                          <TableCell className="px-6 py-4.5 text-right font-black text-slate-900">
+                          <TableCell className="px-3 py-3 text-right font-black text-slate-900 text-xs truncate">
                             {totalQty > 0 ? `${totalQty.toLocaleString()} kg` : '10 kg'}
                           </TableCell>
-                          <TableCell className="px-6 py-4.5 text-center">
+                          <TableCell className="px-3 py-3 text-center">
                             <span
-                              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold ${
+                              className={`inline-flex items-center justify-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
                                 isPending
                                   ? 'bg-amber-50 text-amber-700 border border-amber-100'
                                   : isRejected
@@ -428,7 +428,7 @@ export default function DashboardPage() {
                               }`}
                             >
                               <span
-                                className={`size-1.5 rounded-full ${
+                                className={`size-1.5 rounded-full shrink-0 ${
                                   isPending
                                     ? 'bg-amber-500 animate-pulse'
                                     : isRejected
@@ -436,25 +436,25 @@ export default function DashboardPage() {
                                     : 'bg-emerald-500'
                                 }`}
                               />
-                              {isPending ? 'Chờ duyệt' : isRejected ? 'Đã từ chối' : 'Đã duyệt'}
+                              {isPending ? 'Chờ duyệt' : isRejected ? 'Từ chối' : 'Đã duyệt'}
                             </span>
                           </TableCell>
-                          <TableCell className="px-6 py-4.5 text-right">
+                          <TableCell className="px-3 py-3 text-right">
                             {isPending ? (
                               <Link
                                 href="/supplier/supply-requests"
-                                className="inline-flex items-center gap-1 rounded-xl bg-emerald-800 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-emerald-900 active:scale-95 cursor-pointer"
+                                className="inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-800 px-2.5 py-1 text-[11px] font-bold text-white shadow-xs transition-all hover:bg-emerald-900 active:scale-95 cursor-pointer"
                               >
-                                <FileCheck2 className="size-3.5" />
-                                Xem & Duyệt
+                                <FileCheck2 className="size-3 shrink-0" />
+                                Duyệt
                               </Link>
                             ) : (
                               <Link
                                 href="/supplier/supply-requests"
-                                className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 cursor-pointer"
+                                className="inline-flex items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600 transition-all hover:bg-slate-50 cursor-pointer"
                               >
-                                <Eye className="size-3.5 text-slate-400" />
-                                Chi tiết
+                                <Eye className="size-3 text-slate-400 shrink-0" />
+                                Xem
                               </Link>
                             )}
                           </TableCell>
@@ -465,12 +465,8 @@ export default function DashboardPage() {
                 </Table>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center p-16 text-center">
-                <Truck className="size-12 text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-slate-700">Chưa có yêu cầu cung ứng nào</p>
-                <p className="text-xs text-slate-400 mt-0.5 max-w-sm">
-                  Các yêu cầu mới từ Điểm phân phối sẽ xuất hiện tự động tại đây sau khi được gửi đi.
-                </p>
+              <div className="py-12 text-center text-xs font-bold text-slate-400">
+                Chưa có yêu cầu cung ứng mới nhận nào.
               </div>
             )}
           </div>

@@ -368,7 +368,7 @@ export default function DashboardPage() {
                 />
               </div>
 
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value ?? 'ALL')}>
                 <SelectTrigger className="rounded-xl border border-slate-200 bg-white py-2 px-3 text-xs font-bold text-slate-700 transition-all focus:border-emerald-500 focus:outline-hidden cursor-pointer">
                   <SelectValue />
                 </SelectTrigger>

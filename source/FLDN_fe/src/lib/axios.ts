@@ -2,9 +2,10 @@ import { API_ENDPOINTS } from '@/routes/api-endpoints'
 import type { ApiErrorResponse } from '@/types/api'
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://localhost:7114'
-).replace(/\/+$/, '') + '/api'
+// Bỏ trống NEXT_PUBLIC_API_BASE_URL để gọi cùng origin ('/api') và đi qua
+// rewrites trong next.config.ts. Đặt giá trị cụ thể để gọi thẳng API.
+const rawApiBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ?? ''
+const API_BASE_URL = rawApiBase ? `${rawApiBase.replace(/\/+$/, '')}/api` : '/api'
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null

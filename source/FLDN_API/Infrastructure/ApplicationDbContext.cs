@@ -17,6 +17,9 @@ public class ApplicationDbContext : DbContext
     // Supplier
     public DbSet<SupplierProfile> SupplierProfiles => Set<SupplierProfile>();
 
+    // Distribution point
+    public DbSet<DistributionPointProfile> DistributionPointProfiles => Set<DistributionPointProfile>();
+
     // Product
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();

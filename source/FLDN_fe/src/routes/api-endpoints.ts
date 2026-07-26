@@ -50,6 +50,9 @@ export const API_ENDPOINTS = {
     setDefault: (id: string) => `/addresses/${id}/default`,
   },
   districts: '/districts',
+  distributionPoint: {
+    profile: '/distribution-point/profile',
+  },
   vouchers: {
     validate: '/vouchers/validate',
   },

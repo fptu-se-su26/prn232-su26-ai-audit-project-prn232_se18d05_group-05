@@ -8,5 +8,6 @@ public class District : EntityBase<Guid>
     // Navigation
     public ICollection<DistributionZone> DistributionZones { get; set; } = [];
     public ICollection<SupplierProfile> SupplierProfiles { get; set; } = [];
+    public ICollection<DistributionPointProfile> DistributionPointProfiles { get; set; } = [];
     public ICollection<Address> Addresses { get; set; } = [];
 }

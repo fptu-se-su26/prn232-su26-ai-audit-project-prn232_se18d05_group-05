@@ -23,6 +23,9 @@ export const APP_ROUTES = {
     logistics:  '/admin/logistics',
     zones:      '/admin/zones',
   },
+  distributionPoint: {
+    profile: '/distribution-point/profile',
+  },
   supplier: {
     products: '/supplier/products',
     supplyRequests: '/supplier/supply-requests',

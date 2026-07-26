@@ -203,7 +203,7 @@ export default function OrdersListPage() {
           <div>
             <div className="flex items-center gap-2">
               <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                UC23 & UC24 - Quản lý Cung ứng
+                Quản lý Cung ứng
               </span>
             </div>
             <h1 className="mt-2 text-2xl font-black tracking-tight text-zinc-900 sm:text-3xl">
@@ -440,7 +440,7 @@ export default function OrdersListPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-zinc-900">
-                    UC23: Xác nhận nhận hàng
+                    Xác nhận nhận hàng
                   </h3>
                   <p className="text-xs text-zinc-500 font-mono">
                     Đơn hàng #{confirmOrder.orderId || confirmOrder.id}
@@ -551,7 +551,7 @@ export default function OrdersListPage() {
                       Đang lưu xác nhận...
                     </>
                   ) : (
-                    'Hoàn tất xác nhận (UC23)'
+                    'Hoàn tất xác nhận'
                   )}
                 </Button>
               </div>
@@ -619,7 +619,7 @@ export default function OrdersListPage() {
               <div className="space-y-3 border-t border-zinc-100 pt-4">
                 <p className="text-xs font-bold text-zinc-900 uppercase flex items-center gap-1.5">
                   <Clock className="size-4 text-emerald-600" />
-                  UC24: Lộ trình & Lịch sử trạng thái cung ứng
+                  Lộ trình & Lịch sử trạng thái cung ứng
                 </p>
 
                 <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-emerald-200">

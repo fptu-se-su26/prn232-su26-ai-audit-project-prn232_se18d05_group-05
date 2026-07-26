@@ -9,7 +9,8 @@ public sealed class AdminController(
     IAdminCategoryService adminCategoryService,
     IAdminDashboardService adminDashboardService,
     IAdminLogisticsService adminLogisticsService,
-    IAdminZoneService adminZoneService
+    IAdminZoneService adminZoneService,
+    IDistributionPointService distributionPointService
 ) : ControllerBase
 {
     // ──────────────────────────────────────────────
@@ -206,5 +207,23 @@ public sealed class AdminController(
     {
         await adminZoneService.DeleteZoneAsync(id, ct);
         return Ok(ApiResponse<object>.OkMessage("Đã xóa vùng giao hàng"));
+    }
+
+    // ──────────────────────────────────────────────
+    // Distribution Points
+    // ──────────────────────────────────────────────
+
+    [HttpGet("distribution-points")]
+    public async Task<IActionResult> GetDistributionPoints([FromQuery] DistributionPointListRequest request, CancellationToken ct)
+    {
+        var result = await distributionPointService.GetDistributionPointsAsync(request, ct);
+        return Ok(ApiResponse<PagedResult<DistributionPointListResponse>>.Ok(result));
+    }
+
+    [HttpGet("distribution-points/{userId:guid}")]
+    public async Task<IActionResult> GetDistributionPointProfile(Guid userId, CancellationToken ct)
+    {
+        var result = await distributionPointService.GetProfileByUserIdAsync(userId, ct);
+        return Ok(ApiResponse<DistributionPointProfileResponse>.Ok(result));
     }
 }

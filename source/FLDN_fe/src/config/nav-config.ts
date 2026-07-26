@@ -1,4 +1,4 @@
-import { LayoutDashboard, MapPin, Package, Search, Tag, Truck, Users } from 'lucide-react'
+import { ClipboardList, BarChart3, Boxes, FileText, Forklift, LayoutDashboard, MapPin, Package, Search, Tag, Truck, Users } from 'lucide-react'
 import type { UserRole } from './roles'
 import { APP_ROUTES } from '@/routes/app-routes'
 
@@ -9,6 +9,7 @@ export interface NavItem {
 }
 
 export const NAV_CONFIG: Record<UserRole, NavItem[]> = {
+  // Admin: /api/admin/* (role-locked), products public
   Admin: [
     { label: 'Tổng quan',        href: APP_ROUTES.admin.dashboard,  icon: LayoutDashboard },
     { label: 'Người dùng',       href: APP_ROUTES.admin.users,       icon: Users },
@@ -17,16 +18,22 @@ export const NAV_CONFIG: Record<UserRole, NavItem[]> = {
     { label: 'Tài xế logistics', href: APP_ROUTES.admin.logistics,   icon: Truck },
     { label: 'Vùng giao hàng',   href: APP_ROUTES.admin.zones,       icon: MapPin },
   ],
+  // Supplier: /api/supplier/* (role-locked)
   Supplier: [
     { label: 'Tổng quan', href: APP_ROUTES.dashboard, icon: LayoutDashboard },
-    { label: 'Tìm kiếm sản phẩm', href: APP_ROUTES.products, icon: Search },
+    { label: 'Sản phẩm & Lô hàng', href: APP_ROUTES.supplier.products, icon: Boxes },
+    { label: 'Yêu cầu cung ứng', href: APP_ROUTES.supplier.supplyRequests, icon: Truck },
+    { label: 'Báo cáo KPI', href: APP_ROUTES.supplier.analytics, icon: BarChart3 },
   ],
+  // DistributionPoint: /api/orders [Authorize], /api/products (public)
   DistributionPoint: [
-    { label: 'Tổng quan', href: APP_ROUTES.dashboard, icon: LayoutDashboard },
     { label: 'Tìm kiếm sản phẩm', href: APP_ROUTES.products, icon: Search },
+    { label: 'Tạo yêu cầu cung ứng', href: APP_ROUTES.orders.create, icon: FileText },
+    { label: 'Quản lý yêu cầu', href: APP_ROUTES.orders.list, icon: ClipboardList },
   ],
+  // LogisticsOperator: /api/logistics/* (role-locked)
   LogisticsOperator: [
-    { label: 'Tổng quan', href: APP_ROUTES.dashboard, icon: LayoutDashboard },
-    { label: 'Tìm kiếm sản phẩm', href: APP_ROUTES.products, icon: Search },
+    { label: 'Lô hàng chờ nhận', href: APP_ROUTES.logistics.pending, icon: Truck },
+    { label: 'Lô hàng của tôi', href: APP_ROUTES.logistics.myShipments, icon: Forklift },
   ],
 }

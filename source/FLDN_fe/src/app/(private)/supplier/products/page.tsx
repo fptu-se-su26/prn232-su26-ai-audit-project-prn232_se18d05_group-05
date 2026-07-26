@@ -153,6 +153,11 @@ export default function SupplierProductsPage() {
   const [prodDesc, setProdDesc] = useState('')
   const [prodImage, setProdImage] = useState('')
 
+  // Search & Filter state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('ALL')
+  const [statusFilter, setStatusFilter] = useState('ALL')
+
   const categoriesList = useMemo(() => categoriesData ?? [], [categoriesData])
 
   // MERGE server products AND local created products properly (Server products first)
@@ -221,6 +226,51 @@ export default function SupplierProductsPage() {
 
     return Array.from(mergedMap.values())
   }, [realBatches, localBatches, deletedBatchCodes])
+
+  // Filtered Products list based on search query, category, status
+  const displayedProducts = useMemo(() => {
+    return productsList.filter((p) => {
+      const q = searchQuery.toLowerCase().trim()
+      const pName = (p.name || '').toLowerCase()
+      const pCode = (p.productId || p.id || '').toLowerCase()
+      const matchesSearch = !q || pName.includes(q) || pCode.includes(q)
+
+      const matchesCat =
+        categoryFilter === 'ALL' ||
+        (p.categoryId || p.id) === categoryFilter ||
+        p.categoryName === categoryFilter
+
+      const isActive = p.isActive !== false
+      const matchesStatus =
+        statusFilter === 'ALL' ||
+        (statusFilter === 'ACTIVE' && isActive) ||
+        (statusFilter === 'INACTIVE' && !isActive)
+
+      return matchesSearch && matchesCat && matchesStatus
+    })
+  }, [productsList, searchQuery, categoryFilter, statusFilter])
+
+  // Filtered Batches list based on search query and status filter
+  const displayedBatches = useMemo(() => {
+    return batchesList.filter((b) => {
+      const q = searchQuery.toLowerCase().trim()
+      const bCode = (b.batchCode || '').toLowerCase()
+      const pName = (b.productName || '').toLowerCase()
+      const matchesSearch = !q || bCode.includes(q) || pName.includes(q)
+
+      const today = new Date('2026-07-25').getTime()
+      const exp = b.expiryDate ? new Date(b.expiryDate).getTime() : 0
+      const diffDays = Math.ceil((exp - today) / (1000 * 3600 * 24))
+      const isUrgent = diffDays >= 0 && diffDays <= 3
+
+      const matchesStatus =
+        statusFilter === 'ALL' ||
+        (statusFilter === 'URGENT' && isUrgent) ||
+        (statusFilter === 'NORMAL' && !isUrgent)
+
+      return matchesSearch && matchesStatus
+    })
+  }, [batchesList, searchQuery, statusFilter])
 
   // Calculated Stats
   const totalProductsCount = productsList.length
@@ -858,31 +908,110 @@ export default function SupplierProductsPage() {
         </div>
       </div>
 
-      {/* Main Tabs Navigation - Premium Capsule Design */}
-      <div className="flex items-center gap-2 bg-slate-100/60 p-1.5 rounded-2xl w-fit border border-slate-200/50">
-        <button
-          onClick={() => setActiveTab('PRODUCTS')}
-          className={`flex items-center gap-2 px-5 py-2.5 text-xs font-bold transition-all rounded-xl cursor-pointer ${
-            activeTab === 'PRODUCTS'
-              ? 'bg-white text-emerald-950 shadow-sm border border-slate-200/20 font-black'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
-          }`}
-        >
-          <Boxes className="size-4" />
-          Danh mục Sản phẩm ({productsList.length})
-        </button>
+      {/* Main Tabs Navigation & Search Toolbar */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2 bg-slate-100/60 p-1.5 rounded-2xl w-fit border border-slate-200/50">
+          <button
+            onClick={() => setActiveTab('PRODUCTS')}
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-bold transition-all rounded-xl cursor-pointer ${
+              activeTab === 'PRODUCTS'
+                ? 'bg-white text-emerald-950 shadow-sm border border-slate-200/20 font-black'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
+            }`}
+          >
+            <Boxes className="size-4" />
+            Danh mục Sản phẩm ({displayedProducts.length}/{productsList.length})
+          </button>
 
-        <button
-          onClick={() => setActiveTab('BATCHES')}
-          className={`flex items-center gap-2 px-5 py-2.5 text-xs font-bold transition-all rounded-xl cursor-pointer ${
-            activeTab === 'BATCHES'
-              ? 'bg-white text-emerald-950 shadow-sm border border-slate-200/20 font-black'
-              : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
-          }`}
-        >
-          <QrCode className="size-4" />
-          Danh sách Lô hàng & Mã QR ({batchesList.length})
-        </button>
+          <button
+            onClick={() => setActiveTab('BATCHES')}
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-bold transition-all rounded-xl cursor-pointer ${
+              activeTab === 'BATCHES'
+                ? 'bg-white text-emerald-950 shadow-sm border border-slate-200/20 font-black'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
+            }`}
+          >
+            <QrCode className="size-4" />
+            Danh sách Lô hàng & Mã QR ({displayedBatches.length}/{batchesList.length})
+          </button>
+        </div>
+
+        {/* Smart Search & Filter Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
+          <div className="flex flex-1 items-center gap-3 min-w-[280px]">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder={
+                  activeTab === 'PRODUCTS'
+                    ? 'Tìm kiếm theo tên sản phẩm, mã nông sản...'
+                    : 'Tìm kiếm theo mã lô hàng, tên sản phẩm...'
+                }
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-9 text-xs font-bold text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/10 transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {activeTab === 'PRODUCTS' && (
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-bold text-slate-700 focus:border-emerald-500 focus:outline-hidden cursor-pointer"
+              >
+                <option value="ALL">Tất cả danh mục</option>
+                {categoriesList.map((cat) => (
+                  <option key={cat.categoryId || cat.id} value={cat.categoryId || cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="rounded-xl border border-slate-200 bg-white py-2.5 px-3 text-xs font-bold text-slate-700 focus:border-emerald-500 focus:outline-hidden cursor-pointer"
+            >
+              <option value="ALL">Tất cả trạng thái</option>
+              {activeTab === 'PRODUCTS' ? (
+                <>
+                  <option value="ACTIVE">Đang kinh doanh</option>
+                  <option value="INACTIVE">Ngưng bán</option>
+                </>
+              ) : (
+                <>
+                  <option value="NORMAL">Hoạt động bình thường</option>
+                  <option value="URGENT">Cần bán gấp (≤ 3 ngày)</option>
+                </>
+              )}
+            </select>
+
+            {(searchQuery || categoryFilter !== 'ALL' || statusFilter !== 'ALL') && (
+              <button
+                onClick={() => {
+                  setSearchQuery('')
+                  setCategoryFilter('ALL')
+                  setStatusFilter('ALL')
+                }}
+                className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition-all cursor-pointer"
+              >
+                🔄 Đặt lại
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* TAB 1: PRODUCT TABLE */}
@@ -894,7 +1023,7 @@ export default function SupplierProductsPage() {
                 <Loader2 className="size-8 animate-spin text-emerald-700" />
                 <span className="text-xs font-bold text-slate-400">Đang tải danh sách sản phẩm...</span>
               </div>
-            ) : productsList.length > 0 ? (
+            ) : displayedProducts.length > 0 ? (
               <table className="w-full text-left border-collapse font-sans">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
@@ -908,7 +1037,7 @@ export default function SupplierProductsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 text-xs">
-                  {productsList.map((item) => {
+                  {displayedProducts.map((item) => {
                     const itemId = item.productId || item.id || 'unknown'
                     return (
                       <tr key={itemId} className="transition-all duration-150 hover:bg-slate-50/60">
@@ -1016,8 +1145,10 @@ export default function SupplierProductsPage() {
                 </tbody>
               </table>
             ) : (
-              <div className="p-16 text-center text-slate-500">
-                Hiện chưa có sản phẩm nào. Hãy bấm "Thêm sản phẩm mới" để khai báo nông sản!
+              <div className="p-16 text-center text-slate-500 font-bold text-xs">
+                {searchQuery || categoryFilter !== 'ALL' || statusFilter !== 'ALL'
+                  ? '🔍 Không tìm thấy sản phẩm nào phù hợp với từ khóa hoặc bộ lọc!'
+                  : 'Hiện chưa có sản phẩm nào. Hãy bấm "Thêm sản phẩm mới" để khai báo nông sản!'}
               </div>
             )}
           </div>
@@ -1033,7 +1164,7 @@ export default function SupplierProductsPage() {
                 <Loader2 className="size-8 animate-spin text-emerald-700" />
                 <span className="text-xs font-bold text-slate-400">Đang tải danh sách lô hàng...</span>
               </div>
-            ) : batchesList.length > 0 ? (
+            ) : displayedBatches.length > 0 ? (
               <table className="w-full text-left border-collapse font-sans">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-bold tracking-wider text-slate-400 uppercase">
@@ -1047,7 +1178,7 @@ export default function SupplierProductsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 text-xs">
-                  {batchesList.map((batch) => {
+                  {displayedBatches.map((batch) => {
                     const bId = batch.id || batch.batchId || batch.batchCode
                     const today = new Date('2026-07-25').getTime()
                     const exp = batch.expiryDate ? new Date(batch.expiryDate).getTime() : 0
@@ -1147,9 +1278,15 @@ export default function SupplierProductsPage() {
             ) : (
               <div className="flex flex-col items-center justify-center p-16 text-center">
                 <QrCode className="size-12 text-slate-300 mb-2" />
-                <p className="text-sm font-bold text-slate-700">Chưa có lô hàng nào được tạo</p>
+                <p className="text-sm font-bold text-slate-700">
+                  {searchQuery || statusFilter !== 'ALL'
+                    ? '🔍 Không tìm thấy lô hàng nào phù hợp với từ khóa hoặc bộ lọc!'
+                    : 'Chưa có lô hàng nào được tạo'}
+                </p>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Hãy bấm "Tạo lô hàng mới" để khởi tạo đợt thu hoạch & cấp mã QR truy xuất.
+                  {searchQuery || statusFilter !== 'ALL'
+                    ? 'Thử thay đổi từ khóa hoặc bấm "🔄 Đặt lại" bộ lọc.'
+                    : 'Hãy bấm "Tạo lô hàng mới" để khởi tạo đợt thu hoạch & cấp mã QR truy xuất.'}
                 </p>
               </div>
             )}

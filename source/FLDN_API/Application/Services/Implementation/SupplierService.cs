@@ -2,7 +2,8 @@ namespace Application;
 
 [RegisterService(typeof(ISupplierService))]
 public sealed class SupplierService(
-    IUnitOfWork unitOfWork
+    IUnitOfWork unitOfWork,
+    IAppConfiguration appConfiguration
 ) : ISupplierService
 {
     private const int ExpiryWarningDays = 7;
@@ -622,7 +623,7 @@ public sealed class SupplierService(
             throw new BadRequestException("Unit cost must be greater than 0.");
     }
 
-    private static QRCode CreateQrCode(Batch batch)
+    private QRCode CreateQrCode(Batch batch)
     {
         var code = batch.BatchCode;
         return new QRCode
@@ -630,7 +631,7 @@ public sealed class SupplierService(
             Id = Guid.NewGuid(),
             BatchId = batch.Id,
             QRCodeData = code,
-            QRCodeUrl = $"{AppConstants.BaseUrl}/api/traceability/{Uri.EscapeDataString(code)}",
+            QRCodeUrl = $"{appConfiguration.GetAppOptions().ApiBaseUrl}/api/traceability/{Uri.EscapeDataString(code)}",
             ScanCount = 0
         };
     }

@@ -1,0 +1,40 @@
+{
+  "_comment": [
+    "Mẫu cấu hình Production. Copy thành appsettings.Production.json, điền giá trị thật,",
+    "rồi upload thủ công lên wwwroot qua FTP. File thật KHÔNG được commit (.gitignore đã chặn).",
+    "Các giá trị ở đây sẽ ghi đè appsettings.json khi ASPNETCORE_ENVIRONMENT=Production."
+  ],
+  "AllowedOrigins": [
+    "https://<domain-frontend>.vercel.app"
+  ],
+  "App": {
+    "BaseUrl": "https://<domain-frontend>.vercel.app",
+    "ApiBaseUrl": "https://site81622.siteasp.net"
+  },
+  "ConnectionStrings": {
+    "SqlServerConnection": "Server=...; Database=...; User Id=...; Password=...; Encrypt=True; TrustServerCertificate=True; MultipleActiveResultSets=True;"
+  },
+  "Jwt": {
+    "Audience": "FoodLink",
+    "Issuer": "FoodLink",
+    "Key": "<chuỗi ngẫu nhiên tối thiểu 32 ký tự>",
+    "AccessTokenLifetime": 14400,
+    "RefreshTokenLifetime": 1209600
+  },
+  "EmailSettings": {
+    "SenderEmail": "<email>",
+    "SenderName": "FoodLink",
+    "SmtpHost": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "AppPassword": "<gmail app password>"
+  },
+  "Cloudinary": {
+    "CloudName": "<cloud name>",
+    "ApiKey": "<api key>",
+    "ApiSecret": "<api secret>"
+  },
+  "Upstash": {
+    "BaseUrl": "<upstash rest url>",
+    "Token": "<upstash token>"
+  }
+}

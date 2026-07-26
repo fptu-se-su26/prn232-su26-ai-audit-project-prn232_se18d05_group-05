@@ -50,7 +50,7 @@ public sealed class AuthService(
             TimeSpan.FromMinutes(AppConstants.Email.VerifyTokenTtlMinutes)
         );
 
-        var verifyLink = $"{AppConstants.BaseUrl}{AppConstants.Email.VerifyEmailPath}?token={verifyToken}";
+        var verifyLink = $"{appConfiguration.GetAppOptions().BaseUrl}{AppConstants.Email.VerifyEmailPath}?token={verifyToken}";
         await backgroundJobService.EnqueueEmailAsync(new EmailContent
         {
             Receiver = user.Email,
@@ -119,7 +119,7 @@ public sealed class AuthService(
             TimeSpan.FromMinutes(AppConstants.Email.PasswordResetTokenTtlMinutes)
         );
 
-        var resetLink = $"{AppConstants.BaseUrl}{AppConstants.Email.ResetPasswordPath}?token={resetToken}";
+        var resetLink = $"{appConfiguration.GetAppOptions().BaseUrl}{AppConstants.Email.ResetPasswordPath}?token={resetToken}";
         await backgroundJobService.EnqueueEmailAsync(new EmailContent
         {
             Receiver = user.Email,

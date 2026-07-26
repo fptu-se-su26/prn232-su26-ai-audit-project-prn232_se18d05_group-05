@@ -27,7 +27,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Empty, EmptyDescription, EmptyHeader, EmptyIcon, EmptyTitle } from '@/components/ui/empty'
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
@@ -45,7 +45,7 @@ import {
   useRejectSupplyRequest,
   useSupplierSupplyRequests,
 } from '@/features/supplier/hooks/use-supplier'
-import type { SupplyRequest } from '@/features/supplier/types/supplier.types'
+import type { SupplierSupplyRequest as SupplyRequest } from '@/features/supplier/types/supplier.types'
 
 const REQUEST_STATUS_STORAGE_KEY = 'fldn_supplier_requests_overrides_v3'
 
@@ -644,9 +644,9 @@ export default function SupplierSupplyRequestsPage() {
         ) : (
           <Empty className="p-16">
             <EmptyHeader>
-              <EmptyIcon>
-                <Truck className="size-10 text-slate-400" />
-              </EmptyIcon>
+              <div className="mx-auto size-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                <Truck className="size-6 text-slate-400" />
+              </div>
               <EmptyTitle>Không tìm thấy yêu cầu cung ứng nào</EmptyTitle>
               <EmptyDescription>Vui lòng kiểm tra lại bộ lọc hoặc tìm kiếm.</EmptyDescription>
             </EmptyHeader>

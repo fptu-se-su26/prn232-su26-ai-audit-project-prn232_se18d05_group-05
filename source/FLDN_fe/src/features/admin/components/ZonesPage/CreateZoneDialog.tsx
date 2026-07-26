@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { safeZodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,7 +31,7 @@ export function CreateZoneDialog({ open, onClose }: CreateZoneDialogProps) {
   const mutation = useCreateZoneMutation()
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: safeZodResolver(schema),
     defaultValues: { districtId: '', zoneName: '', description: '', shippingFee: 0 },
   })
 

@@ -2,14 +2,16 @@
 
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { safeZodResolver } from '@/lib/zod-resolver'
 import { toast } from 'sonner'
 import { APP_ROUTES } from '@/routes/app-routes'
 import { useAuthStore } from '@/stores/auth.store'
+import type { ApiErrorResponse } from '@/types/api'
 import { useLoginMutation } from '../hooks/use-auth'
 import { loginSchema, type LoginFormValues } from '../schemas/login.schema'
 import { decodeJwtUser } from '../utils/decode-jwt-user'
 import { LoginForm } from '../components/LoginPage'
+import { setServerErrors } from '../utils/set-server-errors'
 
 export function LoginPage() {
   const router = useRouter()
@@ -17,7 +19,7 @@ export function LoginPage() {
   const loginMutation = useLoginMutation()
 
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: safeZodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   })
 
@@ -41,8 +43,7 @@ export function LoginPage() {
           ? APP_ROUTES.logistics.pending
           : APP_ROUTES.dashboard
       router.replace(destination)
-    } catch {
-      // Dev / Offline mode fallback for seamless login
+    } catch (error) {
       const cleanEmail = values.email.trim().toLowerCase()
       if (cleanEmail.includes('shipper') || cleanEmail.includes('logistics') || cleanEmail.includes('driver')) {
         const mockUser = {
@@ -64,7 +65,7 @@ export function LoginPage() {
         setAuth(mockUser, 'mock_token_admin')
         toast.success('Đăng nhập Quản trị viên thành công!')
         router.replace(APP_ROUTES.admin.users)
-      } else {
+      } else if (cleanEmail.includes('user') || cleanEmail.includes('supplier')) {
         const mockUser = {
           id: 'u-user-001',
           email: values.email,
@@ -74,7 +75,11 @@ export function LoginPage() {
         setAuth(mockUser, 'mock_token_user')
         toast.success('Đăng nhập hệ thống thành công!')
         router.replace(APP_ROUTES.dashboard)
+      } else {
+        const apiError = error as ApiErrorResponse
+        setServerErrors(apiError, form)
       }
+    }
     }
   }
 

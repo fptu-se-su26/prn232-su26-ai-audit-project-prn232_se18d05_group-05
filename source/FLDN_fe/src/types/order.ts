@@ -36,6 +36,13 @@ export interface ConfirmReceiptRequest {
   note?: string
 }
 
+export interface OrderStatusHistory {
+  id: string
+  status: 'Pending' | 'Approved' | 'Dispatched' | 'InTransit' | 'Received' | 'Rejected' | 'Cancelled' | 'Completed'
+  note?: string
+  createdAt: string
+}
+
 export interface SupplyRequestResponse {
   orderId: string
   id?: string
@@ -52,6 +59,7 @@ export interface SupplyRequestResponse {
   note?: string
   createdAt: string
   items?: SupplyRequestItem[]
+  statusHistories?: OrderStatusHistory[]
   message?: string
 }
 

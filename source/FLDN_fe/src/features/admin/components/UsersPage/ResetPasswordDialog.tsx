@@ -1,7 +1,7 @@
 'use client'
 
 import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { safeZodResolver } from '@/lib/zod-resolver'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,7 +35,7 @@ interface ResetPasswordDialogProps {
 export function ResetPasswordDialog({ userId, onClose }: ResetPasswordDialogProps) {
   const mutation = useResetUserPasswordMutation()
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: safeZodResolver(schema),
     defaultValues: { newPassword: '' },
   })
 

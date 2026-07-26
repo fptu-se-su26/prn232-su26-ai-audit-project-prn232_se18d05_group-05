@@ -159,6 +159,7 @@ public sealed class OrderService(
             .Include(r => r.Address)
             .Include(r => r.Items)
                 .ThenInclude(i => i.Product)
+            .Include(r => r.StatusHistories)
             .Where(r => r.DistributionPointId == userId || userId == Guid.Empty)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync(ct);
@@ -174,6 +175,7 @@ public sealed class OrderService(
             .Include(r => r.Address)
             .Include(r => r.Items)
                 .ThenInclude(i => i.Product)
+            .Include(r => r.StatusHistories)
             .FirstOrDefaultAsync(r => r.Id == id && (userId == Guid.Empty || r.DistributionPointId == userId), ct)
             ?? throw new NotFoundException("Supply request not found.");
 
@@ -251,6 +253,13 @@ public sealed class OrderService(
             Unit = i.Product?.Unit ?? string.Empty,
             UnitPrice = i.UnitPrice,
             Quantity = (int)i.Quantity,
-        }).ToList()
+        }).ToList(),
+        StatusHistories = request.StatusHistories.Select(h => new OrderStatusHistoryResponse
+        {
+            Id = h.Id,
+            Status = h.Status,
+            Note = h.Note,
+            CreatedAt = h.CreatedAt
+        }).OrderBy(h => h.CreatedAt).ToList()
     };
 }

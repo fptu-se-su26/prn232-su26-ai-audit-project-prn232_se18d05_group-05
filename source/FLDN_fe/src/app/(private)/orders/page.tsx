@@ -53,6 +53,7 @@ export default function OrdersListPage() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchOrders()
   }, [])
 
@@ -603,6 +604,62 @@ export default function OrdersListPage() {
                 <div className="flex justify-between text-emerald-800 text-sm font-black border-t border-zinc-200 pt-2">
                   <span>Tổng tiền:</span>
                   <span>{formatPrice(detailOrder.finalAmount)}</span>
+                </div>
+              </div>
+
+              {/* UC24: Process Timeline / Stepper */}
+              <div className="space-y-3 border-t border-zinc-100 pt-4">
+                <p className="text-xs font-bold text-zinc-900 uppercase flex items-center gap-1.5">
+                  <Clock className="size-4 text-emerald-600" />
+                  UC24: Lộ trình & Lịch sử trạng thái cung ứng
+                </p>
+
+                <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-emerald-200">
+                  {/* Step 1: Created */}
+                  <div className="relative flex items-start gap-3">
+                    <div className="absolute -left-6 top-0.5 size-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold ring-4 ring-white">
+                      ✓
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-zinc-900">Yêu cầu được khởi tạo (Pending)</p>
+                      <p className="text-[11px] text-zinc-500">{formatDate(detailOrder.createdAt)}</p>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Status Histories */}
+                  {detailOrder.statusHistories && detailOrder.statusHistories.length > 0 ? (
+                    detailOrder.statusHistories.map((hist, idx) => (
+                      <div key={idx} className="relative flex items-start gap-3">
+                        <div className="absolute -left-6 top-0.5 size-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold ring-4 ring-white">
+                          ✓
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-zinc-900">Cập nhật:</span>
+                            {renderStatusBadge(hist.status)}
+                          </div>
+                          <p className="text-[11px] text-zinc-500 mt-0.5">{formatDate(hist.createdAt)}</p>
+                          {hist.note && (
+                            <p className="text-[11px] text-zinc-700 bg-zinc-50 p-2 rounded-xl border border-zinc-100 italic mt-1">
+                              {hist.note}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="relative flex items-start gap-3">
+                      <div className="absolute -left-6 top-0.5 size-5 rounded-full bg-zinc-300 text-white flex items-center justify-center text-[10px] font-bold ring-4 ring-white">
+                        •
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-zinc-600">Đang chờ Nhà cung cấp xử lý & Vận chuyển</p>
+                        <p className="text-[11px] text-zinc-400 mt-0.5">
+                          Trạng thái sẽ được cập nhật real-time khi đơn được duyệt và xuất kho giao hàng.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

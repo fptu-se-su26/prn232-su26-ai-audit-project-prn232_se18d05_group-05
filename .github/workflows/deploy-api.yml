@@ -1,0 +1,46 @@
+name: Deploy API to MonsterASP
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'source/FLDN_API/**'
+      - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore source/FLDN_API/API/API.csproj
+
+      - name: Build
+        run: dotnet build source/FLDN_API/API/API.csproj -c Release --no-restore
+
+      - name: Publish
+        run: dotnet publish source/FLDN_API/API/API.csproj -c Release --no-build -o ./publish
+
+      # appsettings.Production.json được upload thủ công một lần qua FTP và giữ nguyên trên server.
+      # Xoá bản trong publish output để lần deploy nào cũng không ghi đè mất nó.
+      - name: Drop local production settings
+        run: rm -f ./publish/appsettings.Production.json
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./publish/
+          server-dir: /wwwroot/
+          exclude: |
+            **/appsettings.Production.json
